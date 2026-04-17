@@ -121,6 +121,28 @@ img {
   color: var(--ink);
 }
 
+.site-header-lede {
+  pointer-events: auto;
+  margin: 0.625rem 0 0;
+  max-width: 18rem;
+  margin-inline-start: auto;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.site-header-lede a {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.site-header-lede a:hover {
+  border-bottom-color: var(--ink);
+}
+
 .layout {
   flex: 1;
   display: grid;
@@ -141,6 +163,11 @@ img {
   .site-header {
     left: 0;
     text-align: left;
+  }
+
+  .site-header-lede {
+    margin-inline-start: 0;
+    max-width: 22rem;
   }
 }
 
