@@ -47,10 +47,10 @@ export function Lightbox({
     >
       <div className="absolute top-5 left-5 flex items-center gap-4">
         <Link
-          href="/galeries"
+          href="/gallery"
           className="font-display text-xs text-white/70 transition hover:text-white"
         >
-          ← galeries
+          ← gallery
         </Link>
         <button
           type="button"

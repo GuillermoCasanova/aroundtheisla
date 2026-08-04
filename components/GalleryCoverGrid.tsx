@@ -12,8 +12,8 @@ export function GalleryCoverGrid({ galleries }: GalleryCoverGridProps) {
       {galleries.map((gallery, index) => (
         <Link
           key={gallery.slug}
-          href={`/galeries/${gallery.slug}`}
-          className="group overflow-hidden border border-white/10 bg-neutral-900 transition-transform duration-500 hover:scale-[1.02]"
+          href={`/gallery/${gallery.slug}`}
+          className="group overflow-hidden border border-white/10 bg-grain transition-transform duration-500 hover:scale-[1.02]"
         >
           <div className="relative aspect-[4/5]">
             <GalleryImage

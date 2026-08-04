@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+const DESKTOP_NAV_MIN_WIDTH = "(min-width: 768px)";
+
 const navLinks = [
-  { href: "/galeries", label: "galeries" },
+  { href: "/gallery", label: "gallery" },
   { href: "/about", label: "about" },
   { href: "/contact", label: "contact" },
 ];
@@ -21,9 +23,29 @@ export function Header() {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
+    const mediaQuery = window.matchMedia(DESKTOP_NAV_MIN_WIDTH);
+
+    const closeMenuOnDesktop = () => {
+      if (mediaQuery.matches) setMenuOpen(false);
+    };
+
+    closeMenuOnDesktop();
+    mediaQuery.addEventListener("change", closeMenuOnDesktop);
+    return () => mediaQuery.removeEventListener("change", closeMenuOnDesktop);
+  }, []);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(DESKTOP_NAV_MIN_WIDTH);
+    const updateOverflow = () => {
+      document.body.style.overflow =
+        menuOpen && !mediaQuery.matches ? "hidden" : "";
+    };
+
+    updateOverflow();
+    mediaQuery.addEventListener("change", updateOverflow);
     return () => {
       document.body.style.overflow = "";
+      mediaQuery.removeEventListener("change", updateOverflow);
     };
   }, [menuOpen]);
 
@@ -35,14 +57,41 @@ export function Header() {
           : "bg-gradient-to-b from-black/70 to-transparent"
       }`}
     >
-      <div className="mx-auto flex h-14 max-w-[1600px] items-center justify-between px-5 md:h-16 md:px-8">
-        <Link
-          href="/"
-          className="font-display text-sm text-white tracking-normal transition-opacity hover:opacity-70"
-          onClick={() => setMenuOpen(false)}
-        >
-          aroundtheisla
-        </Link>
+      <div className="mx-auto flex h-14 w-full max-w-[1600px] items-center justify-between px-5 md:h-16 md:px-8">
+        {!menuOpen ? (
+          <Link
+            href="/"
+            className="shrink-0 font-display text-sm text-white tracking-normal transition-opacity hover:opacity-70"
+          >
+            aroundtheisla
+          </Link>
+        ) : (
+          <Link
+            href="/"
+            className="hidden shrink-0 font-display text-sm text-white tracking-normal transition-opacity hover:opacity-70 md:inline"
+            onClick={() => setMenuOpen(false)}
+          >
+            aroundtheisla
+          </Link>
+        )}
+
+        {menuOpen ? (
+          <nav
+            className="flex flex-1 items-center justify-center gap-5 sm:gap-6 md:hidden"
+            aria-label="Mobile"
+          >
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="font-display text-xs text-white/85 transition-colors hover:text-white sm:text-sm"
+                onClick={() => setMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        ) : null}
 
         <nav
           className="hidden items-center gap-8 md:flex"
@@ -61,7 +110,7 @@ export function Header() {
 
         <button
           type="button"
-          className="relative z-10 flex h-10 w-10 items-center justify-center md:hidden"
+          className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center md:hidden"
           aria-expanded={menuOpen}
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           onClick={() => setMenuOpen((open) => !open)}
@@ -82,21 +131,12 @@ export function Header() {
       </div>
 
       {menuOpen ? (
-        <nav
-          className="fixed inset-0 z-0 flex flex-col items-center justify-center gap-8 bg-black/95 md:hidden"
-          aria-label="Mobile"
-        >
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="font-display text-sm text-white"
-              onClick={() => setMenuOpen(false)}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        <button
+          type="button"
+          className="fixed inset-0 top-14 z-40 bg-black/95 md:top-16 md:hidden"
+          aria-label="Close menu"
+          onClick={() => setMenuOpen(false)}
+        />
       ) : null}
     </header>
   );

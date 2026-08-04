@@ -49,7 +49,7 @@ export function CoverSlider({ slides }: CoverSliderProps) {
   }
 
   return (
-    <section className="relative bg-black pt-14 md:pt-16">
+    <section className="relative bg-grain pt-14 md:pt-16">
       <div className="relative w-full">
         <NavArrowButton
           direction="prev"

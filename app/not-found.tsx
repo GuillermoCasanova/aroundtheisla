@@ -6,10 +6,10 @@ export default function NotFound() {
       <p className="font-display text-xs text-white/50">404</p>
       <h1 className="mt-3 font-display text-3xl">gallery not found</h1>
       <Link
-        href="/"
+        href="/gallery"
         className="mt-8 font-display text-sm transition hover:text-white/70"
       >
-        back to galeries
+        back to gallery
       </Link>
     </section>
   );

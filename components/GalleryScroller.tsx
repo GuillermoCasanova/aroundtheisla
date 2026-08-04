@@ -65,15 +65,15 @@ export function GalleryScroller({ gallery }: GalleryScrollerProps) {
   }, [activeIndex, gallery.photos.length, lightboxOpen, scrollToIndex]);
 
   return (
-    <section className="flex h-[100dvh] flex-col bg-black pt-14 md:pt-16">
+    <section className="flex h-[100dvh] flex-col bg-grain pt-14 md:pt-16">
       <div className="shrink-0 border-b border-white/10 px-5 py-3 md:px-8 md:py-5">
         <div className="mx-auto flex max-w-[1600px] items-start justify-between gap-4">
           <div>
             <Link
-              href="/galeries"
+              href="/gallery"
               className="font-display text-xs text-white/50 transition hover:text-white"
             >
-              ← galeries
+              ← gallery
             </Link>
             <h1 className="mt-2 font-display text-lg text-white md:mt-3 md:text-3xl">
               {gallery.title}
@@ -135,7 +135,7 @@ export function GalleryScroller({ gallery }: GalleryScrollerProps) {
                   slug={gallery.slug}
                   priority={index === 0}
                   sizes="100vw"
-                  className="object-cover object-center md:object-contain"
+                  className="object-contain object-center"
                 />
               </button>
             </div>

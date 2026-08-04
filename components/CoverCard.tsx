@@ -17,8 +17,8 @@ export function CoverCard({ slide, priority = false }: CoverCardProps) {
 
   return (
     <Link
-      href={`/galeries/${slide.slug}`}
-      className="group relative block h-full w-full shrink-0 grow-0 basis-full snap-start overflow-hidden bg-neutral-900"
+      href={`/gallery/${slide.slug}`}
+      className="group relative block h-full w-full shrink-0 grow-0 basis-full snap-start overflow-hidden bg-grain"
     >
       <div
         className={`flex h-full gap-2 md:gap-3 ${
@@ -34,12 +34,11 @@ export function CoverCard({ slide, priority = false }: CoverCardProps) {
               slug={slide.slug}
               priority={priority && index === 0}
               sizes={imageSizes}
-              className="object-cover object-center"
+              className="object-contain object-center"
             />
           </div>
         ))}
       </div>
-      <div className="pointer-events-none absolute inset-0 bg-black/10 transition-colors group-hover:bg-black/0" />
     </Link>
   );
 }
