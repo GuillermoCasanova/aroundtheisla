@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Miscreants Astro Starter
 
-## Getting Started
+A production Astro site: static output, Tailwind v4 with a semantic token system, 50+ documented components, a live component showcase, and a full SEO and accessibility baseline.
 
-First, run the development server:
+This repo is the canonical baseline every client build inherits — and it is built to be worked on by an AI agent as well as a person, so the documentation is part of the deliverable.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Quickstart
+
+```sh
+npm install
+npm run dev          # http://localhost:4321
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open **`/components`** in dev for the live component showcase, and **`/styleguide`** for the token and type reference. Both are dev-only and never ship to production.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | What it does |
+|---|---|
+| `npm run dev` | dev server with HMR |
+| `npm run build` | production build to `./dist/` |
+| `npm run preview` | serve the production build locally |
+| `npm run check` | the gate: type check + production build |
+| `npm run docs:build` | refresh the generated rule-link footers in `docs/` |
+| `npm run docs:check` | validate rule citations, ids and links |
 
-## Learn More
+## Where things are
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── components/   one PascalCase file per component, flat
+├── content/      Zod-typed collections (+ the component showcase)
+├── data/         site identity and static registries
+├── demos/        dev-only routes — never shipped
+├── images/       source images, imported through astro:assets
+├── layouts/      Layout.astro — the head and SEO contract
+├── lib/          logic helpers (JSON-LD builders)
+├── pages/        production routes only
+└── styles/       global.css — every design token
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Documentation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Start here | For |
+|---|---|
+| **[`docs/workflow.md`](./docs/workflow.md)** | **the router** — find your task, read only what it needs, pick a verification tier |
+| [`docs/README.md`](./docs/README.md) | the full documentation map |
+| [`AGENTS.md`](./AGENTS.md) | the agent contract: non-negotiables, edit surface, definition of done |
+| [`DESIGN.md`](./DESIGN.md) | this client's brand values — colors, type, motion |
+| [`docs/plan.md`](./docs/plan.md) | direction notes — what's coming, what to avoid. Not rules |
+| [`docs/learn/astro-for-beginners.md`](./docs/learn/astro-for-beginners.md) | Astro onboarding, if you're new to the framework |
 
-## Deploy on Vercel
+Rules are cited by stable id — `[components.scripting]` — so they survive moving between files. Run `npm run docs:build` after changing a rule or a citation; `npm run check` fails on a citation that no longer resolves.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Building a site from this starter
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Follow [`docs/runbook.md`](./docs/runbook.md). It walks the six phases from scaffold to launch, and the pre-launch audit is executable as the `launch` skill.
