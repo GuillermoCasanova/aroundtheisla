@@ -1,0 +1,31 @@
+---
+title: NavSimple
+description: Minimal wordmark + hamburger that opens a full-screen black overlay at every breakpoint.
+category: layout
+order: 23
+sourceFile: src/components/NavSimple.astro
+status: stable
+related: [NavInline, Nav, NavMorph, NavMega, AnnouncementBanner]
+---
+
+Site navigation for AroundTheIsla: a brand wordmark on the left and a two-line hamburger on the right. The hamburger is visible from desktop down — there is no separate desktop link row. Opening it reveals a **full-screen black overlay** that animates down from the top, with links centered in the viewport. For desktop inline links instead, use `NavInline`.
+
+## Usage
+
+```astro
+---
+import NavSimple from "@components/NavSimple.astro";
+---
+
+<NavSimple />
+```
+
+Optional props: `brand`, `homeHref`, `links`, `cta`, and `class`. Same `announcement` slot as `Nav` / `NavMorph`.
+
+## Behavior
+
+- Toggle opens/closes the overlay; Esc closes and returns focus to the button.
+- Panel uses `role="dialog"` with a focus trap while open; body scroll is locked.
+- Overlay reveals via `clip-path` from the top; link stack eases into the vertical center.
+- Reduced motion: opacity fade instead of the clip reveal.
+- Clicking a link closes the overlay.

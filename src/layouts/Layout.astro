@@ -12,9 +12,10 @@ import "@fontsource-variable/inter";
 import "@fontsource-variable/jetbrains-mono";
 import "../styles/global.css";
 import { getCollection, render } from "astro:content";
-import Nav from "../components/NavMorph.astro";
+import Nav from "../components/NavInline.astro";
 import AnnouncementBanner from "../components/AnnouncementBanner.astro";
 import Seo from "../components/Seo.astro";
+import Loader from "../components/Loader.astro";
 interface Props {
   title?: string;
   /** Meta description for SEO + social cards. */
@@ -29,6 +30,8 @@ interface Props {
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   /** Theme attribute applied at the document root — flips tokens for the whole page (nav included). */
   theme?: "light" | "dark" | "brand";
+  /** Skip the intro loader on this page (e.g. component docs). */
+  skipLoader?: boolean;
   /** Frontmatter object, present when this layout is used from a Markdown/MDX page. */
   frontmatter?: { title?: string; theme?: "light" | "dark" | "brand"; description?: string };
 }
@@ -44,6 +47,7 @@ const {
   noindex,
   jsonLd,
   theme = fm.theme ?? "light",
+  skipLoader = false,
 } = Astro.props;
 const gtagId = import.meta.env.PUBLIC_GTAG_ID;
 
@@ -90,6 +94,7 @@ const AnnouncementContent = announcement
     )}
   </head>
   <body>
+    {!skipLoader && <Loader />}
     <a
       href="#main"
       class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-intent focus:text-fg-on-intent focus:rounded-sm"

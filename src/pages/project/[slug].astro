@@ -1,0 +1,56 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SectionProject from "../../components/SectionProject.astro";
+import { getImage } from "astro:assets";
+import { articleSchema } from "../../lib/schema";
+import {
+  getProjectGallery,
+  getPublishedProjects,
+} from "../../lib/projects";
+
+export async function getStaticPaths() {
+  const projects = await getPublishedProjects();
+  return projects.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const gallery = getProjectGallery(entry.id);
+
+const og = await getImage({ src: entry.data.cover, width: 1200 });
+const title = entry.data.title;
+const description = entry.data.description;
+
+const jsonLd = articleSchema({
+  path: `project/${entry.id}`,
+  title: `${title} — aroundtheisla`,
+  description,
+  datePublished: entry.data.date.toISOString(),
+  image: og.src,
+  articleSection: ["Work"],
+  breadcrumbParent: { name: "Work", path: "work" },
+  ...(entry.data.location ? { keywords: entry.data.location } : {}),
+});
+---
+
+<Layout
+  title={title}
+  description={description}
+  image={og.src}
+  ogType="article"
+  noindex={entry.data.draft}
+  jsonLd={jsonLd}
+  theme="light"
+>
+  <main id="main">
+    <SectionProject
+      title={title}
+      description={description}
+      cover={entry.data.cover}
+      coverAlt={`${title} cover photograph`}
+      gallery={gallery}
+    />
+  </main>
+</Layout>

@@ -1,0 +1,77 @@
+---
+/**
+ * HeroBanner
+ * Full-bleed photo hero from the Figma Home frame (222:21). A single image
+ * fills the viewport; an optional project label sits lower-right in muted
+ * on-image type.
+ *
+ * Full-bleed by design (no SectionMain): the frame is an edge-to-edge
+ * composition matching the Figma frame. Brand + menu live in Nav — keep
+ * them out of this component so the hero stays a media plane.
+ */
+import type { ImageMetadata } from "astro";
+import { Image } from "astro:assets";
+import defaultImage from "../images/hero-banner-default.jpg";
+
+interface Props {
+  /** Hero photograph. Defaults to the Figma Home frame image. */
+  image?: ImageMetadata;
+  /** Accessible description of the photograph. */
+  alt?: string;
+  /** Lower-right project label. Empty string hides the label. */
+  projectName?: string;
+  /** Accessible name for the section landmark. */
+  ariaLabel?: string;
+  /**
+   * Treat as the LCP candidate (`loading="eager"` + `fetchpriority="high"`).
+   * Set false when another element above the fold owns LCP.
+   */
+  priority?: boolean;
+  class?: string;
+}
+
+const {
+  image = defaultImage,
+  alt = "Around the Isla project photograph",
+  projectName = "PROJECT NAME",
+  ariaLabel = "Featured project",
+  priority = true,
+  class: className,
+} = Astro.props;
+
+const showProjectName = projectName.trim().length > 0;
+---
+
+{
+  /*
+   * Full-bleed hero — allowed deviation from SectionMain: the Figma Home
+   * frame is an edge-to-edge viewport composition; the shared column + side
+   * rules would inset the photograph and fight the full-bleed crop.
+   */
+}
+<section
+  data-hero-banner
+  aria-label={ariaLabel}
+  class:list={["relative isolate min-h-svh w-full overflow-hidden bg-canvas", className]}
+>
+  <Image
+    src={image}
+    alt={alt}
+    class="absolute inset-0 size-full object-cover object-center"
+    widths={[640, 960, 1280, 1600, 1920]}
+    sizes="100vw"
+    loading={priority ? "eager" : "lazy"}
+    fetchpriority={priority ? "high" : undefined}
+    decoding={priority ? "sync" : "async"}
+  />
+
+  {
+    showProjectName && (
+      <p
+        class="pointer-events-none absolute bottom-[clamp(1.5rem,4vh,2.5rem)] right-[clamp(1.25rem,3vw,2.125rem)] max-w-[min(22rem,70vw)] text-right text-body-xsm uppercase tracking-wide text-fg/60"
+      >
+        {projectName}
+      </p>
+    )
+  }
+</section>

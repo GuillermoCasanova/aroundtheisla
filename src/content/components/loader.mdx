@@ -1,0 +1,45 @@
+---
+title: Loader
+description: Full-viewport intro screen with the centered palm mark — fades out once the page is ready.
+category: block
+order: 45
+sourceFile: src/components/Loader.astro
+status: stable
+related: [Layout]
+---
+
+import Preview from "@components/_docs/Preview.astro";
+import PropsTable from "@components/_docs/PropsTable.astro";
+import palmUrl from "../../images/loader-palm.svg?url";
+
+Site intro loader from the Figma Loader frame: a blank stage with the palm mark centered. Wired into `Layout` by default; dismisses after `window` load (honoring a minimum dwell) and skips on return visits within the same session.
+
+## Preview
+
+Static composition — the live overlay only runs on a full page load via `Layout`.
+
+<Preview label="Centered mark on stage" align="center">
+  <div class="flex min-h-48 w-full items-center justify-center bg-panel text-fg">
+    <img src={palmUrl} alt="" width="54" height="84" class="block size-auto text-fg" />
+  </div>
+</Preview>
+
+## Props
+
+<PropsTable props={[
+  { name: "minDuration", type: "number", default: "800", description: "Minimum visible time in ms, even if the document is already ready. Matches --duration-default." },
+  { name: "oncePerSession", type: "boolean", default: "true", description: "Skip on return visits within the same browser session." },
+  { name: "class", type: "string", description: "Extra classes on the overlay root." },
+]} />
+
+## Layout
+
+Pass `skipLoader` on `Layout` to opt a page out (useful for docs or error pages). The overlay is otherwise included on every page.
+
+## Behavior
+
+- Covers the viewport with `bg-panel` / `text-fg` so themes invert correctly.
+- Palm mark breathes gently while waiting; reduced-motion users get a static mark and an immediate exit.
+- Locks document scroll while visible; restores on dismiss.
+- `role="status"` + visually hidden “Loading”; `inert` while covering the page.
+- Without JS, a `<noscript>` rule hides the overlay so the page stays usable.

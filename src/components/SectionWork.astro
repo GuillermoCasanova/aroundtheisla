@@ -1,0 +1,568 @@
+---
+/**
+ * SectionWork
+ * Work index — Figma ALL PROJECTS (222:322). One shared project strip that
+ * switches between GRID and LIST without swapping panels.
+ *
+ * Grid → List: fade out rows below the first; switch the same items into a
+ * horizontal pin/scrub so further projects enter from the right.
+ * List → Grid reverses that. Reduced motion: instant layout swap.
+ *
+ * Full-bleed by design (no SectionMain column / side rules).
+ */
+import { Image } from "astro:assets";
+import { getPublishedProjects } from "../lib/projects";
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+
+const projects = await getPublishedProjects();
+const items = projects.map((project) => ({
+  slug: project.id,
+  title: project.data.title,
+  year: project.data.date.getFullYear(),
+  cover: project.data.cover,
+  href: `/project/${project.id}/`,
+}));
+---
+
+<section
+  id="work-gallery"
+  data-work-gallery
+  data-view="grid"
+  aria-label="Work projects"
+  class:list={["relative bg-canvas text-fg", className]}
+>
+  <header
+    data-work-chrome
+    class="absolute top-[5.5rem] inset-x-[clamp(1.25rem,2.5vw,1.55rem)] z-20 flex min-h-11 items-center justify-between gap-4"
+  >
+    <h1 class="text-body-md lowercase text-fg">Work</h1>
+    <div
+      class="flex items-center gap-4"
+      role="tablist"
+      aria-label="Gallery view"
+    >
+      <button
+        type="button"
+        role="tab"
+        id="work-view-grid"
+        data-work-view="grid"
+        aria-controls="work-stage"
+        aria-selected="true"
+        tabindex="0"
+        class="cursor-pointer text-body-md uppercase text-fg outline-none transition-colors duration-default-quarter hover:text-fg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus font-bold"
+      >
+        Grid
+      </button>
+      <button
+        type="button"
+        role="tab"
+        id="work-view-list"
+        data-work-view="list"
+        aria-controls="work-stage"
+        aria-selected="false"
+        tabindex="-1"
+        class="cursor-pointer text-body-md uppercase text-fg outline-none transition-colors duration-default-quarter hover:text-fg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus font-normal"
+      >
+        List
+      </button>
+    </div>
+  </header>
+
+  <div
+    id="work-stage"
+    data-work-stage
+    role="tabpanel"
+    aria-labelledby="work-view-grid"
+  >
+    <div data-work-viewport>
+      <ul data-work-track>
+        {
+          items.map((item, i) => (
+            <li data-work-item data-work-index={i}>
+              <a
+                href={item.href}
+                class="group/card flex h-full flex-col gap-3 outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+                aria-label={`${item.title}, ${item.year}`}
+              >
+                <div
+                  data-work-media
+                  class="relative w-full overflow-hidden"
+                  style={`--work-ar: ${item.cover.width} / ${item.cover.height}`}
+                >
+                  <Image
+                    src={item.cover}
+                    alt={item.title}
+                    class="absolute inset-0 size-full object-cover transition-transform duration-default group-hover/card:scale-[1.02] group-focus-visible/card:scale-[1.02]"
+                    widths={[360, 540, 720, 960, 1280]}
+                    sizes="(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 30vw"
+                    loading={i < 3 ? "eager" : "lazy"}
+                    fetchpriority={i === 0 ? "high" : undefined}
+                    decoding={i === 0 ? "sync" : "async"}
+                  />
+                </div>
+                <div
+                  data-work-meta
+                  class="flex items-baseline justify-between gap-3"
+                >
+                  <span class="min-w-0 truncate text-body-xsm font-bold text-fg">
+                    {item.title}
+                  </span>
+                  <span class="shrink-0 text-body-xsm italic text-fg-muted">
+                    {item.year}
+                  </span>
+                </div>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  [data-work-stage] {
+    position: relative;
+  }
+
+  [data-work-viewport] {
+    width: 100%;
+  }
+
+  [data-work-track] {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Grid cells need min-width:0 to shrink; list overrides below. */
+  [data-work-gallery][data-view="grid"] [data-work-item] {
+    min-width: 0;
+  }
+
+  /* ----- GRID ----- */
+  [data-work-gallery][data-view="grid"] [data-work-viewport] {
+    padding-inline: clamp(1.25rem, 2.5vw, 2.125rem);
+    padding-top: clamp(8.5rem, 18vh, 10rem);
+    padding-bottom: clamp(2rem, 6vh, 4.5rem);
+  }
+
+  [data-work-gallery][data-view="grid"] [data-work-track] {
+    display: grid;
+    grid-template-columns: 1fr;
+    column-gap: clamp(1rem, 2vw, 1.375rem);
+    row-gap: 2.5rem;
+  }
+
+  @media (min-width: 640px) {
+    [data-work-gallery][data-view="grid"] [data-work-track] {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    [data-work-gallery][data-view="grid"] [data-work-track] {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  [data-work-gallery][data-view="grid"] [data-work-media] {
+    aspect-ratio: 4 / 5;
+  }
+
+  /* ----- LIST ----- */
+  [data-work-gallery][data-view="list"] [data-work-chrome] {
+    position: fixed;
+    z-index: 30;
+  }
+
+  [data-work-gallery][data-view="list"] [data-work-stage] {
+    height: 100svh;
+  }
+
+  [data-work-gallery][data-view="list"] [data-work-viewport] {
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  [data-work-gallery][data-view="list"] [data-work-track] {
+    display: flex;
+    width: max-content;
+    height: 100%;
+    align-items: center;
+    gap: clamp(1.25rem, 3vw, 2.875rem);
+    padding-inline: clamp(1.25rem, 2.5vw, 2.125rem);
+    padding-top: clamp(5.5rem, 14vh, 8rem);
+    padding-bottom: clamp(2rem, 5vh, 4rem);
+  }
+
+  [data-work-gallery][data-view="list"] [data-work-item] {
+    flex: 0 0 auto;
+    min-width: auto;
+  }
+
+  [data-work-gallery][data-view="list"] [data-work-item] > a {
+    width: auto;
+  }
+
+  /* Match SectionProject: height + aspect-ratio on the media box. */
+  [data-work-gallery][data-view="list"] [data-work-media] {
+    height: min(80svh, 55.5rem);
+    aspect-ratio: var(--work-ar);
+    flex-shrink: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-work-gallery][data-view="list"] [data-work-viewport] {
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    [data-work-gallery][data-view="list"] [data-work-track] {
+      transform: none !important;
+    }
+
+    [data-work-gallery][data-view="list"] [data-work-item] {
+      scroll-snap-align: start;
+    }
+
+    [data-work-gallery][data-view="list"] [data-work-chrome] {
+      position: absolute;
+    }
+  }
+</style>
+
+<script>
+  type ViewMode = "grid" | "list";
+
+  const STORAGE_KEY = "work-view";
+
+  let gsap: any;
+  let ScrollTrigger: any;
+
+  async function ensureGsap() {
+    if (gsap && ScrollTrigger) return;
+    gsap = (await import("gsap")).default;
+    ScrollTrigger = (await import("gsap/ScrollTrigger")).ScrollTrigger;
+    gsap.registerPlugin(ScrollTrigger);
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  function parseView(value: string | null | undefined): ViewMode | null {
+    if (value === "grid" || value === "list") return value;
+    return null;
+  }
+
+  function readInitialView(): ViewMode {
+    const params = new URLSearchParams(window.location.search);
+    const fromQuery = parseView(params.get("view"));
+    if (fromQuery) return fromQuery;
+    try {
+      const fromStorage = parseView(sessionStorage.getItem(STORAGE_KEY));
+      if (fromStorage) return fromStorage;
+    } catch {
+      /* private mode */
+    }
+    return "grid";
+  }
+
+  function persistView(view: ViewMode) {
+    try {
+      sessionStorage.setItem(STORAGE_KEY, view);
+    } catch {
+      /* private mode */
+    }
+    const url = new URL(window.location.href);
+    if (view === "grid") url.searchParams.delete("view");
+    else url.searchParams.set("view", view);
+    window.history.replaceState({}, "", url);
+  }
+
+  function colsPerRow() {
+    if (window.matchMedia("(min-width: 1024px)").matches) return 3;
+    if (window.matchMedia("(min-width: 640px)").matches) return 2;
+    return 1;
+  }
+
+  function syncTabs(root: HTMLElement, view: ViewMode) {
+    const tabs = root.querySelectorAll<HTMLButtonElement>("[data-work-view]");
+    const panel = root.querySelector<HTMLElement>("[data-work-stage]");
+    tabs.forEach((tab) => {
+      const active = tab.dataset.workView === view;
+      tab.setAttribute("aria-selected", String(active));
+      tab.tabIndex = active ? 0 : -1;
+      tab.classList.toggle("font-bold", active);
+      tab.classList.toggle("font-normal", !active);
+    });
+    if (panel) {
+      panel.setAttribute(
+        "aria-labelledby",
+        view === "grid" ? "work-view-grid" : "work-view-list",
+      );
+    }
+  }
+
+  const listControllers = new WeakMap<HTMLElement, AbortController>();
+  const listTimelines = new WeakMap<HTMLElement, { kill: () => void }>();
+  const viewLocks = new WeakMap<HTMLElement, boolean>();
+
+  function teardownList(root: HTMLElement) {
+    listControllers.get(root)?.abort();
+    listControllers.delete(root);
+    const tl = listTimelines.get(root) as
+      | { kill: () => void; scrollTrigger?: { kill: (revert?: boolean) => void } }
+      | undefined;
+    // Revert pin spacer before killing the timeline.
+    tl?.scrollTrigger?.kill(true);
+    tl?.kill();
+    listTimelines.delete(root);
+    const track = root.querySelector<HTMLElement>("[data-work-track]");
+    if (track && gsap) gsap.set(track, { clearProps: "transform" });
+    if (ScrollTrigger) ScrollTrigger.refresh();
+  }
+
+  async function initListScrub(root: HTMLElement) {
+    if (prefersReducedMotion()) return;
+    if (listTimelines.has(root)) return;
+
+    const stage = root.querySelector<HTMLElement>("[data-work-stage]");
+    const viewport = root.querySelector<HTMLElement>("[data-work-viewport]");
+    const track = root.querySelector<HTMLElement>("[data-work-track]");
+    if (!stage || !viewport || !track) return;
+    if (root.dataset.view !== "list") return;
+
+    await ensureGsap();
+
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+    );
+
+    if (root.dataset.view !== "list" || listTimelines.has(root)) return;
+
+    const controller = new AbortController();
+    listControllers.set(root, controller);
+    const { signal } = controller;
+
+    const getTravel = () =>
+      Math.max(0, track.scrollWidth - viewport.clientWidth);
+
+    const tl = gsap.timeline({
+      defaults: { ease: "none" },
+      scrollTrigger: {
+        trigger: stage,
+        pin: true,
+        scrub: 0.45,
+        start: "top top",
+        end: () => `+=${Math.max(getTravel(), 1)}`,
+        invalidateOnRefresh: true,
+        anticipatePin: 1,
+      },
+    });
+
+    tl.to(
+      track,
+      {
+        x: () => -getTravel(),
+        duration: 1,
+      },
+      0,
+    );
+
+    listTimelines.set(root, tl);
+
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onMotionChange = () => {
+      if (motionQuery.matches) teardownList(root);
+    };
+    motionQuery.addEventListener("change", onMotionChange, { signal });
+
+    const onLoad = () => ScrollTrigger.refresh();
+    stage.querySelectorAll("img").forEach((img) => {
+      if (!img.complete)
+        img.addEventListener("load", onLoad, { signal, once: true });
+    });
+
+    ScrollTrigger.refresh();
+  }
+
+  function splitItems(root: HTMLElement) {
+    const items = Array.from(
+      root.querySelectorAll<HTMLElement>("[data-work-item]"),
+    );
+    const cols = colsPerRow();
+    return {
+      items,
+      firstRow: items.slice(0, cols),
+      rest: items.slice(cols),
+    };
+  }
+
+  function clearItemProps(items: HTMLElement[]) {
+    if (!gsap) {
+      items.forEach((el) => {
+        el.style.opacity = "";
+        el.style.visibility = "";
+      });
+      return;
+    }
+    gsap.set(items, { clearProps: "opacity,visibility" });
+  }
+
+  async function setView(
+    root: HTMLElement,
+    view: ViewMode,
+    { instant = false }: { instant?: boolean } = {},
+  ) {
+    if (viewLocks.get(root)) return;
+    if (!instant && root.dataset.view === view) return;
+
+    const prev = (root.dataset.view as ViewMode) || "grid";
+    syncTabs(root, view);
+    persistView(view);
+
+    const skipMotion = instant || prefersReducedMotion();
+    const { items, rest } = splitItems(root);
+
+    if (skipMotion) {
+      teardownList(root);
+      root.dataset.view = view;
+      clearItemProps(items);
+      if (view === "list") {
+        window.scrollTo(0, 0);
+        await initListScrub(root);
+      } else if (ScrollTrigger) {
+        ScrollTrigger.refresh();
+      }
+      return;
+    }
+
+    viewLocks.set(root, true);
+
+    try {
+      await ensureGsap();
+
+      if (view === "list" && prev === "grid") {
+        // Fade out rows below the first — first row stays on screen.
+        if (rest.length) {
+          await gsap.to(rest, {
+            autoAlpha: 0,
+            duration: 0.35,
+            ease: "power2.out",
+            stagger: 0.02,
+          });
+        }
+
+        window.scrollTo(0, 0);
+        root.dataset.view = view;
+        // Rest rejoin the strip to the right (off-screen / entering on scrub).
+        gsap.set(rest, { autoAlpha: 1 });
+
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+        );
+
+        await initListScrub(root);
+      } else if (view === "grid" && prev === "list") {
+        teardownList(root);
+        window.scrollTo(0, 0);
+
+        // Hide lower rows before switching so they don't pop in under the strip.
+        gsap.set(rest, { autoAlpha: 0 });
+        root.dataset.view = view;
+
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+        );
+
+        if (rest.length) {
+          await gsap.to(rest, {
+            autoAlpha: 1,
+            duration: 0.35,
+            ease: "power2.out",
+            stagger: 0.02,
+          });
+        }
+
+        clearItemProps(items);
+        if (ScrollTrigger) ScrollTrigger.refresh();
+      } else {
+        root.dataset.view = view;
+        clearItemProps(items);
+        if (view === "list") {
+          window.scrollTo(0, 0);
+          await initListScrub(root);
+        }
+      }
+    } catch (err) {
+      // Never leave the UI stuck mid-transition.
+      console.error("[SectionWork] view switch failed", err);
+      teardownList(root);
+      root.dataset.view = view;
+      clearItemProps(items);
+      if (view === "list") {
+        window.scrollTo(0, 0);
+        await initListScrub(root);
+      }
+    } finally {
+      viewLocks.set(root, false);
+    }
+  }
+
+  function bindRoot(root: HTMLElement) {
+    if (root.dataset.workBound === "true") return;
+    root.dataset.workBound = "true";
+
+    const tabs = Array.from(
+      root.querySelectorAll<HTMLButtonElement>("[data-work-view]"),
+    );
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const view = parseView(tab.dataset.workView);
+        if (view) void setView(root, view);
+      });
+
+      tab.addEventListener("keydown", (e: KeyboardEvent) => {
+        const current = tabs.indexOf(tab);
+        let next = -1;
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+          next = (current + 1) % tabs.length;
+        } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+          next = (current - 1 + tabs.length) % tabs.length;
+        } else if (e.key === "Home") {
+          next = 0;
+        } else if (e.key === "End") {
+          next = tabs.length - 1;
+        }
+        if (next < 0) return;
+        e.preventDefault();
+        const nextTab = tabs[next];
+        if (!nextTab) return;
+        nextTab.focus();
+        const view = parseView(nextTab.dataset.workView);
+        if (view) void setView(root, view);
+      });
+    });
+
+    void setView(root, readInitialView(), { instant: true });
+  }
+
+  function initAll() {
+    document
+      .querySelectorAll<HTMLElement>("[data-work-gallery]")
+      .forEach((root) => bindRoot(root));
+  }
+
+  initAll();
+  document.addEventListener("astro:page-load", initAll);
+</script>

@@ -2,7 +2,7 @@
 
 # Astro for Beginners
 
-> **Background material — not a rule source.** This is onboarding for people new to Astro. It is *not* part of the build standard and must never be cited as one: where it and [`docs/rules/`](../README.md) disagree, the rules win. It also predates the current framework baseline (see `docs/rules/structure.md` for the versions actually in use), so treat specific version numbers here as illustrative.
+> **Background material — not a rule source.** This is onboarding for people new to Astro. It is _not_ part of the build standard and must never be cited as one: where it and [`docs/rules/`](../README.md) disagree, the rules win. It also predates the current framework baseline (see `docs/rules/structure.md` for the versions actually in use), so treat specific version numbers here as illustrative.
 
 A practical guide to Astro + Tailwind 4, written from a real learning conversation. Concepts are introduced in the order they tend to come up when building your first project, not in dictionary order.
 
@@ -135,14 +135,15 @@ Whatever sits between `<Layout>...</Layout>` lands inside `<slot />`.
 
 One layout per **kind of page**. The most common split:
 
-| Layout | Used for |
-|---|---|
-| `MarketingLayout.astro` | Homepage, pricing, about |
-| `BlogLayout.astro` | `/blog/[slug]` posts |
-| `DocsLayout.astro` | `/docs/*` |
-| `AppLayout.astro` | Signed-in dashboard pages |
+| Layout                  | Used for                  |
+| ----------------------- | ------------------------- |
+| `MarketingLayout.astro` | Homepage, pricing, about  |
+| `BlogLayout.astro`      | `/blog/[slug]` posts      |
+| `DocsLayout.astro`      | `/docs/*`                 |
+| `AppLayout.astro`       | Signed-in dashboard pages |
 
 Reasons to add a new layout:
+
 - Different page chrome (different nav, footer, sidebar)
 - Different metadata patterns (article schema vs product schema)
 - Different content widths
@@ -228,7 +229,7 @@ const { label = "Click me", variant = "primary" } = Astro.props;
 - **`interface Props`** — TypeScript type checking. It gives you autocomplete and error warnings when using the component (e.g., passing a wrong prop type). Astro uses this interface specifically to type `Astro.props`.
 - **`const { ... } = Astro.props`** — Actually extracts the values so you can use them in the template below. Without this line, there's no `label` or `variant` variable to reference.
 
-You *technically* could skip the interface and just destructure:
+You _technically_ could skip the interface and just destructure:
 
 ```astro
 ---
@@ -288,9 +289,9 @@ Variables under recognized namespaces auto-generate matching utility classes:
 
 ```css
 @theme {
-  --color-brand: #f00;     /* generates bg-brand, text-brand, border-brand */
-  --spacing: 0.25rem;       /* base unit for ALL spacing utilities */
-  --container-7xl: 90rem;   /* max-w-7xl is now 90rem (default is 80rem) */
+  --color-brand: #f00; /* generates bg-brand, text-brand, border-brand */
+  --spacing: 0.25rem; /* base unit for ALL spacing utilities */
+  --container-7xl: 90rem; /* max-w-7xl is now 90rem (default is 80rem) */
   --font-sans: "Inter", sans-serif;
 }
 ```
@@ -333,11 +334,11 @@ CSS cascade layers introduce a **second tier above specificity**. Tailwind sets 
 
 Rules in **later** layers always beat rules in **earlier** layers, regardless of specificity or source order. So:
 
-| Layer | Strength | What goes in it |
-|---|---|---|
-| `base` | Weakest | Resets, body font, default styles |
-| `components` | Middle | Your reusable patterns (`.btn`, `.container-large`) |
-| `utilities` | Strongest | `bg-red-500`, `mt-4`, `flex`, etc. |
+| Layer        | Strength  | What goes in it                                     |
+| ------------ | --------- | --------------------------------------------------- |
+| `base`       | Weakest   | Resets, body font, default styles                   |
+| `components` | Middle    | Your reusable patterns (`.btn`, `.container-large`) |
+| `utilities`  | Strongest | `bg-red-500`, `mt-4`, `flex`, etc.                  |
 
 This is why you can write `<main class="container-large py-12">` and the `py-12` always overrides anything `container-large` defines about vertical padding. Utilities always win.
 
@@ -359,7 +360,9 @@ Tailwind reads source files as plain text to find class names. It can't follow `
 **3. `@apply` only works with classes that exist.**
 
 ```css
-.btn { @apply container-7xl; }  /* ❌ container-7xl is not a class */
+.btn {
+  @apply container-7xl;
+} /* ❌ container-7xl is not a class */
 ```
 
 ### Reading raw CSS variables
@@ -397,11 +400,11 @@ Three independent layers, each with one job:
 </Layout>
 ```
 
-| Layer | Job | What it owns |
-|---|---|---|
-| **Layout** | Chrome | `<html>`, `<head>`, `<body>`, nav, footer |
-| **Section** | Background | Full-bleed colors/gradients, vertical padding |
-| **Container** | Width | Max-width, horizontal centering |
+| Layer         | Job        | What it owns                                  |
+| ------------- | ---------- | --------------------------------------------- |
+| **Layout**    | Chrome     | `<html>`, `<head>`, `<body>`, nav, footer     |
+| **Section**   | Background | Full-bleed colors/gradients, vertical padding |
+| **Container** | Width      | Max-width, horizontal centering               |
 
 ### The three classes
 
@@ -422,6 +425,7 @@ Three independent layers, each with one job:
 ```
 
 Each does **one** thing:
+
 - `container-large` → caps width and centers (no padding)
 - `section-gutter` → horizontal breathing room from screen edges
 - `section-padding-lg` → vertical rhythm
@@ -513,9 +517,9 @@ The result: the base styling is always applied, and the variant controls only th
 `variantClasses[variant]` uses **bracket notation** because the key is coming from a variable. The two forms look similar but mean different things:
 
 ```js
-variantClasses.primary    // dot notation — looks up a key literally named "primary"
-variantClasses["primary"] // bracket notation with a string — same result
-variantClasses[variant]   // bracket notation with a variable — looks up the key whose name = the value of `variant`
+variantClasses.primary; // dot notation — looks up a key literally named "primary"
+variantClasses["primary"]; // bracket notation with a string — same result
+variantClasses[variant]; // bracket notation with a variable — looks up the key whose name = the value of `variant`
 ```
 
 If you wrote `variantClasses.variant`, JavaScript would search for a key literally called `"variant"` and return `undefined`, because no such key exists in the object. Brackets are the only way to do a **dynamic** lookup where the key is decided at runtime.
@@ -526,8 +530,9 @@ The verbose equivalent without a lookup object would be a chain of `if`/`else` (
 
 ```js
 let classes;
-if (variant === "primary")        classes = "bg-blue-500 text-white";
-else if (variant === "secondary") classes = "border border-blue-500 text-blue-500";
+if (variant === "primary") classes = "bg-blue-500 text-white";
+else if (variant === "secondary")
+  classes = "border border-blue-500 text-blue-500";
 ```
 
 Both produce the same result. The object-lookup version is just shorter, easier to scan, and trivial to extend with a new variant.
@@ -636,17 +641,17 @@ Every element has four concentric layers:
 └────────────────┘
 ```
 
-| Layer | Where | Tailwind utilities |
-|---|---|---|
-| Margin | Outside the box | `m-*`, `mx-*`, `my-*`, `ml-*`, `mr-*`, `mt-*`, `mb-*` |
-| Border | The visible edge | `border-*` |
-| Padding | Inside the box | `p-*`, `px-*`, `py-*`, `pl-*`, `pr-*`, `pt-*`, `pb-*` |
-| Content | Inside the padding | Your h1, p, etc. |
+| Layer   | Where              | Tailwind utilities                                    |
+| ------- | ------------------ | ----------------------------------------------------- |
+| Margin  | Outside the box    | `m-*`, `mx-*`, `my-*`, `ml-*`, `mr-*`, `mt-*`, `mb-*` |
+| Border  | The visible edge   | `border-*`                                            |
+| Padding | Inside the box     | `p-*`, `px-*`, `py-*`, `pl-*`, `pr-*`, `pt-*`, `pb-*` |
+| Content | Inside the padding | Your h1, p, etc.                                      |
 
 ### A real bug from the conversation
 
 ```html
-<div class="container-large mx-6">
+<div class="container-large mx-6"></div>
 ```
 
 `container-large` includes `mx-auto` (which centers the box). But `mx-6` overrides it (margin-left/right become 1.5rem instead of auto). Result: the box stops centering.
@@ -677,6 +682,7 @@ When something doesn't look right, **right-click → Inspect**, then look at the
 There is no error for `text-1xl`, `align-center`, `m-width-auto`, or `container-7xl`. Tailwind just doesn't generate any CSS for them. If a class seems to do nothing, the first thing to check is: **does this class actually exist?**
 
 Real names you might confuse:
+
 - `align-center` → `items-center` (flex children) or `text-center` (text)
 - `text-1xl` → `text-xl`
 - `m-width-auto` → `mx-auto`
@@ -727,13 +733,13 @@ The pattern shows in the gutter columns; the white container hides it where the 
 
 ### Variations
 
-| Effect | Change |
-|---|---|
-| Wider stripes | `background-size: 16px 16px` |
-| Tighter stripes | `background-size: 6px 6px` |
-| Stripes the other way | `135deg` instead of `315deg` |
-| Bolder stripes | `var(--pattern-fg) 2px` instead of `1px` |
-| Dots instead | `radial-gradient(circle, var(--pattern-fg) 1px, transparent 1.5px)` |
+| Effect                | Change                                                              |
+| --------------------- | ------------------------------------------------------------------- |
+| Wider stripes         | `background-size: 16px 16px`                                        |
+| Tighter stripes       | `background-size: 6px 6px`                                          |
+| Stripes the other way | `135deg` instead of `315deg`                                        |
+| Bolder stripes        | `var(--pattern-fg) 2px` instead of `1px`                            |
+| Dots instead          | `radial-gradient(circle, var(--pattern-fg) 1px, transparent 1.5px)` |
 
 ### Why use `rgb(... / opacity)` not a fixed color
 
@@ -775,6 +781,7 @@ export default defineConfig({
 ### When to use Cloudflare Images
 
 Only if you genuinely need:
+
 - Lots of user-uploaded photos served at the edge
 - One URL for every device size/format automatically
 - Centralized image storage outside your repo
@@ -798,6 +805,7 @@ Don't extract a pattern after seeing it once or twice. **Wait until you've writt
 ### Single responsibility for layout primitives
 
 Each layout class should do **one thing**:
+
 - `container-large` → horizontal cap (no padding)
 - `section-gutter` → horizontal padding (no width)
 - `section-padding` → vertical rhythm (nothing else)
@@ -826,7 +834,9 @@ Tailwind 4 introduced the `@utility` directive as the modern way to define reusa
 ```css
 /* Legacy — still works in v4 for backwards compat */
 @layer components {
-  .section-gutter { @apply px-4 md:px-12 lg:px-24; }
+  .section-gutter {
+    @apply px-4 md:px-12 lg:px-24;
+  }
 }
 
 /* Modern v4 — top-level @utility directive */
@@ -850,7 +860,7 @@ Tailwind 4 introduced the `@utility` directive as the modern way to define reusa
 ```css
 @utility container-large {
   @apply mx-auto w-full max-w-7xl;
-  container-type: inline-size;   /* raw CSS works alongside @apply */
+  container-type: inline-size; /* raw CSS works alongside @apply */
 }
 
 @utility section-grid-outside {
@@ -872,9 +882,11 @@ Tailwind's responsive prefixes (`sm:`, `md:`, `lg:`, `xl:`) work with arbitrary 
 
 ```html
 <!-- 1rem gutters on mobile, 2.5rem from md (≥768px) -->
-<div class="grid
+<div
+  class="grid
   grid-cols-[1fr_1rem_minmax(0,90rem)_1rem_1fr]
-  md:grid-cols-[1fr_2.5rem_minmax(0,90rem)_2.5rem_1fr]">
+  md:grid-cols-[1fr_2.5rem_minmax(0,90rem)_2.5rem_1fr]"
+></div>
 ```
 
 ### Rule of thumb
@@ -926,7 +938,7 @@ const { eyebrow, title } = Astro.props;
 
 1. **Each child is routed by its own `slot="..."` attribute.** No attribute = goes to the default `<slot />`.
 2. **Order in source doesn't matter.** Astro reads attributes, not positions.
-3. **Multiple children can target the same slot.** They render in source order *within* that slot.
+3. **Multiple children can target the same slot.** They render in source order _within_ that slot.
 4. **Empty slots render nothing.** No empty wrapper, no whitespace. Use `gap-*` on the parent — it just collapses naturally.
 5. **`slot="..."` must be on a direct child of the component.** Not nested two levels deep.
 
@@ -986,11 +998,11 @@ Wrappers are only for multi-element slots.
 
 ### Decision table
 
-| Situation | What to write |
-|---|---|
-| One element in a slot | Put `slot="name"` on that element |
-| Two+ elements in one slot | `<Fragment slot="name">…</Fragment>` |
-| You want a real `<div>` wrapper | `<div slot="name">…</div>` |
+| Situation                       | What to write                        |
+| ------------------------------- | ------------------------------------ |
+| One element in a slot           | Put `slot="name"` on that element    |
+| Two+ elements in one slot       | `<Fragment slot="name">…</Fragment>` |
+| You want a real `<div>` wrapper | `<div slot="name">…</div>`           |
 
 ---
 
@@ -1055,11 +1067,12 @@ import { defineCollection, z } from "astro:content";
 
 const features = defineCollection({
   type: "data",
-  schema: ({ image }) => z.object({
-    eyebrow: z.string(),
-    title: z.string(),
-    image: image(),   // ← string path in JSON, ImageMetadata at runtime
-  }),
+  schema: ({ image }) =>
+    z.object({
+      eyebrow: z.string(),
+      title: z.string(),
+      image: image(), // ← string path in JSON, ImageMetadata at runtime
+    }),
 });
 
 export const collections = { features };
@@ -1107,13 +1120,13 @@ const features = await getCollection("features");
 
 ### Decision tree
 
-| Situation | Use |
-|---|---|
-| 1–5 specific images, each placed deliberately | Option 1 |
-| Many images driven by a data array | Option 2 |
+| Situation                                           | Use      |
+| --------------------------------------------------- | -------- |
+| 1–5 specific images, each placed deliberately       | Option 1 |
+| Many images driven by a data array                  | Option 2 |
 | Content that grows, has structure, multiple authors | Option 3 |
-| Files Astro shouldn't touch (favicons, downloads) | Option 4 |
-| Hosted somewhere else | Option 5 |
+| Files Astro shouldn't touch (favicons, downloads)   | Option 4 |
+| Hosted somewhere else                               | Option 5 |
 
 ### Common mistakes
 
@@ -1125,7 +1138,7 @@ const features = await getCollection("features");
 
 ## 17. Flattening nested divs
 
-When you see a stack of divs where each one's only child is the next div, ask: *what would break if I merged this div into its parent or its child?* If the answer is "nothing visible," merge it.
+When you see a stack of divs where each one's only child is the next div, ask: _what would break if I merged this div into its parent or its child?_ If the answer is "nothing visible," merge it.
 
 ### Example
 
@@ -1134,7 +1147,7 @@ When you see a stack of divs where each one's only child is the next div, ask: *
 <div class="text-sm">
   <div class="flex items-center gap-2">
     <div class="flex items-center w-6 h-6 text-gray-500">
-      <svg .../>
+      <svg ... />
     </div>
     <span>Schema Builder</span>
   </div>
@@ -1144,7 +1157,7 @@ When you see a stack of divs where each one's only child is the next div, ask: *
 ```html
 <!-- After: 1 div, same render -->
 <div class="flex items-center gap-2 text-sm">
-  <svg class="w-6 h-6 text-gray-500" .../>
+  <svg class="w-6 h-6 text-gray-500" ... />
   <span>Schema Builder</span>
 </div>
 ```
@@ -1173,15 +1186,15 @@ If none of those apply, the wrapper is just styling noise — collapse it.
 
 ## 18. Optional content: slot vs prop vs variant
 
-When part of a component is *sometimes there and sometimes not* (e.g. a card with an optional image), the question is which API to use. The wrong answer is almost always a `variant` prop.
+When part of a component is _sometimes there and sometimes not_ (e.g. a card with an optional image), the question is which API to use. The wrong answer is almost always a `variant` prop.
 
 ### The heuristic
 
-| Question | Answer |
-|---|---|
-| "This part exists or doesn't" | Optional slot or optional prop |
-| "This part looks different" | Variant prop |
-| "Whole layout is different" | Two components, or one with a layout-switching variant |
+| Question                      | Answer                                                 |
+| ----------------------------- | ------------------------------------------------------ |
+| "This part exists or doesn't" | Optional slot or optional prop                         |
+| "This part looks different"   | Variant prop                                           |
+| "Whole layout is different"   | Two components, or one with a layout-switching variant |
 
 **Variants encode style, not presence.** If your variant prop's only job is "should this thing render," delete the variant and just check the thing.
 
@@ -1209,7 +1222,7 @@ const { eyebrow, title } = Astro.props;
 <Card eyebrow="..." title="..." />
 ```
 
-**Win:** the caller controls *what* media renders. Today image, tomorrow video, next week embed. Card never has to know.
+**Win:** the caller controls _what_ media renders. Today image, tomorrow video, next week embed. Card never has to know.
 
 ### Option B — optional prop (more compact call site)
 
@@ -1364,15 +1377,19 @@ The fix is the same every time: **wrapper owns the outer frame, children contrib
 
 ```html
 <div class="border-y divide-y divide-gray-200 border-gray-200">
-  <Item />   <!-- no border -->
-  <Item />   <!-- no border -->
-  <Item />   <!-- no border -->
+  <Item />
+  <!-- no border -->
+  <Item />
+  <!-- no border -->
+  <Item />
+  <!-- no border -->
 </div>
 ```
 
 What each piece does:
+
 - **`border-y`** on the wrapper draws the outer top + bottom edges (first item's top, last item's bottom).
-- **`divide-y`** on the wrapper adds `border-top: 1px` to all *direct children except the first* — exactly one 1px line between every pair.
+- **`divide-y`** on the wrapper adds `border-top: 1px` to all _direct children except the first_ — exactly one 1px line between every pair.
 - **Items themselves have no borders.** They contribute zero, the wrapper contributes everything.
 
 Result: single 1px lines on every edge, no doubles, anywhere.
@@ -1382,7 +1399,9 @@ Result: single 1px lines on every edge, no doubles, anywhere.
 Same pattern for grids — combine `divide-x` and `divide-y`:
 
 ```html
-<div class="grid grid-cols-2 border border-gray-200 divide-x divide-y divide-gray-200">
+<div
+  class="grid grid-cols-2 border border-gray-200 divide-x divide-y divide-gray-200"
+>
   <Card border="none" />
   <Card border="none" />
   <Card border="none" />
@@ -1397,10 +1416,12 @@ Same pattern for grids — combine `divide-x` and `divide-y`:
 If your grid only splits at `md`, the column divider should only activate at `md`:
 
 ```html
-<div class="grid grid-cols-1 md:grid-cols-2 border-y border-gray-200 md:divide-x md:divide-gray-200">
+<div
+  class="grid grid-cols-1 md:grid-cols-2 border-y border-gray-200 md:divide-x md:divide-gray-200"
+></div>
 ```
 
-On mobile (1 column), only the wrapper's top + bottom show. At `md` (2 columns), a vertical divider appears between them. If you want a divider between the *stacked* mobile rows too, add `divide-y md:divide-y-0` so it's on for mobile and off for `md`.
+On mobile (1 column), only the wrapper's top + bottom show. At `md` (2 columns), a vertical divider appears between them. If you want a divider between the _stacked_ mobile rows too, add `divide-y md:divide-y-0` so it's on for mobile and off for `md`.
 
 ### Component side: support `border="none"`
 
@@ -1430,19 +1451,19 @@ Default to `"all"` so existing usage keeps working. Pass `border="none"` when th
 
 This pattern applies anywhere "items in a line should look like one connected block":
 
-| Scope | Wrapper | Children |
-|---|---|---|
-| Cards in a grid | `border-y md:divide-x` on the grid | `border="none"` on each card |
-| Sections in a page | `border-y divide-y` on `<main>` | no borders on the section |
-| Accordion rows | `divide-y` on the accordion | no borders on each row |
-| Sidebar nav groups | `divide-y` on the sidebar | no borders on each group |
-| Table rows | `divide-y` on `<tbody>` | no borders on `<tr>` |
+| Scope              | Wrapper                            | Children                     |
+| ------------------ | ---------------------------------- | ---------------------------- |
+| Cards in a grid    | `border-y md:divide-x` on the grid | `border="none"` on each card |
+| Sections in a page | `border-y divide-y` on `<main>`    | no borders on the section    |
+| Accordion rows     | `divide-y` on the accordion        | no borders on each row       |
+| Sidebar nav groups | `divide-y` on the sidebar          | no borders on each group     |
+| Table rows         | `divide-y` on `<tbody>`            | no borders on `<tr>`         |
 
 Once you see it, you'll use it constantly. **It's the canonical "shared-edge" answer in Tailwind.**
 
 ### Gotcha: `divide-y` only affects direct children
 
-`divide-y` adds borders to *direct children* of the element it's on. If you wrap your items in another element (e.g. a flex container inside the grid), the divider runs between the wrong things. Either keep items as direct children or move `divide-y` onto a dedicated div.
+`divide-y` adds borders to _direct children_ of the element it's on. If you wrap your items in another element (e.g. a flex container inside the grid), the divider runs between the wrong things. Either keep items as direct children or move `divide-y` onto a dedicated div.
 
 Also: `divide-y` runs between **all** direct children, not just same-type ones. If `<main>` has `<aside>` + `<section>` siblings, the divider will run between them too. Move `divide-y` onto a dedicated container if you only want it between specific items.
 
@@ -1485,18 +1506,18 @@ It outputs a clean, deduplicated, space-separated string. Falsy values (`false`,
 
 ### When to use what
 
-| Situation | Use |
-|---|---|
-| Static classes only | `class="..."` |
-| One or two interpolated variables | template string or `class:list` |
-| Multiple fragments, conditionals, or maybe-empty values | `class:list` |
-| Spreading from props | `class:list` |
+| Situation                                               | Use                             |
+| ------------------------------------------------------- | ------------------------------- |
+| Static classes only                                     | `class="..."`                   |
+| One or two interpolated variables                       | template string or `class:list` |
+| Multiple fragments, conditionals, or maybe-empty values | `class:list`                    |
+| Spreading from props                                    | `class:list`                    |
 
 `class:list` doesn't replace `class=`; both work side by side. Use whichever reads cleaner for the situation.
 
 ### Conditional classes — three forms
 
-When you want a class to appear *only* when some condition is true, there are three idiomatic ways to write it inside `class:list`. All three produce the same output:
+When you want a class to appear _only_ when some condition is true, there are three idiomatic ways to write it inside `class:list`. All three produce the same output:
 
 ```astro
 <div class:list={[
@@ -1512,8 +1533,8 @@ When you want a class to appear *only* when some condition is true, there are th
 `a && b` is JavaScript shorthand for "evaluate `a`; if it's truthy, return `b`; otherwise return `a`." It returns the value, not just `true`/`false`:
 
 ```ts
-true  && "border-t border-gray-200"   // → "border-t border-gray-200"
-false && "border-t border-gray-200"   // → false
+true && "border-t border-gray-200"; // → "border-t border-gray-200"
+false && "border-t border-gray-200"; // → false
 ```
 
 So `borderTop && "border-t"` evaluates to the string when `borderTop` is true, and to `false` when it's false. `class:list` automatically drops the `false` — that's why this pattern works without an explicit `: ""`.
@@ -1521,7 +1542,7 @@ So `borderTop && "border-t"` evaluates to the string when `borderTop` is true, a
 #### Which form when
 
 - **`&&`** for "one class, one condition" — terse and the most common in real code.
-- **Ternary** when you need *either A or B* (not on/off): `cond ? "a" : "b"`.
+- **Ternary** when you need _either A or B_ (not on/off): `cond ? "a" : "b"`.
 - **Object form** for "many classes, many conditions" — keeps everything aligned in a column:
   ```astro
   class:list={[
@@ -1540,8 +1561,18 @@ So `borderTop && "border-t"` evaluates to the string when `borderTop` is true, a
 `&&` short-circuits on **all** falsy values: `false`, `0`, `""`, `null`, `undefined`, `NaN`. Inside `class:list` this is fine — falsy values are dropped. But in render contexts, `0` is dangerous:
 
 ```jsx
-{count && <span>{count} items</span>}   {/* ❌ renders "0" when count is 0 */}
-{count > 0 && <span>{count} items</span>} {/* ✅ explicit comparison */}
+{
+  count && <span>{count} items</span>;
+}
+{
+  /* ❌ renders "0" when count is 0 */
+}
+{
+  count > 0 && <span>{count} items</span>;
+}
+{
+  /* ✅ explicit comparison */
+}
 ```
 
 Always use an explicit comparison when the value could legitimately be `0` or `""` and you don't want it rendered.
@@ -1562,14 +1593,14 @@ When a component hardcodes a class internally and the caller passes a conflictin
 
 ```html
 <!-- Rendered HTML — both position utilities on the same element -->
-<div class="relative overflow-hidden absolute inset-0 h-full w-full">
+<div class="relative overflow-hidden absolute inset-0 h-full w-full"></div>
 ```
 
 You might expect `absolute` to win because it appears later in the class attribute. But Tailwind doesn't care about left-to-right order. Both `relative` and `absolute` have identical CSS specificity (one class each), so whichever rule is defined later in Tailwind's generated stylesheet wins. In this case `relative` happens to come after `absolute` in the output, so `relative` wins — and the element stays in flow, pushing content down instead of overlaying it.
 
 **The rule:** never put conflicting CSS utilities on the same element. If a component hardcodes `relative` internally, passing `absolute` from outside won't override it.
 
-**The fix:** keep a component's internal classes neutral — only include what the component *always* needs (like `overflow-hidden`). Let the caller control positioning, sizing, and other context-dependent concerns via the `class` prop.
+**The fix:** keep a component's internal classes neutral — only include what the component _always_ needs (like `overflow-hidden`). Let the caller control positioning, sizing, and other context-dependent concerns via the `class` prop.
 
 ```astro
 <!-- Good — component stays neutral about positioning -->
@@ -1589,11 +1620,11 @@ Inline `<svg>` blocks are fine for one-offs but get noisy fast — every icon is
 
 ### The three approaches
 
-| Approach | Best for |
-|---|---|
-| **Native SVG import** (`import Star from './star.svg'`) | A handful of project-specific custom icons |
-| **`astro-icon` + Iconify** | Almost everything else — name-based, huge catalog, tree-shaken |
-| **Manual `import.meta.glob` wrapper** | When you want zero dependencies and only local SVGs |
+| Approach                                                | Best for                                                       |
+| ------------------------------------------------------- | -------------------------------------------------------------- |
+| **Native SVG import** (`import Star from './star.svg'`) | A handful of project-specific custom icons                     |
+| **`astro-icon` + Iconify**                              | Almost everything else — name-based, huge catalog, tree-shaken |
+| **Manual `import.meta.glob` wrapper**                   | When you want zero dependencies and only local SVGs            |
 
 `astro-icon` is the de-facto standard. It gives you the entire Iconify catalog (200,000+ icons across ~150 sets — Lucide, Heroicons, Material, Phosphor, simple-icons brand logos, etc.) and only ships the ones you actually use.
 
@@ -1610,9 +1641,9 @@ The `@iconify-json/*` packages are dev dependencies. They live in `node_modules`
 
 ```js
 // astro.config.mjs
-import { defineConfig } from 'astro/config';
-import icon from 'astro-icon';
-import tailwindcss from '@tailwindcss/vite';
+import { defineConfig } from "astro/config";
+import icon from "astro-icon";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   integrations: [icon()],
@@ -1704,7 +1735,7 @@ After:
 
 Same visual result. Swapping icons becomes a one-word change. Adding a new card with a different icon doesn't drag in another 16 lines of `<path>` data.
 
-### When *not* to reach for `astro-icon`
+### When _not_ to reach for `astro-icon`
 
 - You need **one** icon, ever → just paste the SVG inline.
 - You're shipping a single brand logo → import the SVG file directly.
@@ -1728,7 +1759,7 @@ font-size: clamp(2.5rem, 5vw + 1rem, 5.5rem);
 
 Two problems:
 
-1. **`vw` ignores user zoom and the root font size.** When a user cranks browser zoom or sets a larger default font (a primary accessibility need — WCAG 1.4.4), `vw` barely responds, because the viewport *in CSS pixels* stays roughly the same. The text grows less than the user asked for.
+1. **`vw` ignores user zoom and the root font size.** When a user cranks browser zoom or sets a larger default font (a primary accessibility need — WCAG 1.4.4), `vw` barely responds, because the viewport _in CSS pixels_ stays roughly the same. The text grows less than the user asked for.
 2. **`vw` is tied to the window, not the content.** If a heading lives inside a 600px sidebar on a 1920px screen, `5vw` gives you 96px — enormous for that box. The text doesn't know about its container.
 
 ### The modern fix: `cqi` + `rem` anchors
@@ -1745,7 +1776,7 @@ The pattern:
 font-size: clamp(MIN_rem, INTERCEPT_rem + SLOPE_cqi, MAX_rem);
 ```
 
-For anchors *(container 20rem → MIN)* and *(container 90rem → MAX)*:
+For anchors _(container 20rem → MIN)_ and _(container 90rem → MAX)_:
 
 ```
 slope      = (MAX - MIN) / 70
@@ -1757,7 +1788,7 @@ That's just the equation of a line, `y = mx + b`, where x is container width in 
 
 ### Making `<body>` a query container by default
 
-`cqi` only works if *some* ancestor has `container-type: inline-size`. If you don't set one, `cqi` silently evaluates to `0` and your text collapses to the `min`. The cleanest fix is to make `<body>` itself a query container:
+`cqi` only works if _some_ ancestor has `container-type: inline-size`. If you don't set one, `cqi` silently evaluates to `0` and your text collapses to the `min`. The cleanest fix is to make `<body>` itself a query container:
 
 ```css
 @layer base {
@@ -1805,7 +1836,7 @@ Design systems usually want each heading tuned individually (different scale jum
 }
 ```
 
-Do the same for `h4`, `h5`, `h6`, and body sizes (`text-body-xl` → `text-body-sm`). Comment each one with its MIN/MAX in rem *and* px — you'll want to retune later and the comment is the spec.
+Do the same for `h4`, `h5`, `h6`, and body sizes (`text-body-xl` → `text-body-sm`). Comment each one with its MIN/MAX in rem _and_ px — you'll want to retune later and the comment is the spec.
 
 ### Why `@utility`, not `@layer components`
 
@@ -1858,7 +1889,7 @@ e.g. to make `h2` range `2.25rem → 4rem`:
 ### Gotchas
 
 1. **No query container = collapse to MIN.** If you remove `container-type` from `<body>` and forget to add one elsewhere, every fluid size quietly pins to its floor value. Debug: in DevTools, check whether an ancestor actually has `container-type: inline-size`.
-2. **`container-type: inline-size` creates containment.** The element can no longer size its block-axis based on its children's *inline* size. For `<body>` and normal block containers this is already how they work. Don't slap it on flex/grid items without testing.
+2. **`container-type: inline-size` creates containment.** The element can no longer size its block-axis based on its children's _inline_ size. For `<body>` and normal block containers this is already how they work. Don't slap it on flex/grid items without testing.
 3. **`cqi` ≠ `@container` queries.** You can use `cqi` units without ever writing a `@container (min-width: ...)` rule. They share the container mechanism but are independent features. Fluid type only needs `cqi`.
 4. **Anchor choice matters per context.** A 20rem → 90rem range assumes a page-sized container. Inside a card that's never wider than 40rem, the MAX anchor is unreachable. Consider tighter anchors (or a component-specific utility) when the container is much narrower than a page.
 5. **`vw` vs `cqi` accessibility difference is real.** At 200% browser zoom, a `rem` floor of `2.75rem` becomes `88px`. A `vw`-only middle term barely budges. Always anchor with `rem`.
@@ -1883,7 +1914,7 @@ Tailwind 4 changed how dark mode works compared to v3. The old `darkMode: 'class
 
 Three layers, same shape as fluid type:
 
-1. **Semantic tokens** (`--color-bg`, `--color-fg`, `--color-border`, `--color-intent`...) — the *role*, not the value. Components only use these.
+1. **Semantic tokens** (`--color-bg`, `--color-fg`, `--color-border`, `--color-intent`...) — the _role_, not the value. Components only use these.
 2. **Theme definitions** — light and dark each redefine the semantic tokens to point at different raw values.
 3. **A switch mechanism** — system preference, a class on `<html>`, or both.
 
@@ -1894,19 +1925,19 @@ The mistake to avoid: writing `bg-zinc-900` in a Card component. If you do that,
 ```css
 @theme {
   /* Semantic color roles — not raw values */
-  --color-bg:           #ffffff;   /* page background */
-  --color-bg-elevated:  #f9fafb;   /* cards, panels */
-  --color-bg-sunken:    #f3f4f6;   /* inputs, wells */
+  --color-bg: #ffffff; /* page background */
+  --color-bg-elevated: #f9fafb; /* cards, panels */
+  --color-bg-sunken: #f3f4f6; /* inputs, wells */
 
-  --color-fg:           #0a0a0a;   /* primary text */
-  --color-fg-muted:     #4b5563;   /* secondary */
-  --color-fg-subtle:    #9ca3af;   /* tertiary, captions */
+  --color-fg: #0a0a0a; /* primary text */
+  --color-fg-muted: #4b5563; /* secondary */
+  --color-fg-subtle: #9ca3af; /* tertiary, captions */
 
-  --color-border:        #e5e7eb;
+  --color-border: #e5e7eb;
   --color-border-strong: #d1d5db;
 
-  --color-intent:    #6366f1;
-  --color-fg-on-intent: #ffffff;     /* text ON primary */
+  --color-intent: #6366f1;
+  --color-fg-on-intent: #ffffff; /* text ON primary */
 }
 ```
 
@@ -1923,13 +1954,13 @@ Three options. They stack — pick the one that matches your needs.
 ```css
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg:           #0a0a0a;
-    --color-bg-elevated:  #18181b;
-    --color-fg:           #fafafa;
-    --color-fg-muted:     #a1a1aa;
-    --color-border:       #27272a;
-    --color-intent:      #818cf8;
-    --color-fg-on-intent:   #0a0a0a;
+    --color-bg: #0a0a0a;
+    --color-bg-elevated: #18181b;
+    --color-fg: #fafafa;
+    --color-fg-muted: #a1a1aa;
+    --color-border: #27272a;
+    --color-intent: #818cf8;
+    --color-fg-on-intent: #0a0a0a;
   }
 }
 ```
@@ -1950,16 +1981,16 @@ That registers a `dark:` variant that activates when an ancestor has `.dark`. Th
 
 ```css
 .dark {
-  --color-bg:          #0a0a0a;
+  --color-bg: #0a0a0a;
   --color-bg-elevated: #18181b;
-  --color-fg:          #fafafa;
-  --color-border:      #27272a;
-  --color-intent:     #818cf8;
-  --color-fg-on-intent:  #0a0a0a;
+  --color-fg: #fafafa;
+  --color-border: #27272a;
+  --color-intent: #818cf8;
+  --color-fg-on-intent: #0a0a0a;
 }
 ```
 
-Important: theme overrides are **regular CSS**, not inside `@theme`. `@theme` is the *defaults* block; overrides redeclare custom properties further down the cascade. Tailwind's generated utilities reference the variables, so when the variables change, the utilities follow automatically.
+Important: theme overrides are **regular CSS**, not inside `@theme`. `@theme` is the _defaults_ block; overrides redeclare custom properties further down the cascade. Tailwind's generated utilities reference the variables, so when the variables change, the utilities follow automatically.
 
 #### Pattern C — Both (recommended for production)
 
@@ -1981,15 +2012,21 @@ Default to system, let a class override. Three states: `auto` (no class), `light
 }
 
 /* Manual overrides win over OS */
-:root.light { --color-bg: #ffffff; --color-fg: #0a0a0a; }
-:root.dark  { --color-bg: #0a0a0a; --color-fg: #fafafa; }
+:root.light {
+  --color-bg: #ffffff;
+  --color-fg: #0a0a0a;
+}
+:root.dark {
+  --color-bg: #0a0a0a;
+  --color-fg: #fafafa;
+}
 ```
 
 Store the user's choice in `localStorage` so it persists across visits.
 
 ### Step 3 — Avoid the FOUC
 
-If you toggle dark mode in JS *after* the page renders, the user sees a white flash before the switch. Fix: a tiny **inline blocking script in `<head>`** that runs before paint.
+If you toggle dark mode in JS _after_ the page renders, the user sees a white flash before the switch. Fix: a tiny **inline blocking script in `<head>`** that runs before paint.
 
 In `Layout.astro`:
 
@@ -2023,8 +2060,12 @@ This is the single most important detail for theme polish. Without it, every dar
 Add this so native form controls and scrollbars also adapt:
 
 ```css
-.light { color-scheme: light; }
-.dark  { color-scheme: dark; }
+.light {
+  color-scheme: light;
+}
+.dark {
+  color-scheme: dark;
+}
 ```
 
 Without this, scrollbars and `<input>` controls stay light even when your CSS goes dark.
@@ -2043,7 +2084,7 @@ Once tokens are defined, components don't think about themes:
 </article>
 ```
 
-**No `dark:` variants anywhere.** The tokens do the work. Reach for `dark:` only when something needs to be *structurally* different in dark mode (swap an image, hide a logo variant, change a border style):
+**No `dark:` variants anywhere.** The tokens do the work. Reach for `dark:` only when something needs to be _structurally_ different in dark mode (swap an image, hide a logo variant, change a border style):
 
 ```astro
 <img src="/logo-light.svg" class="dark:hidden" />
@@ -2085,9 +2126,18 @@ For a three-state toggle (`auto` / `light` / `dark`), use a small dropdown or se
 The same pattern handles brand themes, customer themes, etc. Just stack classes:
 
 ```css
-:root.theme-ocean       { --color-intent: #0ea5e9; --color-bg: #f0f9ff; }
-:root.theme-forest      { --color-intent: #16a34a; --color-bg: #f0fdf4; }
-:root.theme-ocean.dark  { --color-intent: #38bdf8; --color-bg: #082f49; }
+:root.theme-ocean {
+  --color-intent: #0ea5e9;
+  --color-bg: #f0f9ff;
+}
+:root.theme-forest {
+  --color-intent: #16a34a;
+  --color-bg: #f0fdf4;
+}
+:root.theme-ocean.dark {
+  --color-intent: #38bdf8;
+  --color-bg: #082f49;
+}
 ```
 
 Two orthogonal axes (brand × light/dark) compose by stacking classes on `<html>`. Same toggle pattern, same FOUC prevention, same component code.
@@ -2117,7 +2167,7 @@ Light doesn't need a variant — it's the default, so bare utilities (`bg-panel`
 
 #### 2. Define the light palette as the default inside `@theme`
 
-`@theme` is the *defaults* block. Everything you put here becomes a utility (`--color-canvas` → `bg-canvas`) and also feeds the cascade when no theme override is active.
+`@theme` is the _defaults_ block. Everything you put here becomes a utility (`--color-canvas` → `bg-canvas`) and also feeds the cascade when no theme override is active.
 
 ```css
 @theme {
@@ -2147,8 +2197,7 @@ Light doesn't need a variant — it's the default, so bare utilities (`bg-panel`
 
   /* Shadows flip per mode as well */
   --shadow-popover:
-    0 1px 2px rgb(0 0 0 / 0.04),
-    0 12px 24px -8px rgb(0 0 0 / 0.08),
+    0 1px 2px rgb(0 0 0 / 0.04), 0 12px 24px -8px rgb(0 0 0 / 0.08),
     0 24px 48px -12px rgb(0 0 0 / 0.12);
   --shadow-header: 0 8px 10px -10px rgb(0 0 0 / 0.2);
 }
@@ -2156,7 +2205,7 @@ Light doesn't need a variant — it's the default, so bare utilities (`bg-panel`
 
 #### 3. Make every `data-theme` attribute paint its own element
 
-By default, CSS custom properties inherit — so a `<div data-theme="dark">` recolors its *descendants* but not itself. Force the element to also pick up the new `canvas` / `fg` it just redefined:
+By default, CSS custom properties inherit — so a `<div data-theme="dark">` recolors its _descendants_ but not itself. Force the element to also pick up the new `canvas` / `fg` it just redefined:
 
 ```css
 [data-theme="light"],
@@ -2206,9 +2255,9 @@ Each override block just redeclares the semantic tokens. The cascade does the re
   --color-panel: #141414;
   /* …same structural tokens as dark… */
   /* …but brand-distinctive accent colors: */
-  --color-intent: #8b5cf6;        /* brand hue — the primary-action color */
+  --color-intent: #8b5cf6; /* brand hue — the primary-action color */
   --color-intent-hover: #7c3aed;
-  --color-focus: #8b5cf6;         /* focus ring inherits brand */
+  --color-focus: #8b5cf6; /* focus ring inherits brand */
   --accent-line: rgb(139 92 246);
 
   color-scheme: dark;
@@ -2282,7 +2331,7 @@ With tokens doing the real work, component code stays theme-agnostic. You should
 - **One-off surfaces** — a hero image that has a white edge on dark backgrounds; add `brand:mask-b-from-40%` just for brand.
 - **Debug visualization** — a per-mode outline to verify which theme an island is resolving to.
 
-If you find yourself writing `dark:bg-panel`, that's a sign the token is wrong — fix `--color-panel` in the dark override block instead, and *every* `bg-panel` in the codebase follows automatically.
+If you find yourself writing `dark:bg-panel`, that's a sign the token is wrong — fix `--color-panel` in the dark override block instead, and _every_ `bg-panel` in the codebase follows automatically.
 
 #### Adding a fourth (or nth) mode
 
@@ -2298,7 +2347,7 @@ Every new mode needs the same five touch-points. If any is missing, you get a si
 
 ## 29. Custom color systems
 
-Tailwind's default palette (`zinc-700`, `blue-500`, etc.) is designed as a *starting* point, not a design system. For production work you want your own palette built on the same principles. Here's how.
+Tailwind's default palette (`zinc-700`, `blue-500`, etc.) is designed as a _starting_ point, not a design system. For production work you want your own palette built on the same principles. Here's how.
 
 ### The two-layer model (the key insight)
 
@@ -2309,7 +2358,7 @@ Every mature color system has **two distinct layers**:
 
 The mistake everyone makes at first: defining one flat list (`brand`, `accent`, `gray`, `red`) and using it directly in components. It works until you need a second theme, a hover state, a disabled state, or a third brand variant — then everything tangles.
 
-Two layers keeps the palette and the *meaning* separate. Designers can retune the palette without touching components. Developers can rename a semantic role without touching the palette.
+Two layers keeps the palette and the _meaning_ separate. Designers can retune the palette without touching components. Developers can rename a semantic role without touching the palette.
 
 ### Step 1 — Build primitive ramps
 
@@ -2318,7 +2367,7 @@ A ramp is 10–11 stops of the same hue. Stick with Tailwind's stop convention (
 ```css
 @theme {
   /* ---------- BRAND (primary hue) ---------- */
-  --color-brand-50:  #f5f3ff;
+  --color-brand-50: #f5f3ff;
   --color-brand-100: #ede9fe;
   --color-brand-200: #ddd6fe;
   --color-brand-300: #c4b5fd;
@@ -2331,7 +2380,7 @@ A ramp is 10–11 stops of the same hue. Stick with Tailwind's stop convention (
   --color-brand-950: #2e1065;
 
   /* ---------- NEUTRAL (your custom gray) ---------- */
-  --color-neutral-50:  #fafaf9;
+  --color-neutral-50: #fafaf9;
   --color-neutral-100: #f5f5f4;
   /* ...etc, all the way to 950 */
 }
@@ -2347,7 +2396,7 @@ Three options, ranked by output quality:
 2. **A ramp generator from a single seed color** — [UI Colors](https://uicolors.app), [Tailwind Shades](https://www.tailwindshades.com), [Palettte.app](https://palettte.app). Quick, decent results.
 3. **Eyeballing it in hex.** Don't. The middle stops will look muddy and the contrast progression will be uneven.
 
-**Critical rule**: each stop should differ from its neighbor by a *consistent perceptual amount*, not a consistent hex amount. That's why OKLCH wins — it's the only color space designed to make this easy.
+**Critical rule**: each stop should differ from its neighbor by a _consistent perceptual amount_, not a consistent hex amount. That's why OKLCH wins — it's the only color space designed to make this easy.
 
 #### Use OKLCH directly in CSS (recommended)
 
@@ -2355,7 +2404,7 @@ Modern browsers support `oklch()` natively:
 
 ```css
 @theme {
-  --color-brand-500: oklch(0.62 0.24 295);   /* L C H */
+  --color-brand-500: oklch(0.62 0.24 295); /* L C H */
   --color-brand-600: oklch(0.55 0.25 295);
   --color-brand-700: oklch(0.48 0.22 295);
   /* L = lightness 0-1, C = chroma 0-0.4, H = hue 0-360 */
@@ -2371,44 +2420,44 @@ This is where the system actually lives. Components use these names.
 ```css
 @theme {
   /* ---------- SURFACES (backgrounds) ---------- */
-  --color-bg:          var(--color-neutral-50);
+  --color-bg: var(--color-neutral-50);
   --color-bg-elevated: #ffffff;
-  --color-bg-sunken:   var(--color-neutral-100);
-  --color-bg-overlay:  var(--color-neutral-900);
+  --color-bg-sunken: var(--color-neutral-100);
+  --color-bg-overlay: var(--color-neutral-900);
 
   /* ---------- CONTENT (foregrounds) ---------- */
-  --color-fg:          var(--color-neutral-900);
-  --color-fg-muted:    var(--color-neutral-600);
-  --color-fg-subtle:   var(--color-neutral-500);
+  --color-fg: var(--color-neutral-900);
+  --color-fg-muted: var(--color-neutral-600);
+  --color-fg-subtle: var(--color-neutral-500);
 
   /* ---------- LINES ---------- */
-  --color-border:        var(--color-neutral-200);
+  --color-border: var(--color-neutral-200);
   --color-border-strong: var(--color-neutral-300);
-  --color-divider:       var(--color-neutral-100);
+  --color-divider: var(--color-neutral-100);
 
   /* ---------- BRAND ROLES ---------- */
-  --color-intent:        var(--color-brand-600);
-  --color-intent-hover:  var(--color-brand-700);
+  --color-intent: var(--color-brand-600);
+  --color-intent-hover: var(--color-brand-700);
   --color-intent-active: var(--color-brand-800);
-  --color-intent-soft:   var(--color-brand-50);
-  --color-fg-on-intent:     #ffffff;
+  --color-intent-soft: var(--color-brand-50);
+  --color-fg-on-intent: #ffffff;
 
   /* ---------- STATUS ---------- */
-  --color-success:      var(--color-emerald-600);
+  --color-success: var(--color-emerald-600);
   --color-success-soft: var(--color-emerald-50);
-  --color-success-fg:   #ffffff;
+  --color-success-fg: #ffffff;
 
-  --color-warning:      var(--color-amber-500);
+  --color-warning: var(--color-amber-500);
   --color-warning-soft: var(--color-amber-50);
-  --color-warning-fg:   var(--color-neutral-900);
+  --color-warning-fg: var(--color-neutral-900);
 
-  --color-danger:       var(--color-red-600);
-  --color-danger-soft:  var(--color-red-50);
-  --color-danger-fg:    #ffffff;
+  --color-danger: var(--color-red-600);
+  --color-danger-soft: var(--color-red-50);
+  --color-danger-fg: #ffffff;
 
   /* ---------- INTERACTIVE ---------- */
   --color-focus-ring: var(--color-brand-500);
-  --color-selection:  var(--color-brand-200);
+  --color-selection: var(--color-brand-200);
 }
 ```
 
@@ -2435,16 +2484,16 @@ A good naming system answers three questions for each token:
 2. **What variant/state?** (`-hover`, `-active`, `-disabled`, `-soft`, `-strong`, `-muted`...)
 3. **What's it paired with?** (`-fg` for "foreground used on top of this")
 
-| Pattern | Meaning | Example |
-|---|---|---|
-| `bg-*` | Surface colors | `bg`, `bg-elevated`, `bg-sunken` |
-| `fg-*` | Text/icon colors | `fg`, `fg-muted`, `fg-subtle` |
-| `border-*` | Lines | `border`, `border-strong`, `divider` |
-| `<role>` | Solid color for that role | `primary`, `danger` |
-| `<role>-soft` | Tinted background of that role | `primary-soft`, `danger-soft` |
-| `<role>-fg` | Foreground used ON that role | `primary-fg`, `danger-fg` |
-| `<role>-hover` | Hover state | `primary-hover` |
-| `<role>-active` | Active/pressed state | `primary-active` |
+| Pattern         | Meaning                        | Example                              |
+| --------------- | ------------------------------ | ------------------------------------ |
+| `bg-*`          | Surface colors                 | `bg`, `bg-elevated`, `bg-sunken`     |
+| `fg-*`          | Text/icon colors               | `fg`, `fg-muted`, `fg-subtle`        |
+| `border-*`      | Lines                          | `border`, `border-strong`, `divider` |
+| `<role>`        | Solid color for that role      | `primary`, `danger`                  |
+| `<role>-soft`   | Tinted background of that role | `primary-soft`, `danger-soft`        |
+| `<role>-fg`     | Foreground used ON that role   | `primary-fg`, `danger-fg`            |
+| `<role>-hover`  | Hover state                    | `primary-hover`                      |
+| `<role>-active` | Active/pressed state           | `primary-active`                     |
 
 The two non-obvious ones are `-soft` and `-fg` — and they're the most useful tokens you can have:
 
@@ -2453,33 +2502,33 @@ The two non-obvious ones are `-soft` and `-fg` — and they're the most useful t
 
 ### Step 4 — How this plays with light/dark
 
-Theme overrides redeclare *semantic tokens*, **not primitives**. The ramps stay the same in both themes — only the *mappings* change.
+Theme overrides redeclare _semantic tokens_, **not primitives**. The ramps stay the same in both themes — only the _mappings_ change.
 
 ```css
 /* Defaults — light theme */
 @theme {
-  --color-brand-50:  oklch(0.97 0.02 295);
-  --color-brand-950: oklch(0.20 0.10 295);
+  --color-brand-50: oklch(0.97 0.02 295);
+  --color-brand-950: oklch(0.2 0.1 295);
   /* ...full ramp... */
 
-  --color-bg:         var(--color-neutral-50);
-  --color-fg:         var(--color-neutral-900);
-  --color-intent:    var(--color-brand-600);
+  --color-bg: var(--color-neutral-50);
+  --color-fg: var(--color-neutral-900);
+  --color-intent: var(--color-brand-600);
   --color-fg-on-intent: #ffffff;
 }
 
 /* Dark theme — same ramps, different mappings */
 :root.dark {
-  --color-bg:         var(--color-neutral-950);
-  --color-fg:         var(--color-neutral-50);
-  --color-intent:    var(--color-brand-400);   /* lighter for dark bg */
+  --color-bg: var(--color-neutral-950);
+  --color-fg: var(--color-neutral-50);
+  --color-intent: var(--color-brand-400); /* lighter for dark bg */
   --color-fg-on-intent: var(--color-neutral-950);
 }
 ```
 
 Two important rules:
 
-1. **Brand colors usually need a different stop in dark mode.** A `brand-600` that pops on white looks muddy on near-black. Bump it to `brand-400` or `brand-500` in dark mode. The ramp doesn't change; the *role mapping* does.
+1. **Brand colors usually need a different stop in dark mode.** A `brand-600` that pops on white looks muddy on near-black. Bump it to `brand-400` or `brand-500` in dark mode. The ramp doesn't change; the _role mapping_ does.
 2. **Neutrals invert.** Light pulls from `50`/`100`/`200`; dark pulls from `950`/`900`/`800`. Same ramp, opposite ends.
 
 ### Step 5 — Validate accessibility
@@ -2490,7 +2539,7 @@ Non-negotiable. Every text-on-background pair needs to meet WCAG ratios:
 - **Large text** (18pt+ or 14pt+ bold): 3:1 minimum
 - **UI elements** (borders, icons): 3:1 minimum
 
-Test every semantic pair you define, in *both* themes:
+Test every semantic pair you define, in _both_ themes:
 
 - `bg` × `fg`
 - `bg` × `fg-muted`
@@ -2503,7 +2552,7 @@ Tools: WebAIM Contrast Checker, Chrome DevTools color picker (shows the ratio in
 
 **Most common failures**: `fg-muted` and `fg-subtle` on tinted backgrounds. They pass on pure white but fail on `bg-elevated` if it's anything but pure white. Always check the actual combinations you'll use.
 
-### Step 6 — Document what each token is *for*
+### Step 6 — Document what each token is _for_
 
 Tokens without docs become guesswork. Add a reference at the top of `global.css`:
 
@@ -2552,7 +2601,7 @@ If you genuinely want to remove all defaults:
 
 ```css
 @theme {
-  --color-*: initial;   /* wipe all default colors */
+  --color-*: initial; /* wipe all default colors */
   /* now define yours from scratch */
 }
 ```
@@ -2573,8 +2622,8 @@ When the same translucency appears in multiple places (overlay backdrops, glass 
 
 ```css
 @theme {
-  --color-overlay:      rgb(0 0 0 / 0.6);
-  --color-glass:        rgb(255 255 255 / 0.08);
+  --color-overlay: rgb(0 0 0 / 0.6);
+  --color-glass: rgb(255 255 255 / 0.08);
   --color-focus-shadow: rgb(139 92 246 / 0.4);
 }
 ```
@@ -2583,7 +2632,7 @@ Tip: store base color components separately so you can compose alphas dynamicall
 
 ```css
 @theme {
-  --color-brand-rgb: 139 92 246;   /* space-separated, no commas */
+  --color-brand-rgb: 139 92 246; /* space-separated, no commas */
 }
 
 .glow {
@@ -2594,11 +2643,11 @@ Tip: store base color components separately so you can compose alphas dynamicall
 ### Common gotchas
 
 1. **Don't put semantic tokens in components, then realize you need primitives.** Build primitives first, semantics second, components third. Going backwards is painful.
-2. **Don't name semantic tokens after colors.** `--color-blue` for a primary action is a trap — what happens when the brand changes to green? Always name by *role*, never by hue.
+2. **Don't name semantic tokens after colors.** `--color-blue` for a primary action is a trap — what happens when the brand changes to green? Always name by _role_, never by hue.
 3. **Don't skip the `-fg` pair tokens.** If you only define `--color-intent` and not `--color-fg-on-intent`, every component author guesses. They will guess differently. You will end up with white-text-on-yellow somewhere.
 4. **Don't mix systems mid-component.** Either a component uses semantic tokens or it uses primitives — not both. Mixing leads to "this is `bg-panel` but the border is `border-zinc-300`" inconsistencies that survive theme changes and break.
 5. **Don't forget hover/active/focus.** A `primary` token without `primary-hover` means every developer reaches for `hover:bg-brand-700` and you're back to primitives in components.
-6. **Don't try to make every color a token.** One-off illustration colors, decorative gradients, marketing-page hero accents — these can stay as raw values or arbitrary classes. Tokens are for *system* colors, not *content* colors.
+6. **Don't try to make every color a token.** One-off illustration colors, decorative gradients, marketing-page hero accents — these can stay as raw values or arbitrary classes. Tokens are for _system_ colors, not _content_ colors.
 
 ### TL;DR
 
@@ -2610,10 +2659,10 @@ Tip: store base color components separately so you can compose alphas dynamicall
 6. **State variants** (`-hover`, `-active`, `-disabled`) defined upfront.
 7. **Theme switching changes the semantic mappings, not the primitives.** Same ramps, different role assignments per theme.
 8. **Validate contrast** for every semantic pair, in every theme.
-9. **Document what each token is *for***, not just what color it is.
+9. **Document what each token is _for_**, not just what color it is.
 10. **Don't nuke Tailwind defaults** unless you have a reason.
 
-The whole system is "primitives are paint, semantics are roles, components are blind to both." Once you have the two-layer split, custom palettes, multi-brand theming, dark mode, and accessibility audits all become *the same problem* — and you only have to solve it in one place.
+The whole system is "primitives are paint, semantics are roles, components are blind to both." Once you have the two-layer split, custom palettes, multi-brand theming, dark mode, and accessibility audits all become _the same problem_ — and you only have to solve it in one place.
 
 ---
 
@@ -2645,9 +2694,15 @@ const { title } = Astro.props;
 }
 
 @layer components {
-  .container-large { @apply mx-auto w-full max-w-7xl; }
-  .section-gutter { @apply px-4 md:px-12 lg:px-24; }
-  .section-padding-lg { @apply py-32 md:py-48; }
+  .container-large {
+    @apply mx-auto w-full max-w-7xl;
+  }
+  .section-gutter {
+    @apply px-4 md:px-12 lg:px-24;
+  }
+  .section-padding-lg {
+    @apply py-32 md:py-48;
+  }
 }
 ```
 
@@ -2716,13 +2771,13 @@ Adding `is:inline` tells Astro to pass the script through untouched — no bundl
 
 ### When to use `is:inline`
 
-| Scenario | Use `is:inline`? |
-|---|---|
-| Your own component logic | No — let Astro bundle it |
-| Third-party SDK from external URL | Yes |
-| Script using globals like `hbspt`, `gtag`, `Intercom` | Yes |
-| Analytics/tracking snippets | Yes |
-| Inline event handlers or widgets | Yes |
+| Scenario                                              | Use `is:inline`?         |
+| ----------------------------------------------------- | ------------------------ |
+| Your own component logic                              | No — let Astro bundle it |
+| Third-party SDK from external URL                     | Yes                      |
+| Script using globals like `hbspt`, `gtag`, `Intercom` | Yes                      |
+| Analytics/tracking snippets                           | Yes                      |
+| Inline event handlers or widgets                      | Yes                      |
 
 ### Passing Astro variables into inline scripts with `define:vars`
 
@@ -2882,10 +2937,10 @@ This is rarely useful — if you control the content, skip the iframe and use a 
 
 #### When to use what
 
-| Need | Approach |
-|---|---|
-| Embed third-party content (YouTube, Calendly, forms) | iframe + URL params |
-| Two-way communication with an embedded page you control | iframe + `postMessage` |
+| Need                                                      | Approach                                                                    |
+| --------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Embed third-party content (YouTube, Calendly, forms)      | iframe + URL params                                                         |
+| Two-way communication with an embedded page you control   | iframe + `postMessage`                                                      |
 | Custom animation or interactive element you fully control | Skip iframe — use a component with `<script>` (canvas pattern from 30b/30c) |
 
 The key insight: iframes are for **isolation** — embedding content you don't control or don't want to mix with your own DOM. If you control everything, components with scripts are always simpler.
@@ -2904,14 +2959,14 @@ Files in `public/` are served as-is with no bundling. The script should read its
 
 ```js
 // public/scripts/hero-animation.js
-document.addEventListener('DOMContentLoaded', () => {
-  const canvas = document.getElementById('canvas');
+document.addEventListener("DOMContentLoaded", () => {
+  const canvas = document.getElementById("canvas");
   if (!canvas) return;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
 
   // Read config from data attributes (always strings — parse as needed)
   const speed = Number(canvas.dataset.speed) || 1;
-  const color = canvas.dataset.color || '#3b82f6';
+  const color = canvas.dataset.color || "#3b82f6";
 
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -2971,6 +3026,7 @@ Props (build time) → data-* attributes (HTML) → JS reads dataset (runtime) �
 ```
 
 Each step crosses a boundary:
+
 - **Props → data attributes**: Astro renders the values into HTML at build time. Numbers and strings become attribute values.
 - **Data attributes → JS**: The script reads `canvas.dataset.speed` at runtime in the browser. Values are always strings, so parse them with `Number()` or `parseFloat()`.
 - **JS → canvas**: The script uses the parsed values to configure the animation loop.
@@ -2983,9 +3039,9 @@ Each step crosses a boundary:
 
 ### Two ways to pass config to client-side JS
 
-| Method | Tradeoff |
-|---|---|
-| `data-*` attributes | Script is loaded once, each instance reads its own config from the DOM. Works with multiple instances on one page. |
+| Method                                | Tradeoff                                                                                                                       |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `data-*` attributes                   | Script is loaded once, each instance reads its own config from the DOM. Works with multiple instances on one page.             |
 | `define:vars` on `<script is:inline>` | Variables are injected directly as JS — no parsing needed. But the script is inlined (duplicated) for each component instance. |
 
 For canvas animations, **data attributes are the better choice** — you get one cached script file and each canvas reads its own config.
@@ -3089,12 +3145,12 @@ const { speed = 1, color = "#3b82f6", class: className } = Astro.props;
 
 ### The key difference from section 30b
 
-| | 2D canvas (SimplexNoise) | Three.js |
-|---|---|---|
-| **Install** | Copy script to `public/scripts/` | `npm install three` |
-| **Script tag** | `<script is:inline src="/scripts/...">` | `<script>` (bundled by Astro) |
-| **Imports** | None — uses globals / IIFE | `import * as THREE from "three"` |
-| **Why** | Script uses IIFE / `window` globals — bundling breaks it | ES module with standard imports — bundling works perfectly |
+|                | 2D canvas (SimplexNoise)                                 | Three.js                                                   |
+| -------------- | -------------------------------------------------------- | ---------------------------------------------------------- |
+| **Install**    | Copy script to `public/scripts/`                         | `npm install three`                                        |
+| **Script tag** | `<script is:inline src="/scripts/...">`                  | `<script>` (bundled by Astro)                              |
+| **Imports**    | None — uses globals / IIFE                               | `import * as THREE from "three"`                           |
+| **Why**        | Script uses IIFE / `window` globals — bundling breaks it | ES module with standard imports — bundling works perfectly |
 
 The rule: if the library is on npm and uses `import`/`export`, let Astro bundle it. If it's a standalone script that attaches to `window` or uses an IIFE, use `is:inline`.
 
@@ -3136,7 +3192,9 @@ These all work with Astro's bundler — just import them in the `<script>` block
 Wrap the animation in a `prefers-reduced-motion` check so users who opt out see a static scene:
 
 ```js
-const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const prefersReduced = window.matchMedia(
+  "(prefers-reduced-motion: reduce)",
+).matches;
 
 function animate() {
   if (!prefersReduced) {
@@ -3234,26 +3292,26 @@ export const collections = { faq };
 
 Breaking this down:
 
-| Part | What it does |
-|---|---|
-| `defineCollection()` | Registers a collection with Astro |
-| `loader: glob(...)` | Tells Astro where to find the files |
-| `pattern: "**/*.md"` | Match all `.md` files in the folder (including subfolders) |
-| `base: "./src/content/faq"` | The folder to search in |
-| `schema: z.object({...})` | Validates frontmatter — Astro will throw a build error if a field is missing or has the wrong type |
-| `export const collections` | Exposes the collections to Astro |
+| Part                        | What it does                                                                                       |
+| --------------------------- | -------------------------------------------------------------------------------------------------- |
+| `defineCollection()`        | Registers a collection with Astro                                                                  |
+| `loader: glob(...)`         | Tells Astro where to find the files                                                                |
+| `pattern: "**/*.md"`        | Match all `.md` files in the folder (including subfolders)                                         |
+| `base: "./src/content/faq"` | The folder to search in                                                                            |
+| `schema: z.object({...})`   | Validates frontmatter — Astro will throw a build error if a field is missing or has the wrong type |
+| `export const collections`  | Exposes the collections to Astro                                                                   |
 
 #### Common Zod field types
 
 ```ts
-z.string()                    // required string
-z.string().optional()         // optional string
-z.number()                    // required number
-z.boolean()                   // true or false
-z.date()                      // date (parsed from YAML date format)
-z.enum(["blog", "tutorial"])  // must be one of these values
-z.string().default("draft")   // defaults to "draft" if not provided
-z.array(z.string())           // array of strings (e.g., tags: ["astro", "css"])
+z.string(); // required string
+z.string().optional(); // optional string
+z.number(); // required number
+z.boolean(); // true or false
+z.date(); // date (parsed from YAML date format)
+z.enum(["blog", "tutorial"]); // must be one of these values
+z.string().default("draft"); // defaults to "draft" if not provided
+z.array(z.string()); // array of strings (e.g., tags: ["astro", "css"])
 ```
 
 #### Multiple collections
@@ -3298,20 +3356,21 @@ const faqs = (await getCollection("faq"))
 ---
 ```
 
-| Part | What it does |
-|---|---|
-| `getCollection("faq")` | Returns all entries in the `faq` collection as an array |
-| `faq.data.question` | Access frontmatter fields (typed and validated by the schema) |
-| `faq.id` | The filename without extension (e.g., `"what-is-astro"`) |
-| `.filter()` | Standard JS — filter entries by any field |
-| `.sort()` | Standard JS — sort entries by any field |
+| Part                   | What it does                                                  |
+| ---------------------- | ------------------------------------------------------------- |
+| `getCollection("faq")` | Returns all entries in the `faq` collection as an array       |
+| `faq.data.question`    | Access frontmatter fields (typed and validated by the schema) |
+| `faq.id`               | The filename without extension (e.g., `"what-is-astro"`)      |
+| `.filter()`            | Standard JS — filter entries by any field                     |
+| `.sort()`              | Standard JS — sort entries by any field                       |
 
 You can filter and sort however you want — it's just a JavaScript array:
 
 ```ts
 // All FAQs for the pricing page
-const pricingFaqs = (await getCollection("faq"))
-  .filter((faq) => faq.data.page === "pricing");
+const pricingFaqs = (await getCollection("faq")).filter(
+  (faq) => faq.data.page === "pricing",
+);
 
 // All non-draft blog posts, newest first
 const posts = (await getCollection("blog"))
@@ -3335,11 +3394,11 @@ Use `.map()` to loop over entries and render them:
 })}
 ```
 
-| Part | What it does |
-|---|---|
-| `render(faq)` | Converts the markdown body into a `<Content />` Astro component |
-| `faq.data.question` | Pulls from frontmatter — use for headings, labels, metadata |
-| `<Content />` | Outputs the rendered markdown as HTML |
+| Part                | What it does                                                    |
+| ------------------- | --------------------------------------------------------------- |
+| `render(faq)`       | Converts the markdown body into a `<Content />` Astro component |
+| `faq.data.question` | Pulls from frontmatter — use for headings, labels, metadata     |
+| `<Content />`       | Outputs the rendered markdown as HTML                           |
 
 > **Astro 6 note:** In earlier Astro versions, you'd call `faq.render()` on the entry itself. In Astro 6 with the `glob` loader, you import `render` from `astro:content` and call `render(faq)` instead.
 
@@ -3460,10 +3519,10 @@ pages: z.array(z.string()),
 
 ### When to use content collections vs hardcoded content
 
-| Approach | Best for |
-|---|---|
-| Hardcoded in `.astro` | One-off content that won't change (hero text, single CTA) |
-| Content collection | Repeating structured content (FAQs, blog posts, team members, testimonials, changelog entries) |
+| Approach              | Best for                                                                                       |
+| --------------------- | ---------------------------------------------------------------------------------------------- |
+| Hardcoded in `.astro` | One-off content that won't change (hero text, single CTA)                                      |
+| Content collection    | Repeating structured content (FAQs, blog posts, team members, testimonials, changelog entries) |
 
 The rule of thumb: if you have **multiple items with the same shape**, use a collection. If it's a single block of text, hardcode it.
 
@@ -3475,12 +3534,12 @@ Not everything needs a content collection. If your entries are just structured d
 
 ### When to use which
 
-| | JSON/YAML data file | Content collection |
-|---|---|---|
-| Markdown body (`<Content />`) | No | Yes |
-| Schema validation (Zod) | No | Yes |
-| Setup required | None — just import | `content.config.ts` + server restart |
-| Best for | Logos, nav links, social links, pricing tiers | Blog posts, FAQs, team bios, case studies |
+|                               | JSON/YAML data file                           | Content collection                        |
+| ----------------------------- | --------------------------------------------- | ----------------------------------------- |
+| Markdown body (`<Content />`) | No                                            | Yes                                       |
+| Schema validation (Zod)       | No                                            | Yes                                       |
+| Setup required                | None — just import                            | `content.config.ts` + server restart      |
+| Best for                      | Logos, nav links, social links, pricing tiers | Blog posts, FAQs, team bios, case studies |
 
 **The rule:** if the entry needs rich content (paragraphs, bold, links, lists), use a content collection. If it's just fields, use a JSON file.
 
@@ -3540,15 +3599,13 @@ JSON is strict. Common mistakes:
 // WRONG — trailing comma after last item (valid in JS, invalid in JSON)
 [
   { "name": "Acme", "logo": "/logos/acme.svg" },
-  { "name": "Stripe", "logo": "/logos/stripe.svg" },
+  { "name": "Stripe", "logo": "/logos/stripe.svg" }
 ]
 ```
 
 ```json
 // WRONG — single quotes (JSON requires double quotes)
-[
-  { 'name': 'Acme' }
-]
+[{ "name": "Acme" }]
 ```
 
 ### Import syntax
@@ -3591,10 +3648,10 @@ Astro loads `.env` automatically — no extra packages needed.
 
 Astro splits env vars into two categories based on their name:
 
-| Prefix | Available in | Use for |
-|---|---|---|
-| `PUBLIC_` | Server **and** client (browser) | Analytics IDs, public API keys, feature flags |
-| No prefix | Server only (frontmatter, endpoints) | Secret keys, database URLs, private tokens |
+| Prefix    | Available in                         | Use for                                       |
+| --------- | ------------------------------------ | --------------------------------------------- |
+| `PUBLIC_` | Server **and** client (browser)      | Analytics IDs, public API keys, feature flags |
+| No prefix | Server only (frontmatter, endpoints) | Secret keys, database URLs, private tokens    |
 
 ```astro
 ---
@@ -3655,12 +3712,12 @@ Or use data attributes (same pattern as canvas components):
 
 Astro supports multiple `.env` files, loaded by mode:
 
-| File | Loaded when |
-|---|---|
-| `.env` | Always |
-| `.env.local` | Always, but **gitignored** — your local overrides |
-| `.env.development` | `astro dev` only |
-| `.env.production` | `astro build` only |
+| File               | Loaded when                                       |
+| ------------------ | ------------------------------------------------- |
+| `.env`             | Always                                            |
+| `.env.local`       | Always, but **gitignored** — your local overrides |
+| `.env.development` | `astro dev` only                                  |
+| `.env.production`  | `astro build` only                                |
 
 Precedence: mode-specific file > `.env.local` > `.env`. More specific files override less specific ones.
 
@@ -3744,12 +3801,12 @@ import { Image } from "astro:assets";
 
 **The rule:**
 
-| Image source | Use |
-|---|---|
-| File in `src/` (imported) | `<Image>` — gets optimization |
-| File in `public/` (URL path) | `<img>` — no optimization, no import needed |
-| Remote URL | `<Image>` with `width`/`height` or `inferSize` |
-| SVGs (anywhere) | `<img>` — SVGs don't need optimization |
+| Image source                 | Use                                            |
+| ---------------------------- | ---------------------------------------------- |
+| File in `src/` (imported)    | `<Image>` — gets optimization                  |
+| File in `public/` (URL path) | `<img>` — no optimization, no import needed    |
+| Remote URL                   | `<Image>` with `width`/`height` or `inferSize` |
+| SVGs (anywhere)              | `<img>` — SVGs don't need optimization         |
 
 ### `@utility` cannot be nested
 
@@ -3877,13 +3934,13 @@ ScrollTrigger is a plugin that must be registered before use:
 
 ### Key concepts
 
-| Concept | What it means |
-|---|---|
-| `gsap.registerPlugin()` | Required once before using any plugin |
-| `scrollTrigger.trigger` | The element that triggers the animation when scrolled into view |
-| `scrollTrigger.start` | When to start — `"top 80%"` means "when the top of the trigger hits 80% down the viewport" |
-| `gsap.from()` | Animate FROM these values TO the element's current CSS state |
-| `gsap.to()` | Animate from current state TO these values |
+| Concept                 | What it means                                                                              |
+| ----------------------- | ------------------------------------------------------------------------------------------ |
+| `gsap.registerPlugin()` | Required once before using any plugin                                                      |
+| `scrollTrigger.trigger` | The element that triggers the animation when scrolled into view                            |
+| `scrollTrigger.start`   | When to start — `"top 80%"` means "when the top of the trigger hits 80% down the viewport" |
+| `gsap.from()`           | Animate FROM these values TO the element's current CSS state                               |
+| `gsap.to()`             | Animate from current state TO these values                                                 |
 
 ### Using GSAP in a reusable component
 
@@ -3940,10 +3997,10 @@ With CDN, GSAP is a global (`window.gsap`), so no `import` statement. Use `is:in
 
 ### npm import vs CDN — when to use which
 
-| Approach | Pros | Cons |
-|---|---|---|
-| `npm install gsap` + `import` | Tree-shaken, bundled, typed | Only free plugins |
-| CDN + `is:inline` | Access to Club plugins, no build step | No tree-shaking, globals, larger payload |
+| Approach                      | Pros                                  | Cons                                     |
+| ----------------------------- | ------------------------------------- | ---------------------------------------- |
+| `npm install gsap` + `import` | Tree-shaken, bundled, typed           | Only free plugins                        |
+| CDN + `is:inline`             | Access to Club plugins, no build step | No tree-shaking, globals, larger payload |
 
 ### Optional GSAP pattern
 
@@ -4043,14 +4100,14 @@ Common forwards:
 partytown({
   config: {
     forward: [
-      "dataLayer.push",     // Google Analytics / GTM
-      "gtag",               // Some gtag.js setups
-      "fbq",                // Meta Pixel
-      "_hsq.push",          // HubSpot
-      "Intercom",           // Intercom
+      "dataLayer.push", // Google Analytics / GTM
+      "gtag", // Some gtag.js setups
+      "fbq", // Meta Pixel
+      "_hsq.push", // HubSpot
+      "Intercom", // Intercom
     ],
   },
-})
+});
 ```
 
 Always check the third-party script's docs for the global it writes to. Miss this and the script appears to work (no errors) but your analytics dashboard stays empty.
@@ -4158,6 +4215,7 @@ Every nav has the same bones: a semantic `<header>` wrapper for positioning, a v
 ```
 
 Two layers of element intentionally:
+
 - **`<header>`** owns positioning (fixed, z-index, full width).
 - **`<div data-nav-bar>`** owns visuals (height, background, border, rounded corners).
 
@@ -4266,12 +4324,14 @@ Map over the array and branch on the discriminator:
 This is the architectural insight that makes dropdowns click.
 
 **Menu panel** (single column, small, pinned under trigger):
+
 - Lives inside a `<div class="relative">` wrapper
 - Uses `class="absolute left-0 top-full"`
-- `absolute` positions against the nearest *positioned* ancestor, which is the `relative` wrapper
+- `absolute` positions against the nearest _positioned_ ancestor, which is the `relative` wrapper
 - Result: panel appears exactly below the trigger, left-aligned to it
 
 **Mega panel** (full-width, spans the whole nav):
+
 - Cannot live inside the trigger's wrapper — that wrapper is only as wide as the trigger text, and `inset-x-0` inside it would span that narrow area, not the full nav
 - Must be a **sibling of the bar**, positioned relative to the `<header>` itself
 - Uses `class="absolute inset-x-0 top-full"` on the panel, where "nearest positioned ancestor" is now the `fixed` header
@@ -4335,8 +4395,8 @@ No branching on "is this a mega or menu?" — the script doesn't care. It just f
 Click-to-open is fine on mobile. On desktop, users expect hover. Add two constants and a state machine:
 
 ```js
-const HOVER_ENTER = 100;  // ms to wait before opening on hover
-const HOVER_LEAVE = 150;  // ms to wait before closing on leave
+const HOVER_ENTER = 100; // ms to wait before opening on hover
+const HOVER_LEAVE = 150; // ms to wait before closing on leave
 let hoverTimer, leaveTimer;
 
 const anyDropdownOpen = () =>
@@ -4367,7 +4427,7 @@ triggers.forEach((trigger) => {
 
 1. **Hover intent delay** (`HOVER_ENTER = 100`) prevents accidental opens when the user sweeps the cursor across the nav. Too low and panels flash; too high and the nav feels sluggish. 80–120ms is the sweet spot.
 
-2. **Close delay** (`HOVER_LEAVE = 150`) gives the user time to move from the trigger *down into* the panel without it closing. If the trigger is at `y: 56px` and the panel starts at `y: 80px` (with an 8px gap), the cursor needs a moment to travel. 150ms covers typical mouse speeds.
+2. **Close delay** (`HOVER_LEAVE = 150`) gives the user time to move from the trigger _down into_ the panel without it closing. If the trigger is at `y: 56px` and the panel starts at `y: 80px` (with an 8px gap), the cursor needs a moment to travel. 150ms covers typical mouse speeds.
 
 3. **Instant switching** (`anyDropdownOpen() ? 0 : HOVER_ENTER`) — once a user has committed to "I'm browsing dropdowns," further hovers switch instantly. That's the standard pattern in every large nav you've used (GitHub, Stripe, Vercel).
 
@@ -4400,6 +4460,7 @@ The outer `pt-2` is part of the panel's hit area but visually transparent. The c
 A click-only nav excludes keyboard users. Two things to add:
 
 **On the trigger:**
+
 ```js
 trigger.addEventListener("keydown", (e) => {
   if (e.key === "Enter" || e.key === " ") {
@@ -4416,6 +4477,7 @@ trigger.addEventListener("keydown", (e) => {
 ```
 
 **On the panel's links:**
+
 ```js
 panel.addEventListener("keydown", (e) => {
   const links = [...panel.querySelectorAll("a")];
@@ -4432,11 +4494,12 @@ panel.addEventListener("keydown", (e) => {
 ```
 
 **Global Escape to close:**
+
 ```js
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
     closeAllDropdowns();
-    getActiveTrigger()?.focus();  // return focus to the trigger
+    getActiveTrigger()?.focus(); // return focus to the trigger
   }
 });
 ```
@@ -4448,6 +4511,7 @@ This is the minimum for keyboard-accessible dropdowns. ARIA attributes (`aria-ex
 On mobile, hover doesn't exist and dropdown panels wouldn't fit next to the trigger. Two choices:
 
 **A — Hide the desktop panels, show a hamburger**
+
 ```astro
 <nav class="hidden md:flex">{/* desktop links */}</nav>
 
@@ -4465,6 +4529,7 @@ Simple, works for most marketing sites. Trade-off: mobile users don't see the dr
 Clicking "Products" on mobile opens a full-screen panel that replaces the main menu. A "Back" button returns to the top level. This is the pattern Stripe and Vercel use. It's more code but feels native.
 
 For option B, you need:
+
 - Mobile panel list (flat)
 - Mobile panel detail (one per dropdown)
 - JS state for "which panel is active"
@@ -4477,27 +4542,33 @@ Start with option A. Graduate to B only if you have rich dropdowns whose content
 If your page uses a CSS grid for section layout (column 3 at `minmax(0, 90rem)` for content, gutter columns for decoration), your nav needs to align with the same content column. Two approaches:
 
 **A — Wrap the bar in `container-page`** (a utility that mirrors col-3's max-width):
+
 ```css
 @utility container-page {
   @apply mx-auto w-full max-w-[90rem];
 }
 ```
+
 Then: `<div data-nav-bar class="container-page">`. Simple but doesn't auto-follow grid changes.
 
 **B — Make the header itself a section grid** and place children into `col-start-3`:
+
 ```astro
 <header class="section-grid-outside fixed inset-x-0 top-0 z-50">
   <div data-nav-bar class="col-start-3">...</div>
 </header>
 ```
+
 The nav inherits the grid's geometry exactly — change the grid definition once and the nav follows.
 
 **Gotcha with option B:** every direct child of the header that isn't `position: absolute` needs `col-start-3` (or `col-span-full` if it should span everything). Without it, CSS grid auto-placement sticks the element into the next empty cell — which might be a 1rem gutter, squishing it to 16px wide. The mega panels escape this because they're `absolute` and removed from grid flow. The mobile panel and any other non-absolute children must opt in explicitly.
 
 **Responsive column placement:** if you want the bar to be in col-3 on desktop but span full-width on mobile:
+
 ```astro
 <div class="col-span-full md:col-span-1 md:col-start-3">
 ```
+
 - `col-span-full` at mobile = `grid-column: 1 / -1`
 - `md:col-span-1` resets the span to 1 column at md+
 - `md:col-start-3` places that single column at col 3
@@ -4509,6 +4580,7 @@ The `md:col-span-1` is the line people forget. Without it, `md:col-start-3` only
 A fixed nav usually needs to change appearance when the user scrolls (background appears, border darkens, shadow lifts). The cleanest pattern:
 
 **CSS owns the appearance:**
+
 ```css
 [data-nav-bar].is-scrolled {
   border-color: var(--color-grid-border);
@@ -4519,6 +4591,7 @@ A fixed nav usually needs to change appearance when the user scrolls (background
 ```
 
 **JS only toggles one class:**
+
 ```js
 let isScrolled = false;
 const update = () => {
@@ -4590,13 +4663,13 @@ This section walks through doing it properly, and — just as important — when
 
 ### The tradeoff: inline vs extracted
 
-| When                                             | Pick                |
-| ------------------------------------------------ | ------------------- |
-| Only one component uses the data                 | Inline              |
-| Two+ components share the same data              | Extract to `lib/`   |
-| Two+ components have *overlapping* data          | Extract the overlap |
-| Two+ components have totally different data      | Inline each         |
-| You want to re-skin the component without losing local edits | Extract     |
+| When                                                         | Pick                |
+| ------------------------------------------------------------ | ------------------- |
+| Only one component uses the data                             | Inline              |
+| Two+ components share the same data                          | Extract to `lib/`   |
+| Two+ components have _overlapping_ data                      | Extract the overlap |
+| Two+ components have totally different data                  | Inline each         |
+| You want to re-skin the component without losing local edits | Extract             |
 
 The point of extraction isn't "cleanliness" — it's **one source of truth for data that's referenced in multiple places**. If there's only one place, there's nothing to share, and the extra file is just indirection.
 
@@ -4606,17 +4679,17 @@ Let's say you already have an inline Nav (like this starter's). You're about to 
 
 #### Step 1 — identify what's actually shared
 
-Before writing any config file, list the data that appears in *both* components:
+Before writing any config file, list the data that appears in _both_ components:
 
-| Data                                     | Nav | Footer |
-| ---------------------------------------- | --- | ------ |
-| Top-level links (Pricing, Docs, …)       | ✅  | ✅     |
-| Company links (About, Careers, …)        | ✅  | ✅     |
-| CTA button ("Get a Demo")                | ✅  | ❌     |
-| Mega-menu "Products" columns             | ✅  | ❌     |
-| Social media icons                       | ❌  | ✅     |
-| Legal links (Privacy, Terms)             | ❌  | ✅     |
-| Copyright line                           | ❌  | ✅     |
+| Data                               | Nav | Footer |
+| ---------------------------------- | --- | ------ |
+| Top-level links (Pricing, Docs, …) | ✅  | ✅     |
+| Company links (About, Careers, …)  | ✅  | ✅     |
+| CTA button ("Get a Demo")          | ✅  | ❌     |
+| Mega-menu "Products" columns       | ✅  | ❌     |
+| Social media icons                 | ❌  | ✅     |
+| Legal links (Privacy, Terms)       | ❌  | ✅     |
+| Copyright line                     | ❌  | ✅     |
 
 The rows with ✅ in both columns are what deserves extraction. Everything else stays in its own component. Don't extract "all nav data" or "all footer data" as blobs — extract the overlap.
 
@@ -4642,6 +4715,7 @@ export const companyLinks: SiteLink[] = [
 ```
 
 Notes:
+
 - **One type, shared.** `SiteLink` is the shape both components consume. Adding a `description?: string` later means both components get it for free.
 - **Export named, not default.** Default exports are anonymous when you grep. Named exports keep things searchable.
 - **Small scope.** Only what's actually shared lives here. Not the whole nav config.
@@ -4774,7 +4848,7 @@ What if the Nav links to "Pricing, Docs, Changelog" and the Footer links to "Job
 
 Then **you don't extract**. Each component keeps its own inline array. `src/lib/siteLinks.ts` doesn't get created. Don't make a file just because "sharing feels organized." You'd be paying the indirection cost for zero benefit.
 
-But if there's even *one* thing in common — say, the company logo and its `href="/"` — extract only that:
+But if there's even _one_ thing in common — say, the company logo and its `href="/"` — extract only that:
 
 ```ts
 // src/lib/siteLinks.ts
@@ -4799,6 +4873,7 @@ Two lines. Both components import those two constants. Nav keeps its own link ar
 ### Why this starter keeps Nav inline
 
 This starter kept Nav inline because:
+
 1. There's currently no Footer component consuming the same data.
 2. Adding `src/lib/navConfig.ts` for a single consumer is ceremony with no payoff — one extra file to open, one extra import to read, one extra mental hop.
 3. When the Footer lands, we'll extract whatever actually overlaps. Not the whole nav config — just the overlap.
@@ -4811,7 +4886,7 @@ This starter kept Nav inline because:
 
 One of the most confusing Astro quirks: you write a custom component, pass it `data-theme="dark"` (or `id="hero"`, or `aria-labelledby="..."`), and nothing happens. No error, no warning — the attribute is just silently dropped.
 
-This section explains why, how to fix it, and when you should *not* bother.
+This section explains why, how to fix it, and when you should _not_ bother.
 
 ### The problem in one example
 
@@ -4854,8 +4929,9 @@ Three attributes: gone.
 Astro components are **opt-in passthrough**. Props come in via `Astro.props`, and the component author decides what to do with them. Anything not explicitly rendered never reaches the DOM.
 
 Contrast with other frameworks:
-- **Vue**: opt-*out*. Unknown attributes cascade to the root element unless you set `inheritAttrs: false`.
-- **React**: opt-*in*, like Astro. You have to spread `{...rest}` yourself.
+
+- **Vue**: opt-_out_. Unknown attributes cascade to the root element unless you set `inheritAttrs: false`.
+- **React**: opt-_in_, like Astro. You have to spread `{...rest}` yourself.
 - **Plain HTML**: the browser always keeps attributes the author wrote.
 
 Astro's choice makes sense for safety: a parent passing `style="color: red"` or `class="broken"` shouldn't accidentally blow up a child component's own styling. But it surprises newcomers every time — especially when debugging a theme toggle, a test harness attribute, or an aria hook that looks fine in the source but isn't in the DOM.
@@ -4895,7 +4971,7 @@ const {
 
 **Why `class: className` is usually handled separately:** `class` is a reserved word in JavaScript, so you can't just `{ class }`. Rename with `class: className`, then put it in `class:list` alongside your component's own classes. If you leave it in `...rest`, Astro will put it on the element but overwrite any classes the component itself wanted.
 
-### What about typing data-* attributes?
+### What about typing data-\* attributes?
 
 `HTMLAttributes` includes an index signature for `data-*` and `aria-*`, so these all type-check out of the box:
 
@@ -4914,11 +4990,13 @@ After the fix, same inspection. Attribute present. This is the entire mechanism 
 ### When to add this, when not
 
 **Add passthrough to:**
+
 - **Layout wrappers** — `Section`, `Container`, `Grid`, `Stack`, `Flex`, anything that's basically "a styled `<div>` or `<section>`". These are exactly the places callers want to set `id` for anchor links, `data-theme` for scoped dark mode, `aria-labelledby` for landmark semantics, etc.
 - **Generic cards** — `Card`, `Panel`. Same reasoning.
 
 **Skip it on:**
-- **Curated primitives** — `Button`, `Input`, icon wrappers. You've deliberately chosen which attrs are meaningful (`href`, `disabled`, `type`). Exposing *all* native attrs blurs the contract and invites callers to pass `style="..."` or `onclick="..."` where the component has its own opinion.
+
+- **Curated primitives** — `Button`, `Input`, icon wrappers. You've deliberately chosen which attrs are meaningful (`href`, `disabled`, `type`). Exposing _all_ native attrs blurs the contract and invites callers to pass `style="..."` or `onclick="..."` where the component has its own opinion.
 - **Components with their own markup contract** — `Accordion`, `Tabs`, `Nav`. They own the internal structure; forwarding an arbitrary `id` to "whichever root they render" is usually noise and can conflict with the IDs the component generates internally.
 - **Tiny display components** — `Logo`, `Badge`. No call site needs arbitrary passthrough; the footprint isn't worth it.
 
@@ -4957,11 +5035,11 @@ After that change, `<SectionMain data-theme="dark">` actually wrote `data-theme=
 
 The passthrough pattern is one of three layers that together make feature-rich wrapper components:
 
-| Layer            | What it does                                           | Where             |
-|------------------|--------------------------------------------------------|-------------------|
-| **Type surface** | `extends HTMLAttributes<"section">` adds native attrs  | Component frontmatter |
-| **Data capture** | `...rest` collects unspecified props                   | Component frontmatter |
-| **DOM landing**  | `{...rest}` on the rendered element                    | Component template |
+| Layer            | What it does                                          | Where                 |
+| ---------------- | ----------------------------------------------------- | --------------------- |
+| **Type surface** | `extends HTMLAttributes<"section">` adds native attrs | Component frontmatter |
+| **Data capture** | `...rest` collects unspecified props                  | Component frontmatter |
+| **DOM landing**  | `{...rest}` on the rendered element                   | Component template    |
 
 Miss any one of them and the pattern doesn't work. Type surface without capture: TypeScript is happy but the attrs still vanish. Capture without spread: attrs sit unused in a variable. Spread without type surface: the editor underlines the caller.
 
@@ -4971,13 +5049,13 @@ Once you internalize the pattern, you'll reach for it instinctively on every new
 
 ## 39. MDX & component showcase pages
 
-When you start building a starter with more than ~10 components, you'll want a way to *browse* them — see what's in the kit, read each one's API, and (crucially) see them rendered live. The `/components/` route in this project is built from three Astro features working together: **content collections**, **MDX**, and **dynamic routes**. Each does one job. This section walks through how they compose.
+When you start building a starter with more than ~10 components, you'll want a way to _browse_ them — see what's in the kit, read each one's API, and (crucially) see them rendered live. The `/components/` route in this project is built from three Astro features working together: **content collections**, **MDX**, and **dynamic routes**. Each does one job. This section walks through how they compose.
 
 ### Why this is hard without MDX
 
 The first instinct most people have for component documentation is "I'll write a markdown file per component, plus a separate playground page." That gets you docs + live demos, but they're disconnected: the markdown describes the component, the playground renders it, and they drift over time. The example in the docs claims a prop exists; the playground uses a renamed version. Six months in, you can't tell which is current.
 
-MDX collapses this into a single file. The doc *is* the demo — you `import` the actual component into the markdown and render it inline next to its prose description. There's no second source of truth to keep in sync.
+MDX collapses this into a single file. The doc _is_ the demo — you `import` the actual component into the markdown and render it inline next to its prose description. There's no second source of truth to keep in sync.
 
 ### What MDX actually is
 
@@ -5004,10 +5082,12 @@ A native `<details>` accordion with mutually-exclusive open via shared `name`.
 ## Preview
 
 <Preview label="Default">
-  <AccordionMorph items={[
-    { title: "Item one", description: "…" },
-    { title: "Item two", description: "…" },
-  ]} />
+  <AccordionMorph
+    items={[
+      { title: "Item one", description: "…" },
+      { title: "Item two", description: "…" },
+    ]}
+  />
 </Preview>
 
 ## Why native `<details>`
@@ -5060,7 +5140,7 @@ The `loader` tells Astro where to find the files; the `schema` describes the fro
 
 ### Step 2 — Generate one page per entry with a dynamic route
 
-Astro creates one HTML page per `.astro` file in `src/pages/`. Most pages are static (`pages/about.astro` → `/about`). When you want *N* pages generated from data, you use a **dynamic route** — a filename with square brackets:
+Astro creates one HTML page per `.astro` file in `src/pages/`. Most pages are static (`pages/about.astro` → `/about`). When you want _N_ pages generated from data, you use a **dynamic route** — a filename with square brackets:
 
 ```
 src/pages/components/[...slug].astro
@@ -5199,7 +5279,7 @@ The fix lives on `.prose-doc` itself:
 ```css
 .prose-doc {
   width: 100%;
-  min-width: 0;     /* let the article shrink to its parent */
+  min-width: 0; /* let the article shrink to its parent */
   max-width: 100%;
 }
 .prose-doc :where(p, li) > :where(code) {
@@ -5264,7 +5344,7 @@ That's it. No registry update, no route file edit, no manual list to maintain. F
 
 ## 40. Components with subpieces — when and how to split
 
-Most components in this starter are single files: one `.astro` with frontmatter, markup, scoped style, scoped script. That's the right default. But occasionally you'll write a component that genuinely benefits from being broken into pieces — and there are roughly **four shapes** of "component with subpieces," each with a different reason for splitting. The choice depends on *how the consumer uses the thing*, not just on file size.
+Most components in this starter are single files: one `.astro` with frontmatter, markup, scoped style, scoped script. That's the right default. But occasionally you'll write a component that genuinely benefits from being broken into pieces — and there are roughly **four shapes** of "component with subpieces," each with a different reason for splitting. The choice depends on _how the consumer uses the thing_, not just on file size.
 
 ### Shape 1 — Compound components (consumer composes the parts)
 
@@ -5286,6 +5366,7 @@ The classic shadcn / Radix pattern. The wrapper provides shared state and stylin
 ```
 
 **File layout:**
+
 ```
 src/components/
   Card/
@@ -5297,9 +5378,10 @@ src/components/
     Footer.astro
 ```
 
-**Why split:** the consumer needs control over *which* parts appear and *in what order*. A monolithic `Card` with `title`, `description`, `body`, `footer` props would force a fixed structure — what if you want two titles, or a description above the title? Subpieces let consumers compose freely.
+**Why split:** the consumer needs control over _which_ parts appear and _in what order_. A monolithic `Card` with `title`, `description`, `body`, `footer` props would force a fixed structure — what if you want two titles, or a description above the title? Subpieces let consumers compose freely.
 
 **Astro-specific catch:** Astro doesn't have first-class dot syntax for namespaced components like React's `Card.Header`. You either:
+
 - Import each piece separately: `import { Card, CardHeader, CardTitle } from "@components/Card"` — cleaner imports but more typing.
 - Skip dot syntax and have callers import each file directly. Mostly stylistic.
 
@@ -5342,6 +5424,7 @@ src/components/
 ```
 
 **Imports:**
+
 ```ts
 import CardFeatured from "@components/Card/Featured.astro";
 import CardIcon from "@components/Card/Icon.astro";
@@ -5349,7 +5432,7 @@ import CardIcon from "@components/Card/Icon.astro";
 
 **Why split:** alphabetical grouping at the file level. `CardFeatured`, `CardIcon`, `CardStat` are all "kinds of cards" — keeping them in a folder makes the relationship visible without forcing actual code sharing between them.
 
-This is exactly what this starter already does at the *flat* level via naming prefix: `CardFeatured.astro`, `CardIcon.astro` already group alphabetically in a flat folder. The folder version is the next step up if you grow to 5+ card variants and want them visually pulled together. Flat + naming convention is fine until then. (This is the same "how big before you fold into folders" question covered earlier in the guide — see the discussion of the `@components/*` path alias.)
+This is exactly what this starter already does at the _flat_ level via naming prefix: `CardFeatured.astro`, `CardIcon.astro` already group alphabetically in a flat folder. The folder version is the next step up if you grow to 5+ card variants and want them visually pulled together. Flat + naming convention is fine until then. (This is the same "how big before you fold into folders" question covered earlier in the guide — see the discussion of the `@components/*` path alias.)
 
 ### Shape 4 — Layout decomposition (pieces too coupled to be reusable)
 
@@ -5367,7 +5450,7 @@ src/components/
 
 **The boundary test:** could `_MobileDrawer` ever be used without `NavMorph` rendering around it? If yes, it's not really a subpiece — promote it to a top-level component. If no, the underscore + folder placement keeps it tied to its only consumer.
 
-### When *not* to split
+### When _not_ to split
 
 The trap is splitting too eagerly. Three signals you've over-decomposed:
 
@@ -5379,9 +5462,9 @@ The trap is splitting too eagerly. Three signals you've over-decomposed:
 
 Ask: **who's making the layout decisions?**
 
-- If the *consumer* arranges the parts → **compound (1)**: subpieces are public, named, importable.
-- If the *parent* arranges the parts → **internal (2 or 4)**: subpieces are private, underscore-prefixed, not exported.
-- If the parts are *independent siblings* → **variants (3)**: each is its own public component, folder is purely organizational.
+- If the _consumer_ arranges the parts → **compound (1)**: subpieces are public, named, importable.
+- If the _parent_ arranges the parts → **internal (2 or 4)**: subpieces are private, underscore-prefixed, not exported.
+- If the parts are _independent siblings_ → **variants (3)**: each is its own public component, folder is purely organizational.
 
 ### Concrete examples that fit this starter
 

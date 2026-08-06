@@ -1,0 +1,79 @@
+---
+// Chrome-free layout for editorial brand pages (e.g. About) whose design
+// supplies its own navigation. Same Seo / theme / font contract as Layout —
+// without NavMorph or announcement chrome.
+import "@fontsource-variable/archivo";
+import "@fontsource-variable/inter";
+import "@fontsource-variable/jetbrains-mono";
+import "../styles/global.css";
+import Seo from "../components/Seo.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  ogType?: "website" | "article";
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  theme?: "light" | "dark" | "brand";
+  /** Document language. About copy is Spanish. */
+  lang?: string;
+}
+
+const {
+  title = "aroundtheisla",
+  description,
+  image,
+  ogType,
+  noindex,
+  jsonLd,
+  theme = "light",
+  lang = "en",
+} = Astro.props;
+
+const gtagId = import.meta.env.PUBLIC_GTAG_ID;
+---
+
+<html lang={lang} data-theme={theme}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <Seo
+      title={title}
+      description={description}
+      ogType={ogType}
+      image={image}
+      noindex={noindex}
+      jsonLd={jsonLd}
+    />
+
+    {
+      gtagId && (
+        <>
+          <script
+            async
+            src={`https://www.googletagmanager.com/gtag/js?id=${gtagId}`}
+          ></script>
+          <script define:vars={{ gtagId }}>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+              dataLayer.push(arguments);
+            }
+            gtag("js", new Date());
+            gtag("config", gtagId);
+          </script>
+        </>
+      )
+    }
+  </head>
+  <body class="bg-panel text-fg">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-intent focus:text-fg-on-intent focus:rounded-sm"
+    >
+      Skip to main content
+    </a>
+    <slot />
+  </body>
+</html>

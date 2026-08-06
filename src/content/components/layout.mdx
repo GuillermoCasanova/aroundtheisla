@@ -5,7 +5,7 @@ category: layout
 order: 5
 sourceFile: src/layouts/Layout.astro
 status: stable
-related: [Nav, NavMega, NavMorph, SectionMain, Footer]
+related: [Nav, NavMega, NavMorph, SectionMain, Footer, Loader]
 ---
 
 import PropsTable from "@components/_docs/PropsTable.astro";
@@ -17,6 +17,7 @@ The base HTML layout wrapper for every page. Sets up `<html>`, `<head>`, and `<b
 <PropsTable props={[
   { name: "title", type: "string", default: '"Astro Playground"', description: "Page <title> tag." },
   { name: "theme", type: '"light" | "dark" | "brand"', default: '"light"', description: "Sets the `data-theme` attribute on `<html>`. Flips every CSS token (canvas, fg, stroke, etc.) for the whole page — including the nav and announcement bar." },
+  { name: "skipLoader", type: "boolean", default: "false", description: "Omit the intro Loader overlay on this page." },
 ]} />
 
 ## Mechanism
@@ -35,7 +36,7 @@ The base HTML layout wrapper for every page. Sets up `<html>`, `<head>`, and `<b
 
 ### `<body>`
 
-- Renders `<Nav />` at the top of every page.
+- Renders the intro `<Loader />` (unless `skipLoader`), then `<Nav />` at the top of every page.
 - Includes a **skip-to-content** link (`<a href="#main">`) — visually hidden by default, becomes visible on focus for keyboard users.
 - Page content is injected via `<slot />`.
 

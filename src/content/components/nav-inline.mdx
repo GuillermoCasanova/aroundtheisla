@@ -1,0 +1,40 @@
+---
+title: NavInline
+description: Wordmark + bold inline links on desktop; hamburger overlay below md. Figma Home ALT desktop bar.
+category: layout
+order: 24
+sourceFile: src/components/NavInline.astro
+status: stable
+related: [NavSimple, Nav, NavMorph, NavMega, AnnouncementBanner]
+---
+
+Site navigation for AroundTheIsla when the desktop bar should show **inline links** instead of a hamburger. Matches the [Figma Home ALT](https://www.figma.com/design/ypu3FsyfkPDzChjuarqlF5/Website---AroundTheIsla?node-id=222-520&m=dev) header: wordmark on the left, bold **Volumes** / **About** on the right. Below `md`, the two-line hamburger and full-screen overlay from `NavSimple` take over.
+
+## Usage
+
+```astro
+---
+import NavInline from "@components/NavInline.astro";
+---
+
+<NavInline />
+```
+
+Optional props: `brand`, `homeHref`, `links`, `cta`, and `class`. Same `announcement` slot as `NavSimple`.
+
+To use this as the site header, change the import in `src/layouts/Layout.astro`:
+
+```astro
+import Nav from "../components/NavInline.astro";  // was: NavSimple.astro
+```
+
+`NavSimple` stays available for the always-hamburger treatment.
+
+## Behavior
+
+- **Desktop (`md+`):** inline primary links; hamburger is not rendered in the layout (`md:hidden`).
+- **Mobile:** toggle opens/closes the overlay; Esc closes and returns focus to the button.
+- Panel uses `role="dialog"` with a focus trap while open; body scroll is locked.
+- Resizing to desktop while open closes the drawer.
+- Reduced motion: opacity fade instead of the clip reveal.
+- Clicking a drawer link closes the overlay.

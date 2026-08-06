@@ -1,0 +1,28 @@
+---
+// cspell:ignore Didiel González Rodríguez fotógrafo basado Lajas
+import PlainLayout from "../layouts/PlainLayout.astro";
+import SectionAbout from "../components/SectionAbout.astro";
+import { webPageSchema } from "../lib/schema";
+
+const title = "About";
+const description =
+  "Hola — Didiel González Rodríguez (@aroundtheisla), fotógrafo basado en Lajas, Puerto Rico.";
+
+const jsonLd = webPageSchema({
+  path: "about",
+  title: `${title} — aroundtheisla`,
+  description,
+  inLanguage: "es",
+});
+---
+
+<PlainLayout
+  title={title}
+  description={description}
+  lang="es"
+  jsonLd={jsonLd}
+>
+  <main id="main">
+    <SectionAbout />
+  </main>
+</PlainLayout>

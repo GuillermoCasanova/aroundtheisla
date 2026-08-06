@@ -61,6 +61,47 @@ export const homepageSchema = {
 };
 
 /**
+ * Build WebPage + BreadcrumbList JSON-LD for a static marketing page.
+ * `path` is the route under the site root, e.g. "about".
+ */
+export function webPageSchema(opts: {
+  path: string;
+  title: string;
+  description: string;
+  image?: string;
+  inLanguage?: string;
+}) {
+  const path = opts.path.replace(/^\/|\/$/g, "");
+  const url = `${SITE}/${path}/`;
+  const inLanguage = opts.inLanguage ?? "en";
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": `${url}#webpage`,
+        url,
+        name: opts.title,
+        description: opts.description,
+        image: opts.image ? new URL(opts.image, SITE).href : LOGO,
+        isPartOf: { "@id": `${SITE}/#website` },
+        about: { "@id": `${SITE}/#organization` },
+        inLanguage,
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${url}#breadcrumb`,
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: `${SITE}/` },
+          { "@type": "ListItem", position: 2, name: opts.title, item: url },
+        ],
+      },
+    ],
+  };
+}
+
+/**
  * Build Article + BreadcrumbList JSON-LD for a dynamic post/resource page.
  * `path` is the route under the site root, e.g. "resources/my-post".
  * `section` is the breadcrumb parent label + its path, e.g. ["Resources", "resources"].

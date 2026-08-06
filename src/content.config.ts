@@ -22,6 +22,24 @@ const announcements = defineCollection({
   }),
 });
 
+// Photography projects — markdown today, CMS later. The route is
+// `/project/[slug]`; gallery stills live at `src/images/galleries/{slug}/`.
+const projects = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./src/content/projects" }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      description: z.string(),
+      cover: image(),
+      date: z.coerce.date(),
+      location: z.string().optional(),
+      draft: z.boolean().default(false),
+      order: z.number().default(100),
+      /** Filenames in `src/images/homepage/` that should link to this project. */
+      homepageSlides: z.array(z.string()).default([]),
+    }),
+});
+
 // Components showcase — each MDX file documents one component, frontmatter
 // drives the index page and routing. The body is rendered as the detail page
 // content (props tables, mechanism, gotchas). MDX (vs plain MD) is what lets
@@ -39,4 +57,4 @@ const components = defineCollection({
   }),
 });
 
-export const collections = { faq, announcements, components };
+export const collections = { faq, announcements, projects, components };

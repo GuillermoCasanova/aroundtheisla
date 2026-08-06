@@ -1,0 +1,279 @@
+---
+/**
+ * SectionProject
+ * Project detail from Figma `222:412` ("scroll with title").
+ *
+ * Pinned viewport: vertical scroll scrubs a horizontal image strip right → left.
+ * Caption + oversized title stay fixed on the left; GSAP fades them out in the
+ * first stretch of the scrub so they vanish before the photographs arrive.
+ * Back-to-Work stays put for navigation. Full-bleed by design — no SectionMain
+ * column / side rules (same deviation as SectionHomeSlideshow).
+ *
+ * Reduced motion: no pin/scrub — native horizontal overflow with scroll-snap.
+ * The Figma veil overlays are intentionally omitted.
+ */
+import type { ImageMetadata } from "astro";
+import ImageLoader from "@components/ImageLoader.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  /** Cover still — used when the gallery folder is empty. */
+  cover: ImageMetadata;
+  coverAlt?: string;
+  gallery?: ImageMetadata[];
+  class?: string;
+}
+
+const {
+  title,
+  description,
+  cover,
+  coverAlt = title,
+  gallery = [],
+  class: className,
+} = Astro.props;
+
+const images = gallery.length > 0 ? gallery : [cover];
+---
+
+{
+  /*
+   * Full-bleed pin section — allowed deviation from SectionMain: the Figma
+   * project frame is an edge-to-edge horizontal scrub; the shared column +
+   * side rules would clip the track and fight the pin spacer.
+   */
+}
+<section
+  id="project-gallery"
+  data-project-gallery
+  aria-label={`${title} photographs`}
+  class:list={["relative bg-canvas text-fg", className]}
+>
+  <div
+    data-project-gallery-viewport
+    class="relative h-svh w-full overflow-hidden"
+  >
+    <p
+      class="absolute top-[5.5rem] left-[clamp(1.25rem,2.5vw,1.55rem)] z-20 inline-flex min-h-11 items-center gap-3 text-body-md lowercase text-fg"
+    >
+      <a
+        href="/work"
+        class="inline-flex min-h-11 items-center gap-2 transition-colors duration-default-quarter hover:text-fg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+      >
+        <svg
+          class="h-3 w-2 shrink-0"
+          viewBox="0 0 8 13"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M7 1L1.5 6.5L7 12"
+            stroke="currentColor"
+            stroke-width="1.4"
+            stroke-linecap="square"></path>
+        </svg>
+        Work
+      </a>
+      <span aria-hidden="true">{title}</span>
+    </p>
+
+    <h1 class="sr-only">{title}</h1>
+
+    {/* Fixed project copy — fades via GSAP before the strip reaches it. */}
+    <header
+      data-project-gallery-intro
+      class="pointer-events-none absolute bottom-[clamp(1.25rem,3vh,2rem)] left-[clamp(0.75rem,1.5vw,1.5rem)] z-20 max-w-[min(42rem,70vw)]"
+    >
+      {
+        description && (
+          <p class="mb-3 max-w-[16rem] text-body-sm leading-normal text-fg/30">
+            {description}
+          </p>
+        )
+      }
+      <p
+        class="font-heading text-[clamp(4.5rem,14vw,5.15rem)] leading-[0.85] font-normal tracking-tighter uppercase text-fg"
+        aria-hidden="true"
+      >
+        {title}
+      </p>
+    </header>
+
+    <div
+      data-project-gallery-track
+      class="relative z-10 flex h-full w-max items-center gap-[clamp(1rem,1.25vw,1.125rem)] pt-[clamp(4.5rem,10vh,7.5rem)] pb-[clamp(2rem,5vh,4rem)] pl-[min(42vw,38rem)] pr-[clamp(1.25rem,3vw,2.5rem)]"
+    >
+      {
+        images.map((image, i) => (
+          <figure
+            data-project-gallery-slide
+            class="relative m-0 h-[min(80svh,55.5rem)] shrink-0 overflow-hidden"
+            style={`aspect-ratio: ${image.width} / ${image.height}`}
+          >
+            <ImageLoader
+              src={image}
+              alt={i === 0 ? coverAlt : `${title} — photograph ${i + 1}`}
+              class="absolute inset-0 size-full"
+              preserveAspect={false}
+              widths={[480, 720, 960, 1280, 1600]}
+              sizes="(max-width: 768px) 70vw, 40vw"
+              loading={i === 0 ? "eager" : "lazy"}
+              fetchpriority={i === 0 ? "high" : undefined}
+              decoding={i === 0 ? "sync" : "async"}
+            />
+          </figure>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  @media (prefers-reduced-motion: reduce) {
+    [data-project-gallery-viewport] {
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    [data-project-gallery-track] {
+      transform: none !important;
+    }
+
+    [data-project-gallery-intro] {
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+
+    [data-project-gallery-slide] {
+      scroll-snap-align: start;
+    }
+  }
+</style>
+
+<script>
+  const initialized = new WeakSet<HTMLElement>();
+  const controllers = new WeakMap<HTMLElement, AbortController>();
+  const timelines = new WeakMap<HTMLElement, { kill: () => void }>();
+
+  let gsap: any;
+  let ScrollTrigger: any;
+
+  async function ensureGsap() {
+    if (gsap && ScrollTrigger) return;
+    gsap = (await import("gsap")).default;
+    ScrollTrigger = (await import("gsap/ScrollTrigger")).ScrollTrigger;
+    gsap.registerPlugin(ScrollTrigger);
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  function teardown(root: HTMLElement) {
+    controllers.get(root)?.abort();
+    controllers.delete(root);
+    timelines.get(root)?.kill();
+    timelines.delete(root);
+    const track = root.querySelector<HTMLElement>(
+      "[data-project-gallery-track]",
+    );
+    const intro = root.querySelector<HTMLElement>(
+      "[data-project-gallery-intro]",
+    );
+    if (track && gsap) gsap.set(track, { clearProps: "transform" });
+    if (intro && gsap) gsap.set(intro, { clearProps: "opacity,visibility" });
+  }
+
+  async function initOne(root: HTMLElement) {
+    if (initialized.has(root)) return;
+    initialized.add(root);
+
+    const viewport = root.querySelector<HTMLElement>(
+      "[data-project-gallery-viewport]",
+    );
+    const track = root.querySelector<HTMLElement>(
+      "[data-project-gallery-track]",
+    );
+    const intro = root.querySelector<HTMLElement>(
+      "[data-project-gallery-intro]",
+    );
+    if (!viewport || !track) return;
+
+    if (prefersReducedMotion()) return;
+
+    await ensureGsap();
+
+    const controller = new AbortController();
+    controllers.set(root, controller);
+    const { signal } = controller;
+
+    const getTravel = () =>
+      Math.max(0, track.scrollWidth - viewport.clientWidth);
+
+    // One scrubbed timeline: intro fades in the opening stretch, then the
+    // strip keeps traveling. Relative durations = share of total scroll.
+    const tl = gsap.timeline({
+      defaults: { ease: "none" },
+      scrollTrigger: {
+        trigger: root,
+        pin: true,
+        scrub: 0.45,
+        start: "top top",
+        end: () => `+=${Math.max(getTravel(), 1)}`,
+        invalidateOnRefresh: true,
+        anticipatePin: 1,
+      },
+    });
+
+    if (intro) {
+      tl.to(
+        intro,
+        {
+          autoAlpha: 0,
+          duration: 0.06,
+        },
+        0,
+      );
+    }
+
+    tl.to(
+      track,
+      {
+        x: () => -getTravel(),
+        duration: 1,
+      },
+      0,
+    );
+
+    timelines.set(root, tl);
+
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onMotionChange = () => {
+      if (motionQuery.matches) {
+        teardown(root);
+        initialized.delete(root);
+      }
+    };
+    motionQuery.addEventListener("change", onMotionChange, { signal });
+
+    const onLoad = () => ScrollTrigger.refresh();
+    root.querySelectorAll("img").forEach((img) => {
+      if (!img.complete)
+        img.addEventListener("load", onLoad, { signal, once: true });
+    });
+  }
+
+  function initAll() {
+    document
+      .querySelectorAll<HTMLElement>("[data-project-gallery]")
+      .forEach((root) => {
+        void initOne(root);
+      });
+  }
+
+  initAll();
+  document.addEventListener("astro:page-load", initAll);
+</script>

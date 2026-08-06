@@ -1,0 +1,58 @@
+---
+title: HeroBanner
+description: Full-bleed photo hero — viewport-filling image with an optional lower-right project label.
+category: pattern
+order: 11
+sourceFile: src/components/HeroBanner.astro
+status: stable
+related: [SectionHomeSlideshow, NavInline, NavSimple, Media]
+---
+
+import Preview from "@components/_docs/Preview.astro";
+import PropsTable from "@components/_docs/PropsTable.astro";
+import HeroBanner from "@components/HeroBanner.astro";
+
+Full-bleed Home hero from Figma node `222:21`. The default photograph is the Enhanced-NR frame export; pass `image` to swap projects. Brand + menu stay in `NavSimple` — this component is the media plane only.
+
+## Preview
+
+Constrained height so the showcase page stays scrollable. On a real route the section is `min-h-svh`.
+
+<Preview label="Default image + project label" align="stretch">
+  <div class="relative h-96 w-full overflow-hidden">
+    <HeroBanner class="!min-h-full" projectName="PROJECT NAME" priority={false} />
+  </div>
+</Preview>
+
+## Props
+
+<PropsTable props={[
+  { name: "image", type: "ImageMetadata", default: "hero-banner-default.jpg", description: "Photograph imported from src/images/. Defaults to the Figma Home frame asset." },
+  { name: "alt", type: "string", default: '"Around the Isla project photograph"', description: "Accessible description of the image." },
+  { name: "projectName", type: "string", default: '"PROJECT NAME"', description: "Lower-right label. Pass an empty string to hide it." },
+  { name: "ariaLabel", type: "string", default: '"Featured project"', description: "Accessible name for the section landmark." },
+  { name: "priority", type: "boolean", default: "true", description: "LCP treatment — eager load + high fetch priority. Set false when something else owns LCP." },
+  { name: "class", type: "string", description: "Extra classes on the section root." },
+]} />
+
+## Usage
+
+```astro
+---
+import HeroBanner from "@components/HeroBanner.astro";
+import projectShot from "../images/galleries/around-1/A7405674.jpg";
+---
+
+<HeroBanner image={projectShot} projectName="Around 1" alt="Night crowd, film grain" />
+```
+
+## Layout
+
+- Full-bleed on purpose — does not wrap `SectionMain`, so the crop matches the edge-to-edge Figma composition.
+- Place under a layout whose nav can sit over the photograph (e.g. light type on a dark photo). `NavSimple` owns the wordmark + menu; do not duplicate them here.
+
+## Tokens
+
+- Surface fallback: `bg-canvas`
+- Project label: `text-fg/60`, `text-body-xsm`, uppercase (pair with a dark page theme so type stays light on the photo)
+- Spacing: `clamp` insets aligned with the homepage slideshow gutters
