@@ -46,7 +46,7 @@ function coverAlt(item: WorkItem) {
   data-work-gallery
   data-view="grid"
   aria-label="Work projects"
-  class:list={["relative bg-canvas text-fg section-pt-sm", className]}
+  class:list={["relative bg-canvas text-fg pt-20", className]}
 >
   <header data-work-chrome>
     <h1 data-work-title class="h1 font-bold lowercase text-fg">work</h1>
@@ -171,7 +171,7 @@ function coverAlt(item: WorkItem) {
               height={item.cover.height}
               class="size-full object-cover"
               widths={[540, 720, 960, 1280]}
-              sizes="(min-width: 1024px) min(48rem, 42vw), 100vw"
+              sizes="(min-width: 1024px) min(20rem, 20vw), 100vw"
               loading="lazy"
               decoding="async"
             />
@@ -193,15 +193,17 @@ function coverAlt(item: WorkItem) {
     --work-rail-gap: calc(var(--spacing) * 16);
     --work-left-min: calc(var(--work-rail) + var(--work-rail-gap));
     --work-gallery-inset: 20.1875rem;
-    --work-thumb: min(48rem, 42vw, calc((100svh - 7rem) * 4 / 5));
-    /* Match SectionProject rail (`md:section-pt-xs` = 4rem). */
-    --work-chrome-pt: calc(var(--spacing) * 16);
+    --work-thumb: min(20rem, 20vw, calc((100svh - 7rem) * 4 / 5));
+    /* Match SectionProject rail (`md:section-pt-sm` = 5rem). */
+    --work-chrome-pt: calc(var(--spacing) * 20);
     --work-grid-thumb: 48rem;
     --work-thumb-gap: calc(var(--spacing) * 14);
-    --project-grid-max-width: 78rem;
+    /* Shared cap for grid and list. Change this to resize both views. */
+    --work-content-max: 70rem;
+    --work-content-inset: 0rem;
     --work-content-width: min(
       calc(var(--work-grid-thumb) * 2 + var(--work-thumb-gap)),
-      var(--project-grid-max-width)
+      var(--work-content-max)
     );
 
     min-height: 100svh;
@@ -319,7 +321,7 @@ function coverAlt(item: WorkItem) {
     [data-work-panel="list"]:not([hidden]) {
       --work-content-used: min(
         var(--work-content-width),
-        calc(100% - 2 * var(--work-left-min))
+        calc(100% - 2 * var(--work-left-min) - var(--work-content-inset))
       );
       width: var(--work-content-used);
       max-width: 100%;
@@ -339,6 +341,10 @@ function coverAlt(item: WorkItem) {
   }
 
   @media (min-width: 1024px) {
+    [data-work-gallery] {
+      --work-content-inset: calc(var(--spacing) * 24);
+    }
+
     [data-work-panel="list"]:not([hidden]) {
       display: grid;
       grid-template-columns: minmax(12rem, 1fr) var(--work-thumb);

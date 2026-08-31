@@ -241,7 +241,7 @@ async function migratePages() {
         "Hola — Didiel González Rodríguez (@aroundtheisla), fotógrafo basado en Lajas, Puerto Rico.",
     },
     theme: "light",
-    layout: "plain",
+    layout: "site",
     lang: "es",
     showInNav: true,
     navOrder: 20,

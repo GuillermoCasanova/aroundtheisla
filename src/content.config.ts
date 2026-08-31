@@ -67,8 +67,24 @@ const pages = defineCollection({
   }),
 });
 
+// Same gate as demoRoutes() in astro.config.mjs: the showcase MDX is for
+// `astro dev` (or SHOW_DEMOS=true). A production build must not compile it —
+// those docs import starter assets this client repo does not ship, and the
+// /components routes are not injected anyway.
+function loadComponentDocs() {
+  if (process.env.SHOW_DEMOS === "true") return true;
+  return process.argv.includes("dev") && !process.argv.includes("build");
+}
+
 const components = defineCollection({
-  loader: glob({ pattern: "**/*.mdx", base: "./src/content/components" }),
+  loader: loadComponentDocs()
+    ? glob({ pattern: "**/*.mdx", base: "./src/content/components" })
+    : {
+        name: "component-docs-disabled",
+        load: async ({ store }) => {
+          store.clear();
+        },
+      },
   schema: z.object({
     title: z.string(),
     description: z.string(),
