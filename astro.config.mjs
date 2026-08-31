@@ -59,9 +59,8 @@ function demoRoutes() {
   };
 }
 
-// Pure static site, no adapter. The @astrojs/cloudflare adapter's image
-// service passes images through UNoptimized (no sharp), so we drop it and let
-// Astro's default sharp service transcode/resize at build into static /_astro/*.
+// Pure static site, no adapter. Sharp runs at build for local src/images/
+// imports only. Sanity photographs stay on cdn.sanity.io (see OptimizedPicture).
 // The contact-form Cloudflare action is disabled for now (src/actions/
 // index.ts.disabled); re-enabling a working form needs server rendering — see
 // notes: use Cloudflare Pages Functions or imageService:'cloudflare' alongside
@@ -74,14 +73,6 @@ export default defineConfig({
   // sitemap.
   site: site.url,
   output: 'static',
-  image: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'cdn.sanity.io',
-      },
-    ],
-  },
   // Astro 7 defaults compressHTML to 'jsx' (JSX-style whitespace stripping).
   // Keep the v6 HTML-aware behavior so inline spacing doesn't shift.
   compressHTML: true,

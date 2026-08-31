@@ -26,7 +26,7 @@ export const sanityClient: SanityClient = createClient({
 
 const imageBuilder = createImageUrlBuilder({ projectId, dataset });
 
-/** Build a CDN URL; Astro Sharp still transcodes at build. */
+/** Build a Sanity CDN URL. Display photos use this CDN at request time, not Sharp. */
 export function urlFor(source: Parameters<typeof imageBuilder.image>[0]) {
   return imageBuilder.image(source);
 }
@@ -48,8 +48,7 @@ export function toCmsImage(image: SanityAssetImage): CmsImage | null {
   const width = image.asset.metadata?.dimensions?.width;
   const height = image.asset.metadata?.dimensions?.height;
   if (!width || !height) return null;
-  const src =
-    urlFor(image).width(2000).fit("max").url() || image.asset.url || "";
+  const src = image.asset.url || urlFor(image).url() || "";
   if (!src) return null;
   return {
     src,

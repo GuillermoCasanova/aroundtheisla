@@ -11,6 +11,7 @@
 //   <Layout title={post.title} ogType="article" jsonLd={articleSchema({ ... })}>
 
 import { site } from "../data/site";
+import { absoluteImageUrl } from "./cms-image";
 
 const SITE = site.url;
 const LOGO = new URL(site.logo, SITE).href;
@@ -84,7 +85,7 @@ export function webPageSchema(opts: {
         url,
         name: opts.title,
         description: opts.description,
-        image: opts.image ? new URL(opts.image, SITE).href : LOGO,
+        image: opts.image ? absoluteImageUrl(opts.image, SITE) : LOGO,
         isPartOf: { "@id": `${SITE}/#website` },
         about: { "@id": `${SITE}/#organization` },
         inLanguage,
@@ -144,7 +145,7 @@ export function articleSchema(opts: {
         "@id": `${url}#article`,
         headline: opts.title,
         description: opts.description,
-        image: opts.image ? new URL(opts.image, SITE).href : LOGO,
+        image: opts.image ? absoluteImageUrl(opts.image, SITE) : LOGO,
         datePublished: opts.datePublished,
         dateModified: opts.dateModified ?? opts.datePublished,
         author: { "@id": `${SITE}/#organization` },

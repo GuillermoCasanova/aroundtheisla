@@ -13,7 +13,7 @@ import PropsTable from "@components/_docs/PropsTable.astro";
 import ImageLoader from "@components/ImageLoader.astro";
 import demo from "@images/feature-1.webp";
 
-Per-image loading stage: a `bg-secondary/80` surface covering the photograph until it finishes loading. The photo itself is an AVIF → WebP `<Picture>` at quality 70. Wired into project gallery slides via `SectionProject`; reuse anywhere an image needs the branded placeholder. Set `stage={false}` on the LCP image so the overlay does not hide it.
+Per-image loading stage: a `bg-secondary/80` surface covering the photograph until it finishes loading. Local imports emit AVIF then WebP via Sharp; Sanity URLs stay on the image CDN with a width `srcset` (`auto=format`, quality 70). Wired into project gallery slides via `SectionProject`; reuse anywhere an image needs the branded placeholder. Set `stage={false}` on the LCP image so the overlay does not hide it.
 
 ## Preview
 
@@ -85,7 +85,7 @@ import shot from "@images/project.jpg";
 
 ## Behavior
 
-- Emits AVIF then WebP via `OptimizedPicture` at quality 70.
+- Local imports emit AVIF then WebP via `OptimizedPicture` (Sharp at build). Sanity URLs render a CDN `srcset` with `auto=format` at quality 70.
 - Stage uses `bg-secondary/80` so the brand secondary swatch fills the frame at 80% opacity while the photo decodes.
 - Reduced-motion users skip the fade and reveal immediately.
 - Cached images (`img.complete`) skip the stage without waiting for a load event.

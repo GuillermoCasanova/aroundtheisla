@@ -7,6 +7,7 @@
 // (astro.config `site`), so they're correct for whatever domain the build targets.
 // Site-wide defaults (name, default image, twitter handle) come from src/data/site.
 import { site } from "../data/site";
+import { absoluteImageUrl } from "../lib/cms-image";
 
 interface Props {
   /** Document title — also used for og:title / twitter:title. */
@@ -33,7 +34,7 @@ const {
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
-const ogImage = new URL(image, Astro.site).href;
+const ogImage = absoluteImageUrl(image, Astro.site ?? site.url);
 const schemas = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 ---
 
