@@ -1,0 +1,65 @@
+---
+import SectionMain from "./SectionMain.astro";
+import Form from "./Form.astro";
+import Field from "./Field.astro";
+import Button from "./Button.astro";
+
+interface Props {
+  heading: string;
+  lede?: string;
+  class?: string;
+}
+
+const {
+  heading,
+  lede = "",
+  class: className,
+} = Astro.props;
+
+const contactUrl = "/api/contact";
+---
+
+<SectionMain id="contact" contentClass="max-w-md mx-auto" class={className}>
+  <header class="mb-6">
+    <h1 class="h2">{heading}</h1>
+    {
+      lede && (
+        <p class="mt-2 text-fg-muted">{lede}</p>
+      )
+    }
+  </header>
+
+  <Form action={contactUrl} method="POST">
+    <Field
+      name="firstName"
+      label="First name"
+      type="text"
+      required
+      autocomplete="given-name"
+      maxlength={100}
+    />
+    <Field
+      name="lastName"
+      label="Last name"
+      type="text"
+      required
+      autocomplete="family-name"
+      maxlength={100}
+    />
+    <Field
+      name="email"
+      label="Email"
+      type="email"
+      required
+      autocomplete="email"
+      maxlength={254}
+    />
+
+    <Button type="submit" variant="primary" withArrow={false}>
+      Send
+    </Button>
+
+    <p slot="success">Thanks — we'll be in touch shortly.</p>
+    <p slot="error">Something went wrong. Please try again.</p>
+  </Form>
+</SectionMain>

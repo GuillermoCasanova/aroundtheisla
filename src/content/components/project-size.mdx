@@ -1,0 +1,54 @@
+---
+title: ProjectSize
+description: Small / Medium / Large radiogroup that sets photograph column width on a project gallery. Preference persists in localStorage.
+category: pattern
+order: 76
+sourceFile: src/components/ProjectSize.astro
+status: per-project
+related: []
+---
+
+import Preview from "@components/_docs/Preview.astro";
+import PropsTable from "@components/_docs/PropsTable.astro";
+import ProjectSize from "@components/ProjectSize.astro";
+
+Radiogroup used on the project rail, directly under the title. Selecting an option writes `data-size` on the closest `[data-project]` ancestor so the gallery can change column width. The last choice is stored under `ati-project-size`. All three labels share one text size and sit on the same baseline.
+
+## Preview
+
+<Preview label="Default — Large selected" align="start">
+  <div data-project data-size="large" class="min-h-24">
+    <ProjectSize />
+  </div>
+</Preview>
+
+## Props
+
+<PropsTable props={[
+  { name: "label", type: "string", default: '"Photograph size"', description: "Accessible name on the radiogroup." },
+  { name: "value", type: '"small" | "medium" | "large"', default: '"large"', description: "SSR default. The client overrides this from localStorage." },
+  { name: "class", type: "string", description: "Additional classes on the radiogroup wrapper." },
+]} />
+
+## Mechanism
+
+- ARIA radio pattern: `role="radiogroup"` on the wrapper, `role="radio"` + `aria-checked` on each button, roving `tabindex`.
+- Arrow keys, Home, and End move the selection. Click and keyboard both persist the choice.
+- Dispatches a bubbling `project:size` event with `{ size }` so a parent can react without reading the DOM.
+- Labels are the same size (`text-body-md`); the selected label uses `text-fg`, idle labels use `text-fg-muted`.
+
+## Usage
+
+```astro
+---
+import ProjectSize from "@components/ProjectSize.astro";
+---
+
+<section data-project data-size="large">
+  <ProjectSize />
+</section>
+```
+
+## Notes
+
+- Without a `[data-project]` ancestor the radios still update visually; only the gallery width contract is skipped.

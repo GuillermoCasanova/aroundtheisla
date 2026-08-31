@@ -1,18 +1,38 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import HeroBanner from "../components/HeroBanner.astro";
+import SectionHomeHero from "../components/SectionHomeHero.astro";
 import { homepageSchema } from "../lib/schema";
 import { site } from "../data/site";
+import { getPageBySlug } from "../lib/pages";
+
+const page = await getPageBySlug("home");
+if (!page) {
+  throw new Error(
+    'Sanity is missing a page with slug "home". Run npm run migrate:sanity or create it in the Studio.',
+  );
+}
+
+const title = page.data.seoTitle || page.data.title || site.name;
+const description = page.data.seoDescription || site.description;
+const image = page.data.seoImage?.src;
+const heroImages = page.data.heroImages ?? [];
+if (heroImages.length === 0) {
+  throw new Error(
+    "Sanity home page is missing hero photographs. Add 1–5 images in Studio under Home → Hero photographs.",
+  );
+}
 ---
 
 <Layout
-  title={site.name}
-  description={site.description}
+  title={title}
+  description={description}
+  image={image}
   jsonLd={homepageSchema}
   theme="dark"
+  hideFooter={page.data.hideFooter}
 >
   <main id="main">
-    <h1 class="sr-only">{site.name}</h1>
-    <HeroBanner />
+    <h1 class="sr-only">{page.data.title}</h1>
+    <SectionHomeHero images={heroImages} />
   </main>
 </Layout>

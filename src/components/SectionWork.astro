@@ -1,32 +1,44 @@
 ---
 /**
  * SectionWork
- * Work index — Figma ALL PROJECTS (222:322). One shared project strip that
- * switches between GRID and LIST without swapping panels.
- *
- * Grid → List: fade out rows below the first; switch the same items into a
- * horizontal pin/scrub so further projects enter from the right.
- * List → Grid reverses that. Reduced motion: instant layout swap.
- *
- * Full-bleed by design (no SectionMain column / side rules).
+ * Work index — Figma Projects Grid (268:92) and List (268:235).
+ * Two tabpanels: a vertically scrolling 2-column grid (including
+ * mobile), and a numbered name list. Desktop (lg+) uses h2-size
+ * titles and a large sticky cover that swaps on hover/focus.
+ * Tablet and mobile stay names-only.
+ * Full-bleed by design (no SectionMain).
  */
-import { Image } from "astro:assets";
-import { getPublishedProjects } from "../lib/projects";
+import type { ImageMetadata } from "astro";
+import OptimizedPicture from "@components/OptimizedPicture.astro";
+import { isCmsImage, type CmsImage } from "../lib/cms-image";
+
+type Cover = ImageMetadata | CmsImage;
+
+export type WorkItem = {
+  slug: string;
+  title: string;
+  year: number;
+  cover: Cover;
+  href: string;
+};
 
 interface Props {
+  projects: WorkItem[];
   class?: string;
 }
 
-const { class: className } = Astro.props;
+const { projects: items, class: className } = Astro.props;
 
-const projects = await getPublishedProjects();
-const items = projects.map((project) => ({
-  slug: project.id,
-  title: project.data.title,
-  year: project.data.date.getFullYear(),
-  cover: project.data.cover,
-  href: `/project/${project.id}/`,
-}));
+const tabClass =
+  "cursor-pointer text-body-md text-fg outline-none hover:underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas";
+
+function padIndex(index: number) {
+  return String(index + 1).padStart(2, "0");
+}
+
+function coverAlt(item: WorkItem) {
+  return isCmsImage(item.cover) ? item.cover.alt || item.title : item.title;
+}
 ---
 
 <section
@@ -34,15 +46,12 @@ const items = projects.map((project) => ({
   data-work-gallery
   data-view="grid"
   aria-label="Work projects"
-  class:list={["relative bg-canvas text-fg", className]}
+  class:list={["relative bg-canvas text-fg section-pt-sm", className]}
 >
-  <header
-    data-work-chrome
-    class="absolute top-[5.5rem] inset-x-[clamp(1.25rem,2.5vw,1.55rem)] z-20 flex min-h-11 items-center justify-between gap-4"
-  >
-    <h1 class="text-body-md lowercase text-fg">Work</h1>
+  <header data-work-chrome>
+    <h1 data-work-title class="h1 font-bold lowercase text-fg">work</h1>
     <div
-      class="flex items-center gap-4"
+      class="flex items-center gap-4 md:flex-col md:items-start md:gap-2"
       role="tablist"
       aria-label="Gallery view"
     >
@@ -51,10 +60,10 @@ const items = projects.map((project) => ({
         role="tab"
         id="work-view-grid"
         data-work-view="grid"
-        aria-controls="work-stage"
+        aria-controls="work-panel-grid"
         aria-selected="true"
         tabindex="0"
-        class="cursor-pointer text-body-md uppercase text-fg outline-none transition-colors duration-default-quarter hover:text-fg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus font-bold"
+        class:list={[tabClass, "font-bold"]}
       >
         Grid
       </button>
@@ -63,10 +72,10 @@ const items = projects.map((project) => ({
         role="tab"
         id="work-view-list"
         data-work-view="list"
-        aria-controls="work-stage"
+        aria-controls="work-panel-list"
         aria-selected="false"
         tabindex="-1"
-        class="cursor-pointer text-body-md uppercase text-fg outline-none transition-colors duration-default-quarter hover:text-fg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus font-normal"
+        class:list={[tabClass, "font-normal"]}
       >
         List
       </button>
@@ -74,168 +83,301 @@ const items = projects.map((project) => ({
   </header>
 
   <div
-    id="work-stage"
-    data-work-stage
+    id="work-panel-grid"
+    data-work-panel="grid"
     role="tabpanel"
     aria-labelledby="work-view-grid"
   >
-    <div data-work-viewport>
-      <ul data-work-track>
-        {
-          items.map((item, i) => (
-            <li data-work-item data-work-index={i}>
-              <a
-                href={item.href}
-                class="group/card flex h-full flex-col gap-3 outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
-                aria-label={`${item.title}, ${item.year}`}
-              >
-                <div
-                  data-work-media
-                  class="relative w-full overflow-hidden"
-                  style={`--work-ar: ${item.cover.width} / ${item.cover.height}`}
-                >
-                  <Image
-                    src={item.cover}
-                    alt={item.title}
-                    class="absolute inset-0 size-full object-cover transition-transform duration-default group-hover/card:scale-[1.02] group-focus-visible/card:scale-[1.02]"
-                    widths={[360, 540, 720, 960, 1280]}
-                    sizes="(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 30vw"
-                    loading={i < 3 ? "eager" : "lazy"}
-                    fetchpriority={i === 0 ? "high" : undefined}
-                    decoding={i === 0 ? "sync" : "async"}
-                  />
-                </div>
-                <div
-                  data-work-meta
-                  class="flex items-baseline justify-between gap-3"
-                >
-                  <span class="min-w-0 truncate text-body-xsm font-bold text-fg">
-                    {item.title}
-                  </span>
-                  <span class="shrink-0 text-body-xsm italic text-fg-muted">
-                    {item.year}
-                  </span>
-                </div>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
+    <ul data-work-grid>
+      {
+        items.map((item, i) => (
+          <li class="min-w-0">
+            <a
+              href={item.href}
+              class="flex h-full flex-col gap-3 outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+              aria-label={`${item.title}, ${item.year}`}
+            >
+              <div class="relative aspect-[4/5] w-full overflow-hidden">
+                <OptimizedPicture
+                  src={isCmsImage(item.cover) ? item.cover.src : item.cover}
+                  alt={
+                    isCmsImage(item.cover)
+                      ? item.cover.alt || item.title
+                      : item.title
+                  }
+                  width={item.cover.width}
+                  height={item.cover.height}
+                  class="absolute inset-0 size-full object-cover"
+                  widths={[360, 540, 720, 960, 1280]}
+                  sizes="(max-width: 767px) 46vw, min(48rem, 44vw)"
+                  loading={i < 4 ? "eager" : "lazy"}
+                  fetchpriority={i === 0 ? "high" : undefined}
+                  decoding={i === 0 ? "sync" : "async"}
+                />
+              </div>
+              <div class="flex items-baseline justify-between gap-3">
+                <span class="min-w-0 truncate text-body-md font-bold text-fg">
+                  {item.title}
+                </span>
+              </div>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <div
+    id="work-panel-list"
+    data-work-panel="list"
+    role="tabpanel"
+    aria-labelledby="work-view-list"
+    hidden
+  >
+    <ol data-work-names>
+      {
+        items.map((item, i) => (
+          <li class="mb-2 last:mb-0 lg:mb-4">
+            <a
+              href={item.href}
+              data-work-name
+              data-work-index={i}
+              data-active="false"
+              aria-label={item.title}
+              class="inline-flex min-h-11 min-w-0 items-baseline gap-2 text-body-md font-normal text-fg outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas lg:flex lg:min-h-0 lg:h2 lg:font-normal"
+            >
+              <span aria-hidden="true" class="lg:hidden">
+                {padIndex(i)}.
+              </span>
+              <span aria-hidden="true">{item.title}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+    <div data-work-preview>
+      {
+        items.map((item) => (
+          <div
+            data-work-preview-item
+            data-alt={coverAlt(item)}
+            data-active="false"
+            aria-hidden="true"
+          >
+            <OptimizedPicture
+              src={isCmsImage(item.cover) ? item.cover.src : item.cover}
+              alt=""
+              width={item.cover.width}
+              height={item.cover.height}
+              class="size-full object-cover"
+              widths={[540, 720, 960, 1280]}
+              sizes="(min-width: 1024px) min(48rem, 42vw), 100vw"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+        ))
+      }
     </div>
   </div>
 </section>
 
 <style>
-  [data-work-stage] {
-    position: relative;
+  /*
+   * Grid and list stay viewport-centered; width shrinks so both
+   * side margins are at least the rail reserve.
+   */
+  [data-work-gallery] {
+    --work-pad: calc(var(--spacing) * 6.5);
+    --work-rail: 6rem;
+    --work-rail-gap: calc(var(--spacing) * 16);
+    --work-left-min: calc(var(--work-rail) + var(--work-rail-gap));
+    --work-gallery-inset: 20.1875rem;
+    --work-thumb: min(48rem, 42vw, calc((100svh - 7rem) * 4 / 5));
+    /* Match SectionProject rail (`md:section-pt-xs` = 4rem). */
+    --work-chrome-pt: calc(var(--spacing) * 16);
+    --work-grid-thumb: 48rem;
+    --work-thumb-gap: calc(var(--spacing) * 14);
+    --project-grid-max-width: 78rem;
+    --work-content-width: min(
+      calc(var(--work-grid-thumb) * 2 + var(--work-thumb-gap)),
+      var(--project-grid-max-width)
+    );
+
+    min-height: 100svh;
+    padding-inline: clamp(
+      calc(var(--spacing) * 5),
+      2.5vw,
+      calc(var(--spacing) * 6.2)
+    );
+    padding-bottom: clamp(
+      calc(var(--spacing) * 8),
+      6vh,
+      calc(var(--spacing) * 18)
+    );
   }
 
-  [data-work-viewport] {
-    width: 100%;
+  [data-work-chrome] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: calc(var(--spacing) * 4);
+    min-height: 2.75rem;
+    margin-bottom: calc(var(--spacing) * 8);
   }
 
-  [data-work-track] {
+  /*
+   * Display type carries extra leading and font-metric space above the
+   * cap height. Trim the line box so "work" sits on the same edge as
+   * the first project thumbnail.
+   */
+  [data-work-title] {
+    line-height: 1;
+    text-box: trim-both cap alphabetic;
+  }
+
+  [data-work-grid] {
     margin: 0;
     padding: 0;
     list-style: none;
-  }
-
-  /* Grid cells need min-width:0 to shrink; list overrides below. */
-  [data-work-gallery][data-view="grid"] [data-work-item] {
-    min-width: 0;
-  }
-
-  /* ----- GRID ----- */
-  [data-work-gallery][data-view="grid"] [data-work-viewport] {
-    padding-inline: clamp(1.25rem, 2.5vw, 2.125rem);
-    padding-top: clamp(8.5rem, 18vh, 10rem);
-    padding-bottom: clamp(2rem, 6vh, 4.5rem);
-  }
-
-  [data-work-gallery][data-view="grid"] [data-work-track] {
     display: grid;
-    grid-template-columns: 1fr;
-    column-gap: clamp(1rem, 2vw, 1.375rem);
-    row-gap: 2.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: calc(var(--spacing) * 3);
+    row-gap: calc(var(--spacing) * 5);
   }
 
-  @media (min-width: 640px) {
-    [data-work-gallery][data-view="grid"] [data-work-track] {
+  [data-work-names] {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* `lg:h2` supplies size; keep names regular against that utility's 600. */
+  [data-work-name] {
+    font-weight: 400;
+  }
+
+  [data-work-name]:hover span,
+  [data-work-name]:focus-visible span,
+  [data-work-name][data-active="true"] span {
+    text-decoration-line: underline;
+    text-underline-offset: 0.18em;
+  }
+
+  [data-work-preview] {
+    display: none;
+  }
+
+  [data-work-panel][hidden] {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    [data-work-gallery] {
+      display: grid;
+      padding-top: 0;
+      padding-inline: var(--work-pad);
+      grid-template-columns: var(--work-rail) minmax(0, 1fr);
+      column-gap: clamp(
+        var(--work-rail-gap),
+        12.55vw,
+        calc(var(--work-gallery-inset) - var(--work-pad) - var(--work-rail))
+      );
+      align-items: start;
+    }
+
+    [data-work-chrome] {
+      position: fixed;
+      top: 0;
+      left: var(--work-pad);
+      z-index: 1;
+      box-sizing: border-box;
+      width: var(--work-rail);
+      height: 100vh;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: calc(var(--spacing) * 7);
+      margin-bottom: 0;
+      padding-top: var(--work-chrome-pt);
+      padding-bottom: calc(var(--spacing) * 8);
+    }
+
+    [data-work-panel] {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      min-width: 0;
+    }
+
+    [data-work-panel="grid"] {
+      padding-top: var(--work-chrome-pt);
+    }
+
+    [data-work-grid],
+    [data-work-panel="list"]:not([hidden]) {
+      --work-content-used: min(
+        var(--work-content-width),
+        calc(100% - 2 * var(--work-left-min))
+      );
+      width: var(--work-content-used);
+      max-width: 100%;
+      margin-inline: auto;
+    }
+
+    [data-work-grid] {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: clamp(calc(var(--spacing) * 8), 4vw, var(--work-thumb-gap));
+      row-gap: calc(var(--spacing) * 10);
+      justify-content: center;
+    }
+
+    [data-work-panel="list"]:not([hidden]) {
+      padding-top: var(--work-chrome-pt);
     }
   }
 
   @media (min-width: 1024px) {
-    [data-work-gallery][data-view="grid"] [data-work-track] {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-
-  [data-work-gallery][data-view="grid"] [data-work-media] {
-    aspect-ratio: 4 / 5;
-  }
-
-  /* ----- LIST ----- */
-  [data-work-gallery][data-view="list"] [data-work-chrome] {
-    position: fixed;
-    z-index: 30;
-  }
-
-  [data-work-gallery][data-view="list"] [data-work-stage] {
-    height: 100svh;
-  }
-
-  [data-work-gallery][data-view="list"] [data-work-viewport] {
-    height: 100svh;
-    overflow: hidden;
-  }
-
-  [data-work-gallery][data-view="list"] [data-work-track] {
-    display: flex;
-    width: max-content;
-    height: 100%;
-    align-items: center;
-    gap: clamp(1.25rem, 3vw, 2.875rem);
-    padding-inline: clamp(1.25rem, 2.5vw, 2.125rem);
-    padding-top: clamp(5.5rem, 14vh, 8rem);
-    padding-bottom: clamp(2rem, 5vh, 4rem);
-  }
-
-  [data-work-gallery][data-view="list"] [data-work-item] {
-    flex: 0 0 auto;
-    min-width: auto;
-  }
-
-  [data-work-gallery][data-view="list"] [data-work-item] > a {
-    width: auto;
-  }
-
-  /* Match SectionProject: height + aspect-ratio on the media box. */
-  [data-work-gallery][data-view="list"] [data-work-media] {
-    height: min(80svh, 55.5rem);
-    aspect-ratio: var(--work-ar);
-    flex-shrink: 0;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    [data-work-gallery][data-view="list"] [data-work-viewport] {
-      overflow-x: auto;
-      overflow-y: hidden;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
+    [data-work-panel="list"]:not([hidden]) {
+      display: grid;
+      grid-template-columns: minmax(12rem, 1fr) var(--work-thumb);
+      gap: clamp(calc(var(--spacing) * 8), 5vw, var(--work-thumb-gap));
+      align-items: start;
+      min-height: calc(100svh - 8rem);
     }
 
-    [data-work-gallery][data-view="list"] [data-work-track] {
-      transform: none !important;
+    [data-work-preview] {
+      display: block;
+      position: sticky;
+      top: var(--work-chrome-pt);
+      z-index: 0;
+      width: var(--work-thumb);
+      max-width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 5;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
     }
 
-    [data-work-gallery][data-view="list"] [data-work-item] {
-      scroll-snap-align: start;
+    [data-work-preview][data-visible="true"] {
+      opacity: 1;
+      visibility: visible;
     }
 
-    [data-work-gallery][data-view="list"] [data-work-chrome] {
+    [data-work-preview-item] {
       position: absolute;
+      inset: 0;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
     }
+
+    [data-work-preview-item][data-active="true"] {
+      opacity: 1;
+    }
+
   }
 </style>
 
@@ -243,20 +385,8 @@ const items = projects.map((project) => ({
   type ViewMode = "grid" | "list";
 
   const STORAGE_KEY = "work-view";
-
-  let gsap: any;
-  let ScrollTrigger: any;
-
-  async function ensureGsap() {
-    if (gsap && ScrollTrigger) return;
-    gsap = (await import("gsap")).default;
-    ScrollTrigger = (await import("gsap/ScrollTrigger")).ScrollTrigger;
-    gsap.registerPlugin(ScrollTrigger);
-  }
-
-  function prefersReducedMotion() {
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  }
+  const initialized = new WeakSet<HTMLElement>();
+  const controllers = new WeakMap<HTMLElement, AbortController>();
 
   function parseView(value: string | null | undefined): ViewMode | null {
     if (value === "grid" || value === "list") return value;
@@ -288,15 +418,8 @@ const items = projects.map((project) => ({
     window.history.replaceState({}, "", url);
   }
 
-  function colsPerRow() {
-    if (window.matchMedia("(min-width: 1024px)").matches) return 3;
-    if (window.matchMedia("(min-width: 640px)").matches) return 2;
-    return 1;
-  }
-
   function syncTabs(root: HTMLElement, view: ViewMode) {
     const tabs = root.querySelectorAll<HTMLButtonElement>("[data-work-view]");
-    const panel = root.querySelector<HTMLElement>("[data-work-stage]");
     tabs.forEach((tab) => {
       const active = tab.dataset.workView === view;
       tab.setAttribute("aria-selected", String(active));
@@ -304,257 +427,125 @@ const items = projects.map((project) => ({
       tab.classList.toggle("font-bold", active);
       tab.classList.toggle("font-normal", !active);
     });
-    if (panel) {
-      panel.setAttribute(
-        "aria-labelledby",
-        view === "grid" ? "work-view-grid" : "work-view-list",
-      );
-    }
   }
 
-  const listControllers = new WeakMap<HTMLElement, AbortController>();
-  const listTimelines = new WeakMap<HTMLElement, { kill: () => void }>();
-  const viewLocks = new WeakMap<HTMLElement, boolean>();
-
-  function teardownList(root: HTMLElement) {
-    listControllers.get(root)?.abort();
-    listControllers.delete(root);
-    const tl = listTimelines.get(root) as
-      | { kill: () => void; scrollTrigger?: { kill: (revert?: boolean) => void } }
-      | undefined;
-    // Revert pin spacer before killing the timeline.
-    tl?.scrollTrigger?.kill(true);
-    tl?.kill();
-    listTimelines.delete(root);
-    const track = root.querySelector<HTMLElement>("[data-work-track]");
-    if (track && gsap) gsap.set(track, { clearProps: "transform" });
-    if (ScrollTrigger) ScrollTrigger.refresh();
-  }
-
-  async function initListScrub(root: HTMLElement) {
-    if (prefersReducedMotion()) return;
-    if (listTimelines.has(root)) return;
-
-    const stage = root.querySelector<HTMLElement>("[data-work-stage]");
-    const viewport = root.querySelector<HTMLElement>("[data-work-viewport]");
-    const track = root.querySelector<HTMLElement>("[data-work-track]");
-    if (!stage || !viewport || !track) return;
-    if (root.dataset.view !== "list") return;
-
-    await ensureGsap();
-
-    await new Promise<void>((resolve) =>
-      requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+  function setActivePreview(root: HTMLElement, index: number | null) {
+    const preview = root.querySelector<HTMLElement>("[data-work-preview]");
+    const names = root.querySelectorAll<HTMLElement>("[data-work-name]");
+    const shots = root.querySelectorAll<HTMLElement>(
+      "[data-work-preview-item]",
     );
+    const on = index !== null && Number.isFinite(index);
 
-    if (root.dataset.view !== "list" || listTimelines.has(root)) return;
+    if (preview) preview.dataset.visible = String(on);
 
-    const controller = new AbortController();
-    listControllers.set(root, controller);
-    const { signal } = controller;
-
-    const getTravel = () =>
-      Math.max(0, track.scrollWidth - viewport.clientWidth);
-
-    const tl = gsap.timeline({
-      defaults: { ease: "none" },
-      scrollTrigger: {
-        trigger: stage,
-        pin: true,
-        scrub: 0.45,
-        start: "top top",
-        end: () => `+=${Math.max(getTravel(), 1)}`,
-        invalidateOnRefresh: true,
-        anticipatePin: 1,
-      },
+    names.forEach((el, i) => {
+      el.dataset.active = String(on && i === index);
     });
 
-    tl.to(
-      track,
-      {
-        x: () => -getTravel(),
-        duration: 1,
-      },
-      0,
-    );
-
-    listTimelines.set(root, tl);
-
-    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const onMotionChange = () => {
-      if (motionQuery.matches) teardownList(root);
-    };
-    motionQuery.addEventListener("change", onMotionChange, { signal });
-
-    const onLoad = () => ScrollTrigger.refresh();
-    stage.querySelectorAll("img").forEach((img) => {
-      if (!img.complete)
-        img.addEventListener("load", onLoad, { signal, once: true });
+    shots.forEach((el, i) => {
+      const isOn = on && i === index;
+      el.dataset.active = String(isOn);
+      el.setAttribute("aria-hidden", String(!isOn));
+      const img = el.querySelector("img");
+      if (!img) return;
+      img.alt = isOn ? el.dataset.alt || "" : "";
     });
-
-    ScrollTrigger.refresh();
   }
 
-  function splitItems(root: HTMLElement) {
-    const items = Array.from(
-      root.querySelectorAll<HTMLElement>("[data-work-item]"),
-    );
-    const cols = colsPerRow();
-    return {
-      items,
-      firstRow: items.slice(0, cols),
-      rest: items.slice(cols),
-    };
-  }
-
-  function clearItemProps(items: HTMLElement[]) {
-    if (!gsap) {
-      items.forEach((el) => {
-        el.style.opacity = "";
-        el.style.visibility = "";
-      });
-      return;
-    }
-    gsap.set(items, { clearProps: "opacity,visibility" });
-  }
-
-  async function setView(
-    root: HTMLElement,
-    view: ViewMode,
-    { instant = false }: { instant?: boolean } = {},
-  ) {
-    if (viewLocks.get(root)) return;
+  function setView(root: HTMLElement, view: ViewMode, instant = false) {
     if (!instant && root.dataset.view === view) return;
 
-    const prev = (root.dataset.view as ViewMode) || "grid";
+    root.dataset.view = view;
     syncTabs(root, view);
     persistView(view);
 
-    const skipMotion = instant || prefersReducedMotion();
-    const { items, rest } = splitItems(root);
+    root.querySelectorAll<HTMLElement>("[data-work-panel]").forEach((panel) => {
+      panel.hidden = panel.dataset.workPanel !== view;
+    });
 
-    if (skipMotion) {
-      teardownList(root);
-      root.dataset.view = view;
-      clearItemProps(items);
-      if (view === "list") {
-        window.scrollTo(0, 0);
-        await initListScrub(root);
-      } else if (ScrollTrigger) {
-        ScrollTrigger.refresh();
-      }
-      return;
-    }
+    if (view !== "list") setActivePreview(root, null);
 
-    viewLocks.set(root, true);
-
-    try {
-      await ensureGsap();
-
-      if (view === "list" && prev === "grid") {
-        // Fade out rows below the first — first row stays on screen.
-        if (rest.length) {
-          await gsap.to(rest, {
-            autoAlpha: 0,
-            duration: 0.35,
-            ease: "power2.out",
-            stagger: 0.02,
-          });
-        }
-
-        window.scrollTo(0, 0);
-        root.dataset.view = view;
-        // Rest rejoin the strip to the right (off-screen / entering on scrub).
-        gsap.set(rest, { autoAlpha: 1 });
-
-        await new Promise<void>((resolve) =>
-          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-        );
-
-        await initListScrub(root);
-      } else if (view === "grid" && prev === "list") {
-        teardownList(root);
-        window.scrollTo(0, 0);
-
-        // Hide lower rows before switching so they don't pop in under the strip.
-        gsap.set(rest, { autoAlpha: 0 });
-        root.dataset.view = view;
-
-        await new Promise<void>((resolve) =>
-          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-        );
-
-        if (rest.length) {
-          await gsap.to(rest, {
-            autoAlpha: 1,
-            duration: 0.35,
-            ease: "power2.out",
-            stagger: 0.02,
-          });
-        }
-
-        clearItemProps(items);
-        if (ScrollTrigger) ScrollTrigger.refresh();
-      } else {
-        root.dataset.view = view;
-        clearItemProps(items);
-        if (view === "list") {
-          window.scrollTo(0, 0);
-          await initListScrub(root);
-        }
-      }
-    } catch (err) {
-      // Never leave the UI stuck mid-transition.
-      console.error("[SectionWork] view switch failed", err);
-      teardownList(root);
-      root.dataset.view = view;
-      clearItemProps(items);
-      if (view === "list") {
-        window.scrollTo(0, 0);
-        await initListScrub(root);
-      }
-    } finally {
-      viewLocks.set(root, false);
-    }
+    if (!instant) window.scrollTo(0, 0);
   }
 
   function bindRoot(root: HTMLElement) {
-    if (root.dataset.workBound === "true") return;
-    root.dataset.workBound = "true";
+    if (initialized.has(root)) return;
+    initialized.add(root);
+
+    controllers.get(root)?.abort();
+    const controller = new AbortController();
+    controllers.set(root, controller);
+    const { signal } = controller;
 
     const tabs = Array.from(
       root.querySelectorAll<HTMLButtonElement>("[data-work-view]"),
     );
 
     tabs.forEach((tab) => {
-      tab.addEventListener("click", () => {
-        const view = parseView(tab.dataset.workView);
-        if (view) void setView(root, view);
-      });
+      tab.addEventListener(
+        "click",
+        () => {
+          const view = parseView(tab.dataset.workView);
+          if (view) setView(root, view);
+        },
+        { signal },
+      );
 
-      tab.addEventListener("keydown", (e: KeyboardEvent) => {
-        const current = tabs.indexOf(tab);
-        let next = -1;
-        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-          next = (current + 1) % tabs.length;
-        } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-          next = (current - 1 + tabs.length) % tabs.length;
-        } else if (e.key === "Home") {
-          next = 0;
-        } else if (e.key === "End") {
-          next = tabs.length - 1;
-        }
-        if (next < 0) return;
-        e.preventDefault();
-        const nextTab = tabs[next];
-        if (!nextTab) return;
-        nextTab.focus();
-        const view = parseView(nextTab.dataset.workView);
-        if (view) void setView(root, view);
+      tab.addEventListener(
+        "keydown",
+        (e: KeyboardEvent) => {
+          const current = tabs.indexOf(tab);
+          let next = -1;
+          if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+            next = (current + 1) % tabs.length;
+          } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+            next = (current - 1 + tabs.length) % tabs.length;
+          } else if (e.key === "Home") {
+            next = 0;
+          } else if (e.key === "End") {
+            next = tabs.length - 1;
+          }
+          if (next < 0) return;
+          e.preventDefault();
+          const nextTab = tabs[next];
+          if (!nextTab) return;
+          nextTab.focus();
+          const view = parseView(nextTab.dataset.workView);
+          if (view) setView(root, view);
+        },
+        { signal },
+      );
+    });
+
+    const namesList = root.querySelector<HTMLElement>("[data-work-names]");
+    namesList?.addEventListener(
+      "mouseleave",
+      () => setActivePreview(root, null),
+      { signal },
+    );
+    namesList?.addEventListener(
+      "focusout",
+      (e: FocusEvent) => {
+        const next = e.relatedTarget;
+        if (next instanceof Node && namesList.contains(next)) return;
+        setActivePreview(root, null);
+      },
+      { signal },
+    );
+
+    root.querySelectorAll<HTMLElement>("[data-work-name]").forEach((el) => {
+      const index = Number(el.dataset.workIndex);
+      if (!Number.isFinite(index)) return;
+      el.addEventListener("mouseenter", () => setActivePreview(root, index), {
+        signal,
+      });
+      el.addEventListener("focusin", () => setActivePreview(root, index), {
+        signal,
       });
     });
 
-    void setView(root, readInitialView(), { instant: true });
+    setView(root, readInitialView(), true);
   }
 
   function initAll() {
@@ -564,5 +555,4 @@ const items = projects.map((project) => ({
   }
 
   initAll();
-  document.addEventListener("astro:page-load", initAll);
 </script>

@@ -3,19 +3,22 @@
 // Anything you put between <Layout>...</Layout> in a page lands in <slot />.
 //
 // Props are declared via an interface and read from Astro.props.
-// One variable font per role (§10.2). --font-heading / --font-sans / --font-mono
-// in global.css name these families, so all three must actually be loaded —
-// otherwise the stack silently falls through to system-ui/Menlo and renders
-// differently on machines that happen to have the font installed locally.
-import "@fontsource-variable/archivo";
-import "@fontsource-variable/inter";
+// Heading/body faces are local @font-face in global.css (Zalando Sans).
+// Mono still comes from Fontsource. --font-heading / --font-sans / --font-mono
+// in global.css must name loaded families, or the stack silently falls through
+// to system-ui/Menlo and renders differently on machines that have them locally.
 import "@fontsource-variable/jetbrains-mono";
+import "locomotive-scroll/dist/locomotive-scroll.css";
 import "../styles/global.css";
 import { getCollection, render } from "astro:content";
 import Nav from "../components/NavInline.astro";
 import AnnouncementBanner from "../components/AnnouncementBanner.astro";
 import Seo from "../components/Seo.astro";
 import Loader from "../components/Loader.astro";
+import Footer from "../components/Footer.astro";
+import PageTransition from "../components/PageTransition.astro";
+import SmoothScroll from "../components/SmoothScroll.astro";
+import { getFooterCopyright, getNavLinks, getPageBySlug } from "../lib/pages";
 interface Props {
   title?: string;
   /** Meta description for SEO + social cards. */
@@ -32,6 +35,10 @@ interface Props {
   theme?: "light" | "dark" | "brand";
   /** Skip the intro loader on this page (e.g. component docs). */
   skipLoader?: boolean;
+  /** Omit the site footer on this page. */
+  hideFooter?: boolean;
+  /** Document language. */
+  lang?: string;
   /** Frontmatter object, present when this layout is used from a Markdown/MDX page. */
   frontmatter?: { title?: string; theme?: "light" | "dark" | "brand"; description?: string };
 }
@@ -48,8 +55,16 @@ const {
   jsonLd,
   theme = fm.theme ?? "light",
   skipLoader = false,
+  hideFooter = false,
+  lang = "en",
 } = Astro.props;
 const gtagId = import.meta.env.PUBLIC_GTAG_ID;
+const navLinks = await getNavLinks();
+const copyright = await getFooterCopyright();
+const contactPage = await getPageBySlug("contact");
+const navCta = contactPage
+  ? { label: "Get in touch", href: "/contact/" }
+  : undefined;
 
 // Pick the currently-active announcement, if any.
 // Filters by enabled flag and schedule window. Highest priority wins;
@@ -74,7 +89,7 @@ const AnnouncementContent = announcement
 
 ---
 
-<html lang="en" data-theme={theme}>
+<html lang={lang} data-theme={theme}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -94,6 +109,7 @@ const AnnouncementContent = announcement
     )}
   </head>
   <body>
+    <SmoothScroll />
     {!skipLoader && <Loader />}
     <a
       href="#main"
@@ -101,7 +117,7 @@ const AnnouncementContent = announcement
     >
       Skip to main content
     </a>
-    <Nav>
+    <Nav links={navLinks} cta={navCta ?? { label: "Get in touch", href: "/contact/" }}>
       {announcement && AnnouncementContent && (
         <AnnouncementBanner
           slot="announcement"
@@ -114,5 +130,7 @@ const AnnouncementContent = announcement
       )}
     </Nav>
     <slot />
+    {!hideFooter && <Footer copyright={copyright} />}
+    <PageTransition />
   </body>
 </html>

@@ -5,31 +5,19 @@ category: pattern
 order: 11
 sourceFile: src/components/HeroBanner.astro
 status: stable
-related: [SectionHomeSlideshow, NavInline, NavSimple, Media]
+related: [SectionHomeHero, SectionHomeSlideshow, NavInline, NavSimple, Media]
 ---
 
-import Preview from "@components/_docs/Preview.astro";
 import PropsTable from "@components/_docs/PropsTable.astro";
-import HeroBanner from "@components/HeroBanner.astro";
 
-Full-bleed Home hero from Figma node `222:21`. The default photograph is the Enhanced-NR frame export; pass `image` to swap projects. Brand + menu stay in `NavSimple` — this component is the media plane only.
-
-## Preview
-
-Constrained height so the showcase page stays scrollable. On a real route the section is `min-h-svh`.
-
-<Preview label="Default image + project label" align="stretch">
-  <div class="relative h-96 w-full overflow-hidden">
-    <HeroBanner class="!min-h-full" projectName="PROJECT NAME" priority={false} />
-  </div>
-</Preview>
+Full-bleed photo hero. Pass `image` from a CMS photograph or an imported asset. Brand + menu stay in `NavInline` — this component is the media plane only. The homepage itself uses `SectionHomeHero`.
 
 ## Props
 
 <PropsTable props={[
-  { name: "image", type: "ImageMetadata", default: "hero-banner-default.jpg", description: "Photograph imported from src/images/. Defaults to the Figma Home frame asset." },
-  { name: "alt", type: "string", default: '"Around the Isla project photograph"', description: "Accessible description of the image." },
-  { name: "projectName", type: "string", default: '"PROJECT NAME"', description: "Lower-right label. Pass an empty string to hide it." },
+  { name: "image", type: "ImageMetadata | CmsImage", description: "Photograph — imported asset or Sanity image." },
+  { name: "alt", type: "string", description: "Accessible description of the image. Falls back to the CMS alt." },
+  { name: "projectName", type: "string", default: '""', description: "Lower-right label. Pass an empty string to hide it." },
   { name: "ariaLabel", type: "string", default: '"Featured project"', description: "Accessible name for the section landmark." },
   { name: "priority", type: "boolean", default: "true", description: "LCP treatment — eager load + high fetch priority. Set false when something else owns LCP." },
   { name: "class", type: "string", description: "Extra classes on the section root." },
@@ -40,10 +28,9 @@ Constrained height so the showcase page stays scrollable. On a real route the se
 ```astro
 ---
 import HeroBanner from "@components/HeroBanner.astro";
-import projectShot from "../images/galleries/around-1/A7405674.jpg";
 ---
 
-<HeroBanner image={projectShot} projectName="Around 1" alt="Night crowd, film grain" />
+<HeroBanner image={projectCover} projectName="Around 1" alt="Night crowd, film grain" />
 ```
 
 ## Layout

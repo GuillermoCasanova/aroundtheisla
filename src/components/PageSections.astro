@@ -1,0 +1,74 @@
+---
+import type { PageSection } from "../lib/sanity";
+import HeroBanner from "./HeroBanner.astro";
+import SectionHomeSlideshow from "./SectionHomeSlideshow.astro";
+import SectionWork from "./SectionWork.astro";
+import SectionAbout from "./SectionAbout.astro";
+import SectionContact from "./SectionContact.astro";
+import SectionRichText from "./SectionRichText.astro";
+
+interface Props {
+  sections: PageSection[];
+}
+
+const { sections } = Astro.props;
+---
+
+{
+  sections.map((section) => {
+    switch (section._type) {
+      case "sctnHero":
+        return (
+          <HeroBanner
+            image={section.image}
+            alt={section.image.alt}
+            projectName={section.projectName}
+          />
+        );
+      case "sctnHomeSlideshow":
+        return (
+          <SectionHomeSlideshow
+            slides={section.slides.map((slide) => ({
+              image: slide.image,
+              alt: slide.image.alt,
+              href: slide.href,
+            }))}
+          />
+        );
+      case "sctnWork":
+        return (
+          <SectionWork
+            projects={section.projects.map((project) => ({
+              slug: project.id,
+              title: project.title,
+              year: new Date(project.date).getFullYear(),
+              cover: project.cover,
+              href: `/project/${project.id}/`,
+            }))}
+          />
+        );
+      case "sctnAbout":
+        return (
+          <SectionAbout
+            paragraphs={section.paragraphs}
+            instagramHref={section.instagramHref}
+            instagramHandle={section.instagramHandle}
+            brand={section.brand}
+            portrait={section.portrait}
+            portraitAlt={section.portrait.alt}
+            caption={section.caption}
+          />
+        );
+      case "sctnContact":
+        return (
+          <SectionContact heading={section.heading} lede={section.lede} />
+        );
+      case "sctnRichText":
+        return (
+          <SectionRichText heading={section.heading} body={section.body} />
+        );
+      default:
+        return null;
+    }
+  })
+}

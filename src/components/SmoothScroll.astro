@@ -1,0 +1,23 @@
+---
+/**
+ * SmoothScroll — boots Locomotive Scroll (v5 / Lenis) once per document.
+ *
+ * Included from Layout. Renders nothing: the library attaches to the native
+ * document scroller. Reduced-motion users keep native scroll; the intro
+ * loader holds the instance stopped until it is removed.
+ *
+ * Mark elements with `data-scroll` (and optional `data-scroll-speed`) to
+ * opt them into detection / parallax. Read the instance via
+ * `getLocomotiveScroll()` or the bubbling `scroll:ready` event.
+ */
+---
+
+<script>
+  import {
+    initSmoothScroll,
+    refreshSmoothScroll,
+  } from "../lib/smooth-scroll";
+
+  initSmoothScroll();
+  document.addEventListener("astro:page-load", refreshSmoothScroll);
+</script>

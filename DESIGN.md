@@ -41,10 +41,10 @@ The test when adding something: *does this change as a side effect of routine wo
 | Decision | Answer for this project |
 |---|---|
 | **Themes** — which ship, and which is default | |
-| **Palette** — brand hues, if any, and which one `--color-intent` maps to | |
+| **Palette** — brand hues, if any, and which one `--color-intent` maps to | Two brand swatches: `primary` (black) and `secondary` (light gray). Light `intent` maps to `primary`. `secondary` is for project descriptions, not actions. |
 | **Radius** — a stance, and why. This is a brand call with no house default | |
 | **Depth** — tonal offset, hairlines, shadows: which, and in what order of preference | |
-| **Typefaces** — for the heading / body / mono roles | |
+| **Typefaces** — for the heading / body / mono roles | Zalando Sans (Regular + SemiBold) for heading and body; JetBrains Mono for mono |
 | **Motion** — how much, and where it's allowed to be expressive | |
 | **Density** — generous and editorial, or compact and dense | |
 | **Imagery** — photography, illustration, none; and how it's treated | |

@@ -24,8 +24,8 @@ const {
   brand = "aroundtheisla",
   homeHref = "/",
   links = [
-    { label: "Volumes", href: "/work" },
-    { label: "About", href: "/about" },
+    { label: "work", href: "/work" },
+    { label: "about", href: "/about" },
   ],
   cta = { label: "Get in touch", href: "/contact" },
   class: className = "",
@@ -50,7 +50,7 @@ const linkClass =
 
   <div
     data-nav-bar
-    class="container-full relative z-20 flex h-14 items-center justify-between pl-5 pr-4 transition-colors duration-300"
+    class="container-full relative z-20 flex h-14 items-center justify-between pl-5 pr-4 transition-colors duration-300 md:px-[1.625rem]"
   >
     <a
       href={homeHref}
@@ -59,10 +59,7 @@ const linkClass =
       {brand}
     </a>
 
-    <nav
-      class="hidden items-center gap-8 md:flex"
-      aria-label="Primary"
-    >
+    <nav class="hidden items-center gap-8 md:flex" aria-label="Primary">
       {
         links.map((link) => (
           <a href={link.href} class={linkClass}>
@@ -139,9 +136,12 @@ const linkClass =
 <style>
   /* Open-state ancestors use :global so Astro's scope hash doesn't attach to
      the JS-toggled [data-open] attribute (see components.styling). */
-  [data-nav-bar].is-scrolled {
-    background-color: color-mix(in oklab, var(--color-canvas) 92%, transparent);
-    backdrop-filter: blur(8px);
+  /* Frosted fill is mobile-only. Tablet+ (md) stays transparent over the page. */
+  @media (max-width: 47.999rem) {
+    [data-nav-bar].is-scrolled {
+      background-color: color-mix(in oklab, var(--color-canvas) 92%, transparent);
+      backdrop-filter: blur(8px);
+    }
   }
 
   /* When the overlay is open the bar sits on black — keep it transparent so

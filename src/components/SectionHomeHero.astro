@@ -1,0 +1,103 @@
+---
+/**
+ * SectionHomeHero
+ * Full-bleed homepage photograph. Picks one of the Sanity hero images at
+ * random on each landing so the frame changes whenever someone arrives.
+ * The whole frame is a stretched link to /work.
+ *
+ * Full-viewport composition (no SectionMain): the frame is an edge-to-edge
+ * crop, not a column with side rules.
+ */
+import OptimizedPicture from "@components/OptimizedPicture.astro";
+import type { CmsImage } from "../lib/cms-image";
+
+interface Props {
+  images: CmsImage[];
+  class?: string;
+}
+
+const { images, class: className } = Astro.props;
+---
+
+{
+  /*
+   * Full-bleed home frame — allowed deviation from SectionMain: the photograph
+   * is an edge-to-edge viewport crop; the shared column + side rules would
+   * inset it and fight the cover.
+   */
+}
+<section
+  data-home-hero
+  aria-label="Featured photograph"
+  class:list={[
+    "relative isolate min-h-svh w-full overflow-hidden bg-canvas",
+    className,
+  ]}
+>
+  {
+    images.map((image) => (
+      <div
+        data-home-hero-shot
+        hidden
+        class="absolute inset-0"
+      >
+        <OptimizedPicture
+          src={image.src}
+          alt={image.alt}
+          width={image.width}
+          height={image.height}
+          class="absolute inset-0 size-full object-cover object-center"
+          widths={[640, 960, 1280, 1600, 1920]}
+          sizes="100vw"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+    ))
+  }
+
+  {
+    /* Stretched link — same pattern as Clickable, inlined so it can sit
+       on the already-relative section without an extra positioning wrapper. */
+  }
+  <a
+    href="/work"
+    class="absolute inset-0 z-[1] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
+    aria-label="View work"
+  >
+    <span class="sr-only">View work</span>
+  </a>
+
+  {
+    /* No-JS: reveal the first cover so the frame is never empty. */
+  }
+  <noscript>
+    <style>
+      [data-home-hero-shot]:first-of-type {
+        display: block !important;
+      }
+    </style>
+  </noscript>
+
+  {
+    /* Inline so the pick lands before paint — a bundled module would flash. */
+  }
+  <script is:inline>
+    (function () {
+      var root = document.currentScript && document.currentScript.closest
+        ? document.currentScript.closest("[data-home-hero]")
+        : document.querySelector("[data-home-hero]");
+      if (!root) return;
+      var shots = root.querySelectorAll("[data-home-hero-shot]");
+      if (!shots.length) return;
+      var pick = Math.floor(Math.random() * shots.length);
+      var chosen = shots[pick];
+      chosen.removeAttribute("hidden");
+      var img = chosen.querySelector("img");
+      if (img) {
+        img.loading = "eager";
+        img.setAttribute("fetchpriority", "high");
+      }
+    })();
+  </script>
+</section>

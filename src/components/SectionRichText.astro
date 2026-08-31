@@ -1,0 +1,22 @@
+---
+import SectionMain from "./SectionMain.astro";
+import { portableTextToHtml } from "../lib/portable-text";
+
+interface Props {
+  heading?: string;
+  body: unknown[];
+  class?: string;
+}
+
+const { heading, body, class: className } = Astro.props;
+const html = portableTextToHtml(body);
+---
+
+<SectionMain id="rich-text" contentClass="max-w-prose" class={className}>
+  {
+    heading && (
+      <h1 class="h2 mb-6">{heading}</h1>
+    )
+  }
+  <div class="prose-doc" set:html={html} />
+</SectionMain>

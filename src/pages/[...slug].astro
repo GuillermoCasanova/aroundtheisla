@@ -1,0 +1,67 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PlainLayout from "../layouts/PlainLayout.astro";
+import PageSections from "../components/PageSections.astro";
+import { webPageSchema } from "../lib/schema";
+import { getPublishedPages, pageSections, type CmsPage } from "../lib/pages";
+
+export async function getStaticPaths() {
+  const pages = await getPublishedPages();
+  return pages
+    .filter((page) => page.id !== "home")
+    .map((page) => ({
+      params: { slug: page.id },
+      props: { page },
+    }));
+}
+
+interface Props {
+  page: CmsPage;
+}
+
+const { page } = Astro.props;
+const title = page.data.seoTitle || page.data.title;
+const description = page.data.seoDescription || "";
+const image = page.data.seoImage?.src;
+const jsonLd = webPageSchema({
+  path: page.id,
+  title: `${title} — aroundtheisla`,
+  description,
+  image,
+  inLanguage: page.data.lang,
+});
+
+const sections = pageSections(page);
+---
+
+{
+  page.data.layout === "plain" ? (
+    <PlainLayout
+      title={title}
+      description={description}
+      image={image}
+      jsonLd={jsonLd}
+      theme={page.data.theme}
+      lang={page.data.lang}
+      hideFooter={page.data.hideFooter}
+    >
+      <main id="main">
+        <PageSections sections={sections} />
+      </main>
+    </PlainLayout>
+  ) : (
+    <Layout
+      title={title}
+      description={description}
+      image={image}
+      jsonLd={jsonLd}
+      theme={page.data.theme}
+      lang={page.data.lang}
+      hideFooter={page.data.hideFooter}
+    >
+      <main id="main">
+        <PageSections sections={sections} />
+      </main>
+    </Layout>
+  )
+}

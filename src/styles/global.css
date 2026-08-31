@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./typography.css";
 
 /* ==========================================================================
    THEME ATTRIBUTE
@@ -16,6 +17,24 @@
 @custom-variant dark  (&:where([data-theme="dark"],  [data-theme="dark"]  *));
 @custom-variant brand (&:where([data-theme="brand"], [data-theme="brand"] *));
 
+/* Local faces for --font-heading / --font-sans. Regular covers light–normal;
+   SemiBold covers medium–black so font-medium / font-bold don't faux-weight. */
+@font-face {
+  font-family: "Zalando Sans";
+  src: url("../fonts/ZalandoSans-Regular.woff2") format("woff2");
+  font-weight: 100 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Zalando Sans";
+  src: url("../fonts/ZalandoSans-SemiBold.woff2") format("woff2");
+  font-weight: 500 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ==========================================================================
    THEME TOKENS
    Variables under recognized namespaces (--color-*, --spacing-*, --font-*,
@@ -28,13 +47,13 @@
    ========================================================================== */
 @theme {
   /* ---------- Typography ---------- */
-  /* Family names must match what @fontsource-variable/* registers (they all end
-     in " Variable") and each family must be imported in Layout.astro, or the
+  /* Family names must match a loaded @font-face (Zalando Sans below; mono via
+     @fontsource-variable/jetbrains-mono in Layout). An unused name in the
      stack silently falls through to the system fallback. */
   --font-sans:
-    "Inter Variable", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    "Zalando Sans", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   --font-heading:
-    "Archivo Variable", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    "Zalando Sans", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   --font-mono:
     "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
 
@@ -82,9 +101,14 @@
   --color-fg-subtle: #8a8a8a;          /* placeholders, disabled */
   --color-fg-on-intent: #ffffff;       /* text on intent-colored surfaces */
 
+  /* Brand swatches — Figma Colors (291:212). Stay constant across themes;
+     map semantic roles (intent, description text) to them per theme. */
+  --color-primary: #000000;
+  --color-secondary: #c4c4c4;
+
   /* Intent (brand / primary action) */
-  --color-intent: #0a0a0a;             /* primary action color */
-  --color-intent-hover: #1a1a1a;       /* hover state for intent */
+  --color-intent: var(--color-primary); /* primary action color */
+  --color-intent-hover: #1a1a1a;        /* hover state for intent */
 
   /* Borders */
   --color-stroke: #d7d7d7;             /* default border */
@@ -187,7 +211,9 @@
   --color-fg-muted: #525252;
   --color-fg-subtle: #8a8a8a;
   --color-fg-on-intent: #ffffff;
-  --color-intent: #0a0a0a;
+  --color-primary: #000000;
+  --color-secondary: #c4c4c4;
+  --color-intent: var(--color-primary);
   --color-intent-hover: #1a1a1a;
   --color-stroke: #d7d7d7;
   --color-stroke-strong: #bdbdbd;
@@ -211,6 +237,8 @@
   --color-fg-muted: #a3a3a3;
   --color-fg-subtle: #6b6b6b;
   --color-fg-on-intent: #0a0a0a;
+  --color-primary: #000000;
+  --color-secondary: #c4c4c4;
   --color-intent: #f5f5f5;
   --color-intent-hover: #e5e5e5;
   --color-stroke: #2a2a2a;
@@ -237,6 +265,8 @@
   --color-fg-muted: #a3a3a3;
   --color-fg-subtle: #6b6b6b;
   --color-fg-on-intent: #0a0a0a;
+  --color-primary: #000000;
+  --color-secondary: #c4c4c4;
   --color-intent: #f5f5f5;
   --color-intent-hover: #e5e5e5;
   --color-stroke: #2a2a2a;
@@ -291,114 +321,6 @@
   :where(button:disabled, [aria-disabled="true"]) {
     cursor: not-allowed;
   }
-}
-
-/* ==========================================================================
-   FLUID TYPOGRAPHY
-   Each heading and body size is an independent clamp() so the design
-   system can tune them individually. The formula is linear interpolation
-   between two rem anchors driven by `cqi` (1cqi = 1% of the nearest query
-   container's inline size).
-
-   For anchors (20rem → MIN) and (90rem → MAX):
-     slope      = (MAX - MIN) / 70
-     intercept  = MIN - slope * 20
-     font-size  = clamp(MIN, intercept*1rem + slope*100cqi, MAX)
-
-   Values below are pre-computed for readability. To retune a size, change
-   its MIN/MAX and recompute intercept + slope*100.
-   ========================================================================== */
-
-/* ----- H1: 2.75rem → 5.25rem  (44 → 84px) ----- */
-@utility h1 {
-  font-family: var(--font-heading);
-  font-weight: 400;
-  line-height: 0.95;
-  letter-spacing: -0.045em;
-  font-size: clamp(2.75rem, 2.0357rem + 3.5714cqi, 5.25rem);
-  text-wrap: balance;
-}
-
-/* ----- H2: 2rem → 3.5rem  (32 → 56px) ----- */
-@utility h2 {
-  font-family: var(--font-heading);
-  font-weight: 400;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  font-size: clamp(2rem, 1.5714rem + 2.1429cqi, 3.5rem);
-  text-wrap: balance;
-}
-
-/* ----- H3: 1.5rem → 2.25rem  (24 → 36px) ----- */
-@utility h3 {
-  font-family: var(--font-heading);
-  font-weight: 400;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  font-size: clamp(1.5rem, 1.2857rem + 1.0714cqi, 2.25rem);
-  text-wrap: balance;
-}
-
-/* ----- H4: 1.25rem → 1.75rem  (20 → 28px) ----- */
-@utility h4 {
-  font-family: var(--font-heading);
-  font-weight: 400;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
-  font-size: clamp(1.25rem, 1.1071rem + 0.7143cqi, 1.75rem);
-}
-
-/* ----- H5: 1.125rem → 1.375rem  (18 → 22px) ----- */
-@utility h5 {
-  font-family: var(--font-heading);
-  font-weight: 400;
-  line-height: 1.3;
-  font-size: clamp(1.125rem, 1.0536rem + 0.3571cqi, 1.375rem);
-}
-
-/* ----- H6: 1rem → 1.125rem  (16 → 18px) ----- */
-@utility h6 {
-  font-family: var(--font-heading);
-  font-weight: 400;
-  line-height: 1.4;
-  font-size: clamp(1rem, 0.9643rem + 0.1786cqi, 1.125rem);
-}
-
-/* ----- Body XL: 1rem → 1.25rem  (16 → 20px) — hero subhead, lead paragraphs ----- */
-@utility text-body-xl {
-  font-size: clamp(1rem, 0.9286rem + 0.3571cqi, 1.25rem);
-  line-height: 1.55;
-}
-
-/* ----- Body LG: 0.9375rem → 1.125rem  (15 → 18px) — default body ----- */
-@utility text-body-lg {
-  font-size: clamp(0.9375rem, 0.8839rem + 0.2679cqi, 1.125rem);
-  line-height: 1.55;
-}
-
-/* ----- Body MD: 0.875rem → 1rem  (14 → 16px) — secondary body, cards ----- */
-@utility text-body-md {
-  font-size: clamp(0.875rem, 0.8393rem + 0.1786cqi, 1rem);
-  line-height: 1.5;
-}
-
-/* ----- Body SM: 0.8125rem → 0.9375rem  (13 → 15px) — captions, labels ----- */
-@utility text-body-sm {
-  font-size: clamp(0.8125rem, 0.7768rem + 0.1786cqi, 0.9375rem);
-  line-height: 1.5;
-}
-
-@utility text-body-xsm {
-  font-size: 0.75rem;
-  line-height: 1.5;
-}
-
-
-/* ----- Re-anchor fluid type to a smaller context (cards, sidebars, modals).
-         Drop `cq` onto any element and its descendants' `cqi`-based sizes
-         will resolve against THIS element instead of <body>. ----- */
-@utility cq {
-  container-type: inline-size;
 }
 
 /* ==========================================================================

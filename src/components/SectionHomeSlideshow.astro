@@ -4,67 +4,33 @@
  * Full-bleed horizontal project gallery for the homepage. Vertical scroll
  * pins the frame and swipes the track right → left (GSAP ScrollTrigger).
  *
- * Images load from `src/images/homepage/` via import.meta.glob — drop files
- * there to extend the strip. Slides whose filename is listed on a project’s
- * `homepageSlides` frontmatter link through to `/project/{slug}`.
- *
  * Full-bleed by design (no SectionMain column / side rules) so the pin
  * matches the Figma frame edge-to-edge.
  *
  * Reduced motion: no pin/scrub — native horizontal overflow with scroll-snap.
  */
 import type { ImageMetadata } from "astro";
-import { Image } from "astro:assets";
-import {
-  getPublishedProjects,
-  homepageSlideProjectMap,
-} from "../lib/projects";
+import ImageLoader from "@components/ImageLoader.astro";
+import { isCmsImage, type CmsImage } from "../lib/cms-image";
+
+export type SlideshowSlide = {
+  image: ImageMetadata | CmsImage;
+  alt?: string;
+  href?: string;
+};
 
 interface Props {
+  slides: SlideshowSlide[];
   /** Accessible name for the landmark. */
   ariaLabel?: string;
   class?: string;
 }
 
-const { ariaLabel = "Project photographs", class: className } = Astro.props;
-
-const modules = import.meta.glob<{ default: ImageMetadata }>(
-  "../images/homepage/*.{png,jpg,jpeg,webp}",
-  { eager: true },
-);
-
-/** Prefer the Figma frame order, then the rest alphabetically. */
-const preferredOrder = [
-  "A7405137 1.png",
-  "A7404128 1.png",
-  "A7404482 1.png",
-  "A7404501 1.png",
-  "A7404235 1.png",
-  "A7404990 1.png",
-  "A7405409 1.png",
-];
-
-const projects = await getPublishedProjects();
-const slideProjects = homepageSlideProjectMap(projects);
-
-const images = Object.entries(modules)
-  .map(([path, mod]) => {
-    const file = path.split("/").pop() ?? path;
-    const projectSlug = slideProjects.get(file);
-    return {
-      src: mod.default,
-      file,
-      href: projectSlug ? `/project/${projectSlug}/` : undefined,
-    };
-  })
-  .sort((a, b) => {
-    const ai = preferredOrder.indexOf(a.file);
-    const bi = preferredOrder.indexOf(b.file);
-    if (ai === -1 && bi === -1) return a.file.localeCompare(b.file);
-    if (ai === -1) return 1;
-    if (bi === -1) return -1;
-    return ai - bi;
-  });
+const {
+  slides,
+  ariaLabel = "Project photographs",
+  class: className,
+} = Astro.props;
 ---
 
 {
@@ -89,18 +55,28 @@ const images = Object.entries(modules)
       class="flex h-full w-max items-end gap-[clamp(1.25rem,3vw,2.875rem)] px-[clamp(1.25rem,2.5vw,2.125rem)] pb-[clamp(2rem,6vh,4.5rem)] pt-[clamp(4.5rem,12vh,7rem)]"
     >
       {
-        images.map((image, i) => {
-          const alt = `Around the Isla project photograph ${i + 1}`;
+        slides.map((slide, i) => {
+          const alt =
+            slide.alt ??
+            (isCmsImage(slide.image)
+              ? slide.image.alt
+              : `Around the Isla project photograph ${i + 1}`);
           const img = (
-            <Image
-              src={image.src}
+            <ImageLoader
+              src={isCmsImage(slide.image) ? slide.image.src : slide.image}
               alt={alt}
-              class="absolute inset-0 size-full object-cover transition-[transform,opacity] duration-default group-hover/slide:scale-[1.02] group-focus-visible/slide:scale-[1.02]"
+              width={slide.image.width}
+              height={slide.image.height}
+              class="absolute inset-0 size-full"
+              imgClass="absolute inset-0 size-full object-cover transition-[transform,opacity] duration-default group-hover/slide:scale-[1.02] group-focus-visible/slide:scale-[1.02]"
+              preserveAspect={false}
               widths={[480, 720, 960, 1200]}
               sizes="(max-width: 768px) 70vw, 42vw"
               loading={i === 0 ? "eager" : "lazy"}
               fetchpriority={i === 0 ? "high" : undefined}
               decoding={i === 0 ? "sync" : "async"}
+              stage={i !== 0}
+              placeholder={isCmsImage(slide.image) ? slide.image.lqip : undefined}
             />
           );
 
@@ -109,9 +85,9 @@ const images = Object.entries(modules)
               data-home-slideshow-slide
               class="relative m-0 h-[min(72svh,47rem)] w-[min(42vw,37.5rem)] shrink-0 overflow-hidden"
             >
-              {image.href ? (
+              {slide.href ? (
                 <a
-                  href={image.href}
+                  href={slide.href}
                   class="group/slide absolute inset-0 block outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
                   aria-label={`Open project for photograph ${i + 1}`}
                 >

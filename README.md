@@ -8,8 +8,14 @@ This repo is the canonical baseline every client build inherits — and it is bu
 
 ```sh
 npm install
-npm run dev          # http://localhost:4321
+cp .env.example .env   # fill PUBLIC_SANITY_PROJECT_ID + dataset
+npm run dev            # http://localhost:4321
+npm run studio         # Sanity Studio at http://localhost:3333
 ```
+
+From `studio/`, use `npm run dev` (or `npm run studio`) to edit locally, and `npm run deploy` to publish to `aroundtheisla.sanity.studio`. Use the local scripts, not a global `sanity` CLI — a version mismatch fails deploy with `uploadSchema is not a function`.
+
+Editorial content (projects, pages, about, contact copy) lives in Sanity and is fetched **at build time**. Publishing in the Studio does not update the live site until the next `astro build` (wire a Sanity webhook to your Cloudflare deploy hook).
 
 Open **`/components`** in dev for the live component showcase, and **`/styleguide`** for the token and type reference. Both are dev-only and never ship to production.
 
@@ -21,6 +27,8 @@ Open **`/components`** in dev for the live component showcase, and **`/styleguid
 | `npm run build` | production build to `./dist/` |
 | `npm run preview` | serve the production build locally |
 | `npm run check` | the gate: type check + production build |
+| `npm run studio` | Sanity Studio (sibling `studio/` package) |
+| `npm run migrate:sanity` | one-shot import of local markdown + images into Sanity |
 | `npm run docs:build` | refresh the generated rule-link footers in `docs/` |
 | `npm run docs:check` | validate rule citations, ids and links |
 

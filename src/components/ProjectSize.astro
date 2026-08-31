@@ -1,0 +1,199 @@
+---
+/**
+ * ProjectSize
+ * Small / Medium / Large radiogroup for the project photograph column.
+ *
+ * Sets `data-size` on the closest `[data-project]` ancestor so the gallery
+ * can change column width. Preference persists in localStorage. Keyboard:
+ * arrows, Home, End (ARIA radio pattern). Reduced motion is owned by the
+ * gallery width transition, not this control.
+ *
+ * @prop label - Accessible name on the radiogroup. Default "Photograph size".
+ * @prop value - SSR default. JS overrides from localStorage. Default "large".
+ */
+export type PhotoSize = "small" | "medium" | "large";
+
+interface Props {
+  /** Accessible name for the radiogroup. */
+  label?: string;
+  /** SSR default; JS overrides from localStorage on the client. */
+  value?: PhotoSize;
+  class?: string;
+}
+
+const {
+  label = "Photograph size",
+  value = "large",
+  class: className,
+} = Astro.props;
+
+const sizes: { id: PhotoSize; label: string }[] = [
+  { id: "small", label: "Small" },
+  { id: "medium", label: "Medium" },
+  { id: "large", label: "Large" },
+];
+---
+
+<div
+  data-project-size
+  role="radiogroup"
+  aria-label={label}
+  class:list={["flex items-center gap-4", className]}
+>
+  {
+    sizes.map((size) => (
+      <button
+        type="button"
+        role="radio"
+        data-project-size-option={size.id}
+        aria-checked={size.id === value ? "true" : "false"}
+        tabindex={size.id === value ? 0 : -1}
+        class="min-h-11 text-body-md leading-none text-fg-muted transition-colors duration-default-quarter hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+      >
+        {size.label}
+      </button>
+    ))
+  }
+</div>
+
+<style>
+  [data-project-size-option][aria-checked="true"] {
+    color: var(--color-fg);
+  }
+</style>
+
+<script>
+  const initialized = new WeakSet<HTMLElement>();
+  const STORAGE_KEY = "ati-project-size";
+  const SIZES = ["small", "medium", "large"] as const;
+  type PhotoSize = (typeof SIZES)[number];
+
+  function isPhotoSize(value: string | null | undefined): value is PhotoSize {
+    return value === "small" || value === "medium" || value === "large";
+  }
+
+  function readStoredSize(): PhotoSize {
+    try {
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      if (isPhotoSize(stored)) return stored;
+    } catch {
+      /* private mode / blocked storage */
+    }
+    return "large";
+  }
+
+  function writeStoredSize(size: PhotoSize) {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, size);
+    } catch {
+      /* private mode / blocked storage */
+    }
+  }
+
+  function currentSize(group: HTMLElement): PhotoSize {
+    const root = group.closest<HTMLElement>("[data-project]");
+    const fromRoot = root?.dataset.size;
+    if (isPhotoSize(fromRoot)) return fromRoot;
+
+    const checked = group.querySelector<HTMLButtonElement>(
+      "[data-project-size-option][aria-checked='true']",
+    );
+    const fromButton = checked?.dataset.projectSizeOption;
+    return isPhotoSize(fromButton) ? fromButton : "large";
+  }
+
+  function applySize(group: HTMLElement, size: PhotoSize) {
+    const root = group.closest<HTMLElement>("[data-project]");
+    if (root) root.dataset.size = size;
+
+    group
+      .querySelectorAll<HTMLButtonElement>("[data-project-size-option]")
+      .forEach((button) => {
+        const selected = button.dataset.projectSizeOption === size;
+        button.setAttribute("aria-checked", selected ? "true" : "false");
+        button.tabIndex = selected ? 0 : -1;
+      });
+
+    group.dispatchEvent(
+      new CustomEvent("project:size", {
+        bubbles: true,
+        cancelable: true,
+        detail: { size },
+      }),
+    );
+  }
+
+  function initOne(group: HTMLElement) {
+    if (initialized.has(group)) return;
+    initialized.add(group);
+
+    const options = Array.from(
+      group.querySelectorAll<HTMLButtonElement>("[data-project-size-option]"),
+    );
+    if (options.length === 0) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    applySize(group, readStoredSize());
+
+    const select = (size: PhotoSize, moveFocus = false) => {
+      applySize(group, size);
+      writeStoredSize(size);
+      if (moveFocus) {
+        options
+          .find((button) => button.dataset.projectSizeOption === size)
+          ?.focus();
+      }
+    };
+
+    options.forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          const next = button.dataset.projectSizeOption;
+          if (isPhotoSize(next)) select(next);
+        },
+        { signal },
+      );
+    });
+
+    group.addEventListener(
+      "keydown",
+      (event) => {
+        const current = SIZES.indexOf(currentSize(group));
+        if (current < 0) return;
+
+        let next = current;
+        if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+          next = (current + 1) % SIZES.length;
+        } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+          next = (current - 1 + SIZES.length) % SIZES.length;
+        } else if (event.key === "Home") {
+          next = 0;
+        } else if (event.key === "End") {
+          next = SIZES.length - 1;
+        } else {
+          return;
+        }
+
+        event.preventDefault();
+        select(SIZES[next]!, true);
+      },
+      { signal },
+    );
+
+    group.addEventListener("project:destroy", () => controller.abort(), {
+      signal,
+    });
+  }
+
+  function initAll() {
+    document
+      .querySelectorAll<HTMLElement>("[data-project-size]")
+      .forEach((group) => initOne(group));
+  }
+
+  initAll();
+  document.addEventListener("astro:page-load", initAll);
+</script>

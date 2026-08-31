@@ -1,6 +1,6 @@
 ---
 title: ImageLoader
-description: Photo frame with the centered palm loading stage — fades out once the image is fully loaded.
+description: Photo frame with a secondary-color loading stage — fades out once the image is fully loaded.
 category: primitive
 order: 7
 sourceFile: src/components/ImageLoader.astro
@@ -11,19 +11,16 @@ related: [Loader, SectionProject]
 import Preview from "@components/_docs/Preview.astro";
 import PropsTable from "@components/_docs/PropsTable.astro";
 import ImageLoader from "@components/ImageLoader.astro";
-import palmUrl from "../../images/loader-palm.svg?url";
 import demo from "@images/feature-1.webp";
 
-Per-image loading stage from the Figma loader frame (`242:21`): a `bg-canvas` surface with the palm mark centered, covering the photograph until it finishes loading. Wired into project gallery slides via `SectionProject`; reuse anywhere an image needs the branded placeholder.
+Per-image loading stage: a `bg-secondary/80` surface covering the photograph until it finishes loading. The photo itself is an AVIF → WebP `<Picture>` at quality 70. Wired into project gallery slides via `SectionProject`; reuse anywhere an image needs the branded placeholder. Set `stage={false}` on the LCP image so the overlay does not hide it.
 
 ## Preview
 
-Static stage composition (matches the Figma frame):
+Static stage composition:
 
-<Preview label="Palm stage on canvas" align="center">
-  <div class="relative flex min-h-64 w-full max-w-md items-center justify-center bg-canvas text-fg">
-    <img src={palmUrl} alt="" width="54" height="84" class="block size-auto" />
-  </div>
+<Preview label="Secondary color stage" align="center">
+  <div class="relative min-h-64 w-full max-w-md bg-secondary/80" />
 </Preview>
 
 Live image with the stage (cached images dismiss immediately):
@@ -45,12 +42,14 @@ Live image with the stage (cached images dismiss immediately):
 <PropsTable props={[
   { name: "src", type: "ImageMetadata | string", required: true, description: "Imported asset (optimized) or a remote/CMS URL string." },
   { name: "alt", type: "string", required: true, description: "Accessible description. Pass \"\" only for decorative images." },
-  { name: "widths", type: "number[]", description: "Responsive srcset widths — ImageMetadata only." },
+  { name: "widths", type: "number[]", description: "Responsive srcset widths." },
   { name: "sizes", type: "string", description: "sizes attribute paired with widths." },
   { name: "loading", type: '"eager" | "lazy"', default: '"lazy"', description: "Native loading hint. Use eager + fetchpriority high for LCP." },
   { name: "fetchpriority", type: '"high" | "low" | "auto"', description: "Fetch priority for the LCP candidate." },
   { name: "decoding", type: '"async" | "sync" | "auto"', default: '"async"', description: "Native decoding hint." },
   { name: "preserveAspect", type: "boolean", default: "true", description: "Set aspect-ratio from ImageMetadata. False when a parent already sizes the frame." },
+  { name: "stage", type: "boolean", default: "true", description: "Secondary-color overlay while the photo decodes. Set false on the LCP image." },
+  { name: "placeholder", type: "string", description: "Sanity LQIP data URL painted under the photo." },
   { name: "class", type: "string", description: "Extra classes on the frame." },
   { name: "imgClass", type: "string", default: "absolute inset-0 size-full object-cover", description: "Extra classes on the img." },
 ]} />
@@ -86,7 +85,9 @@ import shot from "@images/project.jpg";
 
 ## Behavior
 
-- Stage uses `bg-canvas` / `text-fg` so themes invert correctly (Figma `#f2f2f2` maps to the canvas token).
-- Palm mark breathes while waiting; reduced-motion users get a static mark and an immediate reveal.
+- Emits AVIF then WebP via `OptimizedPicture` at quality 70.
+- Stage uses `bg-secondary/80` so the brand secondary swatch fills the frame at 80% opacity while the photo decodes.
+- Reduced-motion users skip the fade and reveal immediately.
 - Cached images (`img.complete`) skip the stage without waiting for a load event.
+- `stage={false}` skips the overlay so an LCP photograph can paint immediately. An optional `placeholder` LQIP still fills the frame.
 - Without JS, a `<noscript>` rule hides the stage so the photograph stays visible.

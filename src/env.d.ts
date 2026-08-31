@@ -1,5 +1,16 @@
 /// <reference types="astro/client" />
 
+interface ImportMetaEnv {
+  readonly PUBLIC_SANITY_PROJECT_ID: string;
+  readonly PUBLIC_SANITY_DATASET: string;
+  readonly SANITY_API_READ_TOKEN?: string;
+  readonly PUBLIC_GTAG_ID?: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
 import type { EmailMessage } from "cloudflare:email";
 
 interface SendEmailBinding {

@@ -24,4 +24,6 @@ export const site = {
   twitter: "",
   /** Public profiles for schema.org sameAs (optional). */
   sameAs: [] as string[],
+  /** Site footer copyright line. */
+  copyright: "Copyright 2004-{current_year} © Dudi Hasson",
 };

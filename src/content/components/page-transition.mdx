@@ -1,0 +1,36 @@
+---
+title: PageTransition
+description: Full-viewport fade overlay between same-origin navigations — no client router.
+category: layout
+order: 7
+sourceFile: src/components/PageTransition.astro
+status: stable
+related: [Layout, Loader]
+---
+
+import Preview from "@components/_docs/Preview.astro";
+import PropsTable from "@components/_docs/PropsTable.astro";
+
+A covering `div` that fades the canvas in and out when the visitor follows an internal link. Wired into `Layout` and `PlainLayout`. It does not enable Astro's client router — the next page still loads normally; the overlay just hides the swap.
+
+## Preview
+
+Static composition — the live overlay only runs on a full page load via `Layout`.
+
+<Preview label="Covering canvas" align="center">
+  <div class="min-h-48 w-full bg-canvas" aria-hidden="true"></div>
+</Preview>
+
+## Props
+
+<PropsTable props={[
+  { name: "class", type: "string", description: "Extra classes on the overlay root." },
+]} />
+
+## Behavior
+
+- Intercepts same-origin `<a>` clicks (capture phase), fades the overlay in, then assigns the new URL.
+- The destination page starts covered when arriving from a transition, then fades out.
+- Skips modifier-key clicks, new tabs, downloads, hashes, `mailto` / `tel`, and links marked `data-no-transition`.
+- `prefers-reduced-motion: reduce` skips the overlay and navigates immediately.
+- Without JS, a `<noscript>` rule hides the overlay so the page stays usable.

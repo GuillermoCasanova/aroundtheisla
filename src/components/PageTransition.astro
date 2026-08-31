@@ -1,0 +1,230 @@
+---
+/**
+ * PageTransition
+ * Full-viewport fade overlay between same-origin navigations.
+ *
+ * Does not use Astro's client router. Intercepts internal link clicks, fades
+ * this covering div in, then lets the browser load the next page. The
+ * destination starts covered (when arriving from a transition) and fades out.
+ *
+ * Opt a link out with `data-no-transition`. Reduced-motion skips the overlay
+ * and navigates immediately.
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+{
+  /* Runs before paint so an arriving transition is covered, and a normal
+     load never flashes the overlay. */
+}
+<script is:inline define:vars={{ sessionKey: "ati-page-transition" }}>
+  try {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduce && sessionStorage.getItem(sessionKey) === "1") {
+      document.documentElement.dataset.pageTransitionState = "covered";
+    }
+    sessionStorage.removeItem(sessionKey);
+  } catch {
+    /* private mode — skip the overlay */
+  }
+</script>
+
+<div
+  class:list={[
+    "page-transition pointer-events-none fixed inset-0 z-100 bg-canvas opacity-0",
+    className,
+  ]}
+  data-page-transition
+  aria-hidden="true"
+  inert
+></div>
+
+{/* Without JS the overlay would trap the page — hide it entirely. */}
+<noscript>
+  <style>
+    [data-page-transition] {
+      display: none !important;
+    }
+  </style>
+</noscript>
+
+<style is:global>
+  /* Namespaced under the html data attribute so it can't leak.
+     Higher specificity than the default opacity-0 utility so the first
+     paint of an arriving page is already covered. */
+  html[data-page-transition-state="covered"] [data-page-transition] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+</style>
+
+<style>
+  .page-transition {
+    transition: opacity var(--timing-default-half);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page-transition {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const SESSION_KEY = "ati-page-transition";
+  const initialized = new WeakSet<HTMLElement>();
+
+  function prefersReducedMotion(): boolean {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  function overlayDurationMs(): number {
+    const raw = getComputedStyle(document.documentElement)
+      .getPropertyValue("--duration-default-half")
+      .trim();
+    const seconds = Number.parseFloat(raw);
+    return Number.isFinite(seconds) ? seconds * 1000 : 400;
+  }
+
+  function isInternalNav(anchor: HTMLAnchorElement): boolean {
+    if (anchor.target && anchor.target !== "_self") return false;
+    if (anchor.hasAttribute("download")) return false;
+    if (anchor.dataset.noTransition !== undefined) return false;
+
+    const href = anchor.getAttribute("href");
+    if (!href || href.startsWith("#")) return false;
+    if (/^(mailto|tel|javascript):/i.test(href)) return false;
+
+    const url = new URL(anchor.href, window.location.href);
+    if (url.origin !== window.location.origin) return false;
+    if (url.pathname === window.location.pathname && url.search === window.location.search) {
+      return false;
+    }
+
+    return true;
+  }
+
+  function cover(): void {
+    document.documentElement.dataset.pageTransitionState = "covered";
+  }
+
+  function uncover(): void {
+    delete document.documentElement.dataset.pageTransitionState;
+  }
+
+  function initPageTransition() {
+    document.querySelectorAll<HTMLElement>("[data-page-transition]").forEach((root) => {
+      if (initialized.has(root)) return;
+      initialized.add(root);
+
+      const controller = new AbortController();
+      const { signal } = controller;
+      let leaving = false;
+
+      const waitForCover = (): Promise<void> =>
+        new Promise((resolve) => {
+          if (prefersReducedMotion()) {
+            resolve();
+            return;
+          }
+
+          let settled = false;
+          const finish = () => {
+            if (settled) return;
+            settled = true;
+            resolve();
+          };
+
+          root.addEventListener(
+            "transitionend",
+            (event: TransitionEvent) => {
+              if (event.target !== root || event.propertyName !== "opacity") return;
+              finish();
+            },
+            { signal },
+          );
+          window.setTimeout(finish, overlayDurationMs() + 50);
+        });
+
+      const reveal = () => {
+        if (document.documentElement.dataset.pageTransitionState !== "covered") return;
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            uncover();
+          });
+        });
+      };
+
+      const leaveTo = async (url: URL) => {
+        if (leaving) return;
+        leaving = true;
+
+        try {
+          sessionStorage.setItem(SESSION_KEY, "1");
+        } catch {
+          /* ignore */
+        }
+
+        cover();
+        await waitForCover();
+        window.location.assign(url.href);
+      };
+
+      document.addEventListener(
+        "click",
+        (event: MouseEvent) => {
+          if (event.defaultPrevented) return;
+          if (event.button !== 0) return;
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+          if (prefersReducedMotion()) return;
+
+          const target = event.target;
+          if (!(target instanceof Element)) return;
+
+          const anchor = target.closest("a");
+          if (!anchor || !isInternalNav(anchor)) return;
+
+          event.preventDefault();
+          void leaveTo(new URL(anchor.href, window.location.href));
+        },
+        { capture: true, signal },
+      );
+
+      window.addEventListener(
+        "pageshow",
+        (event: PageTransitionEvent) => {
+          if (!event.persisted) return;
+          leaving = false;
+          try {
+            sessionStorage.removeItem(SESSION_KEY);
+          } catch {
+            /* ignore */
+          }
+          uncover();
+        },
+        { signal },
+      );
+
+      window
+        .matchMedia("(prefers-reduced-motion: reduce)")
+        .addEventListener(
+          "change",
+          () => {
+            if (prefersReducedMotion()) uncover();
+          },
+          { signal },
+        );
+
+      reveal();
+
+      root.addEventListener("page-transition:destroy", () => controller.abort(), { signal });
+    });
+  }
+
+  initPageTransition();
+  document.addEventListener("astro:page-load", initPageTransition);
+</script>

@@ -11,16 +11,16 @@ related: [SectionMain, Loader]
 import Preview from "@components/_docs/Preview.astro";
 import PropsTable from "@components/_docs/PropsTable.astro";
 
-Pinned horizontal project strip from the Figma “left right slideshow” frame. Images come from the `src/images/homepage/` collection — add or remove files there and the strip updates on build.
+Pinned horizontal project strip from the Figma “left right slideshow” frame. Pass `slides` from the CMS page section (or any `{ image, href? }` list).
 
 ## Preview
 
-The live pin/scrub needs a full page scroll, so the showcase shows the static first frame. Open `/work` to feel the scroll-linked swipe.
+The live pin/scrub needs a full page scroll, so the showcase shows the static first frame.
 
-<Preview label="Static first frame (scroll behavior on /work)" align="stretch">
+<Preview label="Static first frame (scroll behavior on a page that includes this section)" align="stretch">
   <div class="relative h-80 w-full overflow-hidden bg-canvas">
     <p class="absolute inset-x-0 top-4 px-4 text-body-sm text-fg-muted">
-      SectionHomeSlideshow — preview is static; visit /work for the pinned scroll swipe.
+      SectionHomeSlideshow — preview is static; visit a page that includes this section for the pinned scroll swipe.
     </p>
   </div>
 </Preview>
@@ -28,13 +28,13 @@ The live pin/scrub needs a full page scroll, so the showcase shows the static fi
 ## Props
 
 <PropsTable props={[
+  { name: "slides", type: "SlideshowSlide[]", description: "Ordered photographs. Each item is an imported asset or CMS image, with an optional project href." },
   { name: "ariaLabel", type: "string", default: '"Project photographs"', description: "Accessible name for the section landmark." },
   { name: "class", type: "string", description: "Extra classes on the section root." },
 ]} />
 
 ## Behavior
 
-- Loads every image in `src/images/homepage/` via `import.meta.glob`, ordered to match the Figma frame first.
 - GSAP ScrollTrigger pins the viewport and scrubs the track `x` so images move **right → left** as the user scrolls down.
 - First image is the LCP candidate (`loading="eager"` + `fetchpriority="high"`).
 - `prefers-reduced-motion: reduce` skips the pin and falls back to native horizontal scroll-snap.

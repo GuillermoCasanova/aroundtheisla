@@ -1,0 +1,47 @@
+---
+title: SmoothScroll
+description: Site-wide Locomotive Scroll (v5 / Lenis) — smooth wheel, in-view detection, and optional parallax.
+category: layout
+order: 6
+sourceFile: src/components/SmoothScroll.astro
+status: stable
+related: [Layout]
+---
+
+Wired into `Layout` and `PlainLayout` on every page. Boots [Locomotive Scroll](https://scroll.locomotive.ca) v5, which smooths native document scroll via Lenis. No wrapper element is required.
+
+This component renders nothing. It is a client script: reduced-motion leaves native scroll alone, and the intro loader keeps the instance stopped until it leaves the tree.
+
+## Using it on a page
+
+Add `data-scroll` to any element you want Locomotive to observe. Speed is optional — omit it for in-view detection only.
+
+```html
+<h2 data-scroll data-scroll-speed="0.3">Headline</h2>
+```
+
+Common attributes:
+
+| Attribute | Effect |
+|---|---|
+| `data-scroll` | Observe this element |
+| `data-scroll-speed` | Parallax multiplier (auto-disabled on touch) |
+| `data-scroll-repeat` | Re-trigger when it leaves and re-enters |
+| `data-scroll-css-progress` | Expose progress as a CSS custom property |
+
+Programmatic scroll (skip links, in-page anchors) goes through Lenis when `anchors` is on — the skip-to-main link in `Layout` is covered.
+
+## Reduced motion
+
+`prefers-reduced-motion: reduce` skips initialization entirely. Native scroll, keyboard, and the OS scrollbar stay as they are. The instance is destroyed if the preference turns on mid-session, and created if it turns off.
+
+## From other scripts
+
+```ts
+import { getLocomotiveScroll } from "@/lib/smooth-scroll";
+
+const scroll = getLocomotiveScroll();
+scroll?.scrollTo("#main");
+```
+
+A bubbling, cancelable `scroll:ready` event fires once the instance exists, with the instance on `event.detail`.

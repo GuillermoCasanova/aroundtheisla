@@ -1,0 +1,131 @@
+/* ==========================================================================
+   FLUID TYPOGRAPHY
+   Each heading and body size is an independent clamp() so the design
+   system can tune them individually. The formula is linear interpolation
+   between two rem anchors driven by `cqi` (1cqi = 1% of the nearest query
+   container's inline size).
+
+   For anchors (20rem → MIN) and (90rem → MAX):
+     slope      = (MAX - MIN) / 70
+     intercept  = MIN - slope * 20
+     font-size  = clamp(MIN, intercept*1rem + slope*100cqi, MAX)
+
+   Values below are pre-computed for readability. To retune a size, change
+   its MIN/MAX and recompute intercept + slope*100.
+   ========================================================================== */
+
+/* ----- Display: 2rem → 3.5rem ----- */
+@utility text-display {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.14;
+  letter-spacing: -0.027em;
+  font-size: clamp(2rem, 1.5714rem + 2.1429cqi, 3.5rem);
+  text-wrap: balance;
+}
+
+/* ----- Heading 1: 2.5rem → 4rem ----- */
+@utility h1 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-size: clamp(2.5rem, 2.0714rem + 2.1429cqi, 4rem);
+  text-wrap: balance;
+}
+
+/* ----- Heading 2: 2rem → 3.25rem ----- */
+@utility h2 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.012em;
+  font-size: clamp(2rem, 1.6429rem + 1.7857cqi, 3.25rem);
+  text-wrap: balance;
+}
+
+/* ----- Heading 3: 1.75rem → 2.5rem ----- */
+@utility h3 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: 1.28;
+  font-size: clamp(1.75rem, 1.5357rem + 1.0714cqi, 2.5rem);
+  text-wrap: balance;
+}
+
+/* ----- Heading 4: 1.25rem → 1.5rem ----- */
+@utility h4 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: 1.4;
+  font-size: clamp(1.25rem, 1.1786rem + 0.3571cqi, 1.5rem);
+}
+
+/* Compact heading step for existing consumers (not in the Figma ramp). */
+@utility h5 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: 1.4;
+  font-size: clamp(1.125rem, 1.0893rem + 0.1786cqi, 1.25rem);
+}
+
+@utility h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: 1.45;
+  font-size: clamp(1rem, 0.9643rem + 0.1786cqi, 1.125rem);
+}
+
+/* ----- Body Large: 1rem → 1.125rem — lead / intro ----- */
+@utility text-body-xl {
+  font-size: clamp(1rem, 0.9643rem + 0.1786cqi, 1.125rem);
+  line-height: 1.56;
+}
+
+/* ----- Body: 0.9375rem → 1rem — default reading size ----- */
+@utility text-body-lg {
+  font-size: clamp(0.9375rem, 0.9196rem + 0.0893cqi, 1rem);
+  line-height: 1.5;
+}
+
+/* ----- Body Small: 0.8125rem → 0.875rem — secondary / compact ----- */
+@utility text-body-md {
+  font-size: clamp(0.8125rem, 0.7946rem + 0.0893cqi, 0.875rem);
+  line-height: 1.43;
+}
+
+/* Caption step between Body Small and Overline (existing consumers). */
+@utility text-body-sm {
+  font-size: clamp(0.75rem, 0.7321rem + 0.0893cqi, 0.8125rem);
+  line-height: 1.45;
+}
+
+/* ----- Overline size, no case transform — list meta, micro labels ----- */
+@utility text-body-xsm {
+  font-size: 0.6875rem;
+  line-height: 1.45;
+}
+
+/* ----- Body Tiny: 0.5rem ----- */
+@utility text-body-tiny {
+  font-size: 0.5rem;
+  line-height: 1.25;
+}
+
+/* ----- Overline: 0.6875rem — uppercase labels ----- */
+@utility text-overline {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  letter-spacing: 0.136em;
+  text-transform: uppercase;
+}
+
+
+/* ----- Re-anchor fluid type to a smaller context (cards, sidebars, modals).
+         Drop `cq` onto any element and its descendants' `cqi`-based sizes
+         will resolve against THIS element instead of <body>. ----- */
+@utility cq {
+  container-type: inline-size;
+}

@@ -1,0 +1,79 @@
+---
+/**
+ * OptimizedPicture
+ * AVIF → WebP responsive photograph. Shared so every CMS and imported
+ * photo uses the same formats and quality instead of a one-off <Image>.
+ */
+import type { ImageMetadata } from "astro";
+import { Picture } from "astro:assets";
+
+interface Props {
+  src: ImageMetadata | string;
+  alt: string;
+  /** Required when `src` is a remote URL so Sharp can transcode at build. */
+  width?: number;
+  height?: number;
+  widths?: number[];
+  sizes?: string;
+  loading?: "eager" | "lazy";
+  fetchpriority?: "high" | "low" | "auto";
+  decoding?: "async" | "sync" | "auto";
+  quality?: number;
+  class?: string;
+  /** Forwarded to the inner <img> so ImageLoader can bind load listeners. */
+  "data-image-loader-img"?: boolean | "";
+}
+
+const {
+  src,
+  alt,
+  width,
+  height,
+  widths,
+  sizes,
+  loading = "lazy",
+  fetchpriority,
+  decoding = "async",
+  quality = 70,
+  class: className,
+  "data-image-loader-img": dataImageLoaderImg,
+} = Astro.props;
+
+const isAsset = typeof src !== "string";
+---
+
+{
+  isAsset ? (
+    <Picture
+      src={src}
+      alt={alt}
+      class={className}
+      widths={widths}
+      sizes={sizes}
+      formats={["avif", "webp"]}
+      fallbackFormat="webp"
+      quality={quality}
+      loading={loading}
+      fetchpriority={fetchpriority}
+      decoding={decoding}
+      data-image-loader-img={dataImageLoaderImg}
+    />
+  ) : (
+    <Picture
+      src={src}
+      alt={alt}
+      width={width ?? 1600}
+      height={height ?? 1200}
+      class={className}
+      widths={widths}
+      sizes={sizes}
+      formats={["avif", "webp"]}
+      fallbackFormat="webp"
+      quality={quality}
+      loading={loading}
+      fetchpriority={fetchpriority}
+      decoding={decoding}
+      data-image-loader-img={dataImageLoaderImg}
+    />
+  )
+}

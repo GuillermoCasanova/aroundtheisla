@@ -74,6 +74,14 @@ export default defineConfig({
   // sitemap.
   site: site.url,
   output: 'static',
+  image: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.sanity.io',
+      },
+    ],
+  },
   // Astro 7 defaults compressHTML to 'jsx' (JSX-style whitespace stripping).
   // Keep the v6 HTML-aware behavior so inline spacing doesn't shift.
   compressHTML: true,

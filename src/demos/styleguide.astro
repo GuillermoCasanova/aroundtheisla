@@ -5,7 +5,7 @@ import Button from "../components/Button.astro";
 
 // ──────────────────────────────────────────────────────────────────────────
 // Token reference data — kept inline so the styleguide is a single file and
-// can be skimmed alongside `src/styles/global.css`.
+// can be skimmed alongside `src/styles/global.css` and `src/styles/typography.css`.
 // ──────────────────────────────────────────────────────────────────────────
 
 const semanticColors = [
@@ -16,6 +16,8 @@ const semanticColors = [
   { name: "fg-muted",     var: "--color-fg-muted",     role: "Captions, labels, secondary copy" },
   { name: "fg-subtle",    var: "--color-fg-subtle",    role: "Placeholders, disabled" },
   { name: "fg-on-intent", var: "--color-fg-on-intent", role: "Text on intent-colored surfaces" },
+  { name: "primary",      var: "--color-primary",      role: "Brand primary — Figma Colors swatch" },
+  { name: "secondary",    var: "--color-secondary",    role: "Brand secondary — project descriptions" },
   { name: "intent",       var: "--color-intent",       role: "Primary action color" },
   { name: "intent-hover", var: "--color-intent-hover", role: "Hover state for intent" },
   { name: "stroke",       var: "--color-stroke",       role: "Default border" },
@@ -32,20 +34,23 @@ const themeModes = [
 ];
 
 const typeScale = [
-  { class: "h1", desc: "44 → 84px",  example: "The quick brown fox" },
-  { class: "h2", desc: "32 → 56px",  example: "The quick brown fox" },
-  { class: "h3", desc: "24 → 36px",  example: "The quick brown fox" },
-  { class: "h4", desc: "20 → 28px",  example: "The quick brown fox" },
-  { class: "h5", desc: "18 → 22px",  example: "The quick brown fox" },
-  { class: "h6", desc: "16 → 18px",  example: "The quick brown fox" },
+  { class: "text-display", desc: "Display · 2 → 3.5rem · bold", example: "The quick brown fox" },
+  { class: "h1", desc: "Heading 1 · 2.5 → 4rem · bold", example: "The quick brown fox" },
+  { class: "h2", desc: "Heading 2 · 2 → 3.25rem · semibold", example: "The quick brown fox" },
+  { class: "h3", desc: "Heading 3 · 1.75 → 2.5rem · semibold", example: "The quick brown fox" },
+  { class: "h4", desc: "Heading 4 · 1.25 → 1.5rem · semibold", example: "The quick brown fox" },
+  { class: "h5", desc: "Compact heading · 1.125 → 1.25rem", example: "The quick brown fox" },
+  { class: "h6", desc: "Compact heading · 1 → 1.125rem", example: "The quick brown fox" },
 ];
 
 const bodyScale = [
-  { class: "text-body-xl",  desc: "16 → 20px — hero subhead, lead paragraphs", example: "Body XL — for hero subheads and standout copy that should breathe." },
-  { class: "text-body-lg",  desc: "15 → 18px — default body",                 example: "Body LG — the default body size for most prose content." },
-  { class: "text-body-md",  desc: "14 → 16px — secondary body, cards",        example: "Body MD — secondary body, denser card text." },
-  { class: "text-body-sm",  desc: "13 → 15px — captions, labels",             example: "Body SM — captions and labels." },
-  { class: "text-body-xsm", desc: "12px — micro-labels (not fluid)",          example: "Body XSM — micro labels and uppercase tracking-wider treatments." },
+  { class: "text-body-xl", desc: "Body Large · 1 → 1.125rem — lead / intro", example: "Body Large — introductory paragraphs and emphasized blocks." },
+  { class: "text-body-lg", desc: "Body · 0.9375 → 1rem — default reading size", example: "Body — the default size for paragraphs and general content." },
+  { class: "text-body-md", desc: "Body Small · 0.8125 → 0.875rem — secondary / compact", example: "Body Small — secondary text, supporting descriptions, compact layouts." },
+  { class: "text-body-sm", desc: "Caption · 0.75 → 0.8125rem", example: "Caption — labels and supporting notes." },
+  { class: "text-body-xsm", desc: "Micro · 0.6875rem", example: "Micro — list meta and compact labels." },
+  { class: "text-body-tiny", desc: "Body Tiny · 0.5rem", example: "Body Tiny — the smallest reading size." },
+  { class: "text-overline", desc: "Overline · 0.6875rem · semibold · uppercase", example: "Overline label" },
 ];
 
 const sectionPaddings = [
@@ -189,7 +194,7 @@ const motionEasings = [
       <h3 class="h5 mt-8 mb-4">Headings</h3>
       <ul class="flex flex-col">
         {typeScale.map((t) => (
-          <li class="grid grid-cols-[5rem_1fr_auto_auto] items-baseline gap-4 py-4 border-t border-stroke">
+          <li class="grid grid-cols-[7.5rem_1fr_auto_auto] items-baseline gap-4 py-4 border-t border-stroke">
             <code class="font-mono text-xs text-fg-subtle">{t.class}</code>
             <span class={t.class} data-resolve-font-size>{t.example}</span>
             <code class="font-mono text-xs text-fg-subtle whitespace-nowrap" data-resolve-font-size-target>…</code>
@@ -201,7 +206,7 @@ const motionEasings = [
       <h3 class="h5 mt-12 mb-4">Body</h3>
       <ul class="flex flex-col">
         {bodyScale.map((t) => (
-          <li class="grid grid-cols-[8rem_1fr_auto_auto] items-baseline gap-4 py-4 border-t border-stroke">
+          <li class="grid grid-cols-[9.5rem_1fr_auto_auto] items-baseline gap-4 py-4 border-t border-stroke">
             <code class="font-mono text-xs text-fg-subtle">{t.class}</code>
             <span class={t.class} data-resolve-font-size>{t.example}</span>
             <code class="font-mono text-xs text-fg-subtle whitespace-nowrap" data-resolve-font-size-target>…</code>
@@ -214,12 +219,12 @@ const motionEasings = [
       <ul class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <li class="border border-stroke bg-canvas p-5">
           <code class="font-mono text-xs text-fg-subtle">--font-heading</code>
-          <p class="mt-2 h4">Archivo</p>
-          <p class="text-xs text-fg-muted mt-2">Used by .h1–.h6 utilities for headings.</p>
+          <p class="mt-2 h4">Zalando Sans</p>
+          <p class="text-xs text-fg-muted mt-2">Used by .text-display and .h1–.h6.</p>
         </li>
         <li class="border border-stroke bg-canvas p-5">
           <code class="font-mono text-xs text-fg-subtle">--font-sans</code>
-          <p class="mt-2 text-base font-sans">Inter (default body)</p>
+          <p class="mt-2 text-base font-sans">Zalando Sans (default body)</p>
           <p class="text-xs text-fg-muted mt-2">System fallback chain for body copy.</p>
         </li>
         <li class="border border-stroke bg-canvas p-5">

@@ -21,7 +21,9 @@
     ".wrangler/**",
     "package-lock.json",
     "public/**",
-    "src/env.d.ts"
+    "src/env.d.ts",
+    "studio/node_modules/**",
+    "studio/dist/**"
   ],
   "ignoreRegExpList": [
     "/^import\\s.+$/gm",
@@ -36,6 +38,7 @@
   "words": [
     "affordances",
     "aroundtheisla",
+    "artboard",
     "applebot",
     "bento",
     "browsable",
@@ -45,6 +48,7 @@
     "dictionaried",
     "Didiel",
     "didielo",
+    "Dudi",
     "footgun",
     "huetone",
     "inlines",
@@ -72,6 +76,7 @@
     "wcag",
     "webflow",
     "archivo",
+    "Zalando",
     "astro",
     "astrojs",
     "choreographies",
@@ -91,6 +96,7 @@
     "González",
     "grainient",
     "gsap",
+    "Hasson",
     "Lajas",
     "gtag",
     "hbspt",
@@ -122,6 +128,18 @@
     "uppercased",
     "wordmark",
     "workerd",
-    "wrangler"
+    "wrangler",
+    "groq",
+    "hotspot",
+    "portabletext",
+    "sanity",
+    "sctn",
+    "lede",
+    "lerp",
+    "lenis",
+    "locomotive",
+    "lqip",
+    "stega",
+    "focusables"
   ]
 }

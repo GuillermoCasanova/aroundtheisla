@@ -1,5 +1,15 @@
 import { defineCollection, z } from "astro:content";
 import { glob } from "astro/loaders";
+import { fetchPageEntries, fetchProjectEntries } from "./lib/sanity";
+
+const cmsImage = z.object({
+  src: z.string(),
+  alt: z.string(),
+  width: z.number(),
+  height: z.number(),
+  caption: z.string().optional(),
+  lqip: z.string().optional(),
+});
 
 const faq = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "./src/content/faq" }),
@@ -22,28 +32,41 @@ const announcements = defineCollection({
   }),
 });
 
-// Photography projects — markdown today, CMS later. The route is
-// `/project/[slug]`; gallery stills live at `src/images/galleries/{slug}/`.
 const projects = defineCollection({
-  loader: glob({ pattern: "**/*.md", base: "./src/content/projects" }),
-  schema: ({ image }) =>
-    z.object({
-      title: z.string(),
-      description: z.string(),
-      cover: image(),
-      date: z.coerce.date(),
-      location: z.string().optional(),
-      draft: z.boolean().default(false),
-      order: z.number().default(100),
-      /** Filenames in `src/images/homepage/` that should link to this project. */
-      homepageSlides: z.array(z.string()).default([]),
-    }),
+  loader: async () => fetchProjectEntries(),
+  schema: z.object({
+    title: z.string(),
+    seoTitle: z.string().optional(),
+    seoDescription: z.string().optional(),
+    seoImage: cmsImage.optional(),
+    description: z.string(),
+    credits: z.string().optional(),
+    date: z.coerce.date(),
+    location: z.string().optional(),
+    order: z.number().default(100),
+    cover: cmsImage,
+    gallery: z.array(cmsImage),
+  }),
 });
 
-// Components showcase — each MDX file documents one component, frontmatter
-// drives the index page and routing. The body is rendered as the detail page
-// content (props tables, mechanism, gotchas). MDX (vs plain MD) is what lets
-// docs `import` and render live previews of the component itself.
+const pages = defineCollection({
+  loader: async () => fetchPageEntries(),
+  schema: z.object({
+    title: z.string(),
+    seoTitle: z.string().optional(),
+    seoDescription: z.string().optional(),
+    seoImage: cmsImage.optional(),
+    theme: z.enum(["light", "dark"]),
+    layout: z.enum(["site", "plain"]),
+    lang: z.string(),
+    showInNav: z.boolean(),
+    navOrder: z.number(),
+    hideFooter: z.boolean(),
+    heroImages: z.array(cmsImage).max(5).default([]),
+    sections: z.array(z.unknown()),
+  }),
+});
+
 const components = defineCollection({
   loader: glob({ pattern: "**/*.mdx", base: "./src/content/components" }),
   schema: z.object({
@@ -57,4 +80,4 @@ const components = defineCollection({
   }),
 });
 
-export const collections = { faq, announcements, projects, components };
+export const collections = { faq, announcements, projects, pages, components };
