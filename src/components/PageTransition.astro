@@ -13,8 +13,8 @@
  * not into the source page's black.
  *
  * Links marked `data-page-transition-kind="palm"` fade to the light canvas,
- * reveal the centered palm mark, navigate under that cover, then fade the
- * whole overlay out once the destination is ready.
+ * reveal the centered palm mark, fade the mark out on white, navigate under
+ * that cover, then fade the overlay out once the destination is ready.
  *
  * Opt a link out with `data-no-transition`. Reduced-motion skips the overlay
  * and navigates immediately.
@@ -90,6 +90,7 @@ const { class: className } = Astro.props;
     aspect-ratio: 109 / 149;
     opacity: 0;
     color: var(--color-fg);
+    transition: opacity var(--timing-default-quarter);
   }
 
   .page-transition__mark :global(svg) {
@@ -100,7 +101,6 @@ const { class: className } = Astro.props;
 
   :global(html[data-page-transition-kind="palm"]) .page-transition__mark {
     opacity: 1;
-    transition: opacity var(--timing-default-quarter);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -197,6 +197,10 @@ const { class: className } = Astro.props;
     document.documentElement.dataset.pageTransitionKind = "palm";
   }
 
+  function hidePalm(): void {
+    delete document.documentElement.dataset.pageTransitionKind;
+  }
+
   function uncover(root: HTMLElement): void {
     delete document.documentElement.dataset.pageTransitionState;
     delete document.documentElement.dataset.pageTransitionKind;
@@ -215,7 +219,6 @@ const { class: className } = Astro.props;
       const finish = () => {
         if (settled) return;
         settled = true;
-        delete document.documentElement.dataset.pageTransitionKind;
         resolve();
       };
 
@@ -458,9 +461,11 @@ const { class: className } = Astro.props;
           showPalm();
           await waitForMark();
           await waitMs(palmHoldMs(), signal);
+          hidePalm();
+          await waitForMark();
         }
 
-        persistTransition(kind);
+        persistTransition("cover");
         paintLightChrome();
         void document.documentElement.offsetHeight;
         await nextPaint();
