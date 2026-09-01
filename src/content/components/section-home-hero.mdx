@@ -1,6 +1,6 @@
 ---
 title: SectionHomeHero
-description: Homepage frame — one photograph picked at random from the Sanity hero set (up to 5) on each landing.
+description: Homepage frame — one photograph pair picked at random from the Sanity hero set (up to 5) on each landing. Desktop and mobile crops are art-directed.
 category: pattern
 order: 10
 sourceFile: src/components/SectionHomeHero.astro
@@ -10,17 +10,17 @@ related: [HeroBanner, SectionHomeSlideshow, NavInline]
 
 import PropsTable from "@components/_docs/PropsTable.astro";
 
-Figma Home (`222:21`): a white canvas and one photograph, centered. The shot is chosen at random from the homepage's Sanity hero photographs (up to 5) whenever the page loads. Brand + menu stay in `NavInline`.
+Figma Home (`222:21`): a white canvas and one photograph, centered. The shot is chosen at random from the homepage's Sanity hero photographs (up to 5) whenever the page loads. Each shot has a wide desktop crop and a taller mobile crop; a `<picture>` element serves one file. Brand + menu stay in `NavInline`.
 
 ## Props
 
 <PropsTable props={[
-  { name: "images", type: "CmsImage[]", required: true, description: "Hero photographs from Sanity. One is shown at random." },
+  { name: "images", type: "CmsHeroShot[]", required: true, description: "Hero photograph pairs from Sanity (`desktop` + `mobile`). One pair is shown at random." },
   { name: "class", type: "string", description: "Extra classes on the section root." },
 ]} />
 
 ## Layout
 
 - Full-viewport on purpose — does not wrap `SectionMain`, so the crop matches the edge-to-edge Figma composition.
-- Images are authored on the Home document in Studio (`Hero photographs`).
+- Images are authored on the Home document in Studio (`Hero photographs`) as desktop + mobile pairs. The desktop crop is used from 768px up.
 - Without JavaScript the first photograph is shown.

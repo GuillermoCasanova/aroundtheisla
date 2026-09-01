@@ -1,4 +1,5 @@
 import { altImage } from "./objects/altImage";
+import { heroShot } from "./objects/heroShot";
 import { seo } from "./objects/seo";
 import { navLink } from "./objects/navLink";
 import { navigationItem } from "./objects/navigationItem";
@@ -17,6 +18,7 @@ import { footerSettings } from "./documents/footerSettings";
 
 export const schemaTypes = [
   altImage,
+  heroShot,
   seo,
   navLink,
   navigationItem,

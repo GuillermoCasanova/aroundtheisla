@@ -3,7 +3,7 @@
  * SectionWork
  * Work index — Figma Projects Grid (268:92) and List (268:235).
  * Two tabpanels: a vertically scrolling 2-column grid (including
- * mobile), and a numbered name list. Desktop (lg+) uses h2-size
+ * mobile), and a numbered name list. Desktop (lg+) uses h3-size
  * titles and a large sticky cover that swaps on hover/focus.
  * Tablet and mobile stay names-only.
  * Full-bleed by design (no SectionMain).
@@ -65,7 +65,7 @@ function coverAlt(item: WorkItem) {
         tabindex="0"
         class:list={[tabClass, "font-bold"]}
       >
-        Grid
+        grid
       </button>
       <button
         type="button"
@@ -77,7 +77,7 @@ function coverAlt(item: WorkItem) {
         tabindex="-1"
         class:list={[tabClass, "font-normal"]}
       >
-        List
+        list
       </button>
     </div>
   </header>
@@ -116,7 +116,7 @@ function coverAlt(item: WorkItem) {
                 />
               </div>
               <div class="flex items-baseline justify-between gap-3">
-                <span class="min-w-0 truncate text-body-md font-bold text-fg">
+                <span class="min-w-0 truncate text-body-md font-bold lowercase text-fg">
                   {item.title}
                 </span>
               </div>
@@ -144,7 +144,7 @@ function coverAlt(item: WorkItem) {
               data-work-index={i}
               data-active="false"
               aria-label={item.title}
-              class="inline-flex min-h-11 min-w-0 items-baseline gap-2 text-body-md font-normal text-fg outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas lg:flex lg:min-h-0 lg:h2 lg:font-normal"
+              class="inline-flex min-h-11 min-w-0 items-baseline gap-2 text-body-md font-normal lowercase text-fg outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas lg:flex lg:min-h-0 lg:h3 lg:font-normal"
             >
               <span aria-hidden="true" class="lg:hidden">
                 {padIndex(i)}.
@@ -257,7 +257,7 @@ function coverAlt(item: WorkItem) {
     flex-direction: column;
   }
 
-  /* `lg:h2` supplies size; keep names regular against that utility's 600. */
+  /* `lg:h3` supplies size; keep names regular against that utility's 600. */
   [data-work-name] {
     font-weight: 400;
   }

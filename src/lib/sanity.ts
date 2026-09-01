@@ -1,6 +1,6 @@
 import { createClient, type SanityClient } from "@sanity/client";
 import { createImageUrlBuilder } from "@sanity/image-url";
-import type { CmsImage } from "./cms-image";
+import type { CmsHeroShot, CmsImage } from "./cms-image";
 
 const projectId = import.meta.env.PUBLIC_SANITY_PROJECT_ID;
 const dataset = import.meta.env.PUBLIC_SANITY_DATASET || "production";
@@ -66,6 +66,19 @@ function requireImage(image: SanityAssetImage, label: string): CmsImage {
     throw new Error(`Sanity image missing or incomplete: ${label}`);
   }
   return mapped;
+}
+
+type RawHeroShot = {
+  desktop?: SanityAssetImage;
+  mobile?: SanityAssetImage;
+} & Exclude<SanityAssetImage, null | undefined>;
+
+function mapHeroShot(shot: RawHeroShot | null | undefined): CmsHeroShot | null {
+  if (!shot) return null;
+  const desktop = toCmsImage(shot.desktop) ?? toCmsImage(shot);
+  if (!desktop) return null;
+  const mobile = toCmsImage(shot.mobile) ?? desktop;
+  return { desktop, mobile };
 }
 
 /** GROQ returns null for empty fields; Zod optional() only accepts undefined. */
@@ -232,7 +245,7 @@ export type PageEntry = {
   showInNav: boolean;
   navOrder: number;
   hideFooter: boolean;
-  heroImages: CmsImage[];
+  heroImages: CmsHeroShot[];
   sections: PageSection[];
 };
 
@@ -246,7 +259,7 @@ type RawPage = {
   showInNav?: boolean;
   navOrder?: number;
   hideFooter?: boolean;
-  heroImages?: SanityAssetImage[];
+  heroImages?: RawHeroShot[];
   sections?: Record<string, unknown>[];
 };
 
@@ -334,7 +347,18 @@ export async function fetchPageEntries(): Promise<PageEntry[]> {
       showInNav,
       navOrder,
       hideFooter,
-      heroImages[] ${imageProjection},
+      heroImages[] {
+        _key,
+        _type,
+        alt,
+        caption,
+        asset->{
+          url,
+          metadata { dimensions { width, height }, lqip }
+        },
+        desktop ${imageProjection},
+        mobile ${imageProjection}
+      },
       sections[] {
         _type,
         _type == "sctnHero" => {
@@ -384,8 +408,8 @@ export async function fetchPageEntries(): Promise<PageEntry[]> {
     navOrder: row.navOrder ?? 100,
     hideFooter: row.hideFooter ?? row.id === "home",
     heroImages: (row.heroImages ?? [])
-      .map((image) => toCmsImage(image))
-      .filter((image): image is CmsImage => image !== null),
+      .map((shot) => mapHeroShot(shot))
+      .filter((shot): shot is CmsHeroShot => shot !== null),
     sections: (row.sections ?? [])
       .map((section) => mapSection(section, projects))
       .filter((section): section is PageSection => section !== null),

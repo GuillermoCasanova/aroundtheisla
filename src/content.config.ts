@@ -62,7 +62,15 @@ const pages = defineCollection({
     showInNav: z.boolean(),
     navOrder: z.number(),
     hideFooter: z.boolean(),
-    heroImages: z.array(cmsImage).max(5).default([]),
+    heroImages: z
+      .array(
+        z.object({
+          desktop: cmsImage,
+          mobile: cmsImage,
+        }),
+      )
+      .max(5)
+      .default([]),
     sections: z.array(z.unknown()),
   }),
 });

@@ -12,6 +12,12 @@ export type CmsImage = {
   lqip?: string;
 };
 
+/** Homepage hero pair — wide desktop crop + taller mobile crop. */
+export type CmsHeroShot = {
+  desktop: CmsImage;
+  mobile: CmsImage;
+};
+
 const SANITY_CDN_HOST = "cdn.sanity.io";
 const DEFAULT_QUALITY = 70;
 const DEFAULT_WIDTHS = [640, 960, 1280, 1600, 2000];

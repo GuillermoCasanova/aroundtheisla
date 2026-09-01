@@ -1,18 +1,19 @@
 ---
 /**
  * SectionHomeHero
- * Full-bleed homepage photograph. Picks one of the Sanity hero images at
+ * Full-bleed homepage photograph. Picks one of the Sanity hero shots at
  * random on each landing so the frame changes whenever someone arrives.
+ * Each shot is an art-directed pair: taller crop below 768px, wide crop above.
  * The whole frame is a stretched link to /work.
  *
  * Full-viewport composition (no SectionMain): the frame is an edge-to-edge
  * crop, not a column with side rules.
  */
 import OptimizedPicture from "@components/OptimizedPicture.astro";
-import type { CmsImage } from "../lib/cms-image";
+import type { CmsHeroShot } from "../lib/cms-image";
 
 interface Props {
-  images: CmsImage[];
+  images: CmsHeroShot[];
   class?: string;
 }
 
@@ -35,17 +36,20 @@ const { images, class: className } = Astro.props;
   ]}
 >
   {
-    images.map((image) => (
+    images.map((shot) => (
       <div
         data-home-hero-shot
         hidden
         class="absolute inset-0"
       >
         <OptimizedPicture
-          src={image.src}
-          alt={image.alt}
-          width={image.width}
-          height={image.height}
+          src={shot.desktop.src}
+          srcMobile={shot.mobile.src}
+          alt={shot.desktop.alt || shot.mobile.alt}
+          width={shot.desktop.width}
+          height={shot.desktop.height}
+          widthMobile={shot.mobile.width}
+          heightMobile={shot.mobile.height}
           class="absolute inset-0 size-full object-cover object-center"
           widths={[640, 960, 1280, 1600, 1920]}
           sizes="100vw"

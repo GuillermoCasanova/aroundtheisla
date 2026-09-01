@@ -22,11 +22,6 @@ export const siteSettings = defineType({
         Rule.required().uri({ scheme: ["https", "http"] }),
     }),
     defineField({
-      name: "seo",
-      type: "seo",
-      title: "Site SEO",
-    }),
-    defineField({
       name: "mainNav",
       type: "reference",
       title: "Main navigation",

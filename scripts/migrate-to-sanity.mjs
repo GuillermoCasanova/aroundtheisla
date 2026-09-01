@@ -192,7 +192,14 @@ async function migratePages() {
     showInNav: false,
     navOrder: 0,
     hideFooter: true,
-    heroImages: [{ ...hero, _key: "hero001" }],
+    heroImages: [
+      {
+        _type: "heroShot",
+        _key: "hero001",
+        desktop: hero,
+        mobile: hero,
+      },
+    ],
     sections: [
       {
         _type: "sctnHero",

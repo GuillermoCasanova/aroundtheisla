@@ -18,7 +18,7 @@ const image = page.data.seoImage?.src;
 const heroImages = page.data.heroImages ?? [];
 if (heroImages.length === 0) {
   throw new Error(
-    "Sanity home page is missing hero photographs. Add 1–5 images in Studio under Home → Hero photographs.",
+    "Sanity home page is missing hero photographs. Add 1–5 desktop + mobile pairs in Studio under Home → Hero photographs.",
   );
 }
 ---

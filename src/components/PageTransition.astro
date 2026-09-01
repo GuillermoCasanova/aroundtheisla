@@ -7,6 +7,10 @@
  * this covering div in, then lets the browser load the next page. The
  * destination starts covered (when arriving from a transition) and fades out.
  *
+ * Overlay is a light-theme island (`data-theme="light"`) so `bg-canvas` is
+ * always the interior canvas — leaving the dark homepage fades into light,
+ * not into the source page's black.
+ *
  * Opt a link out with `data-no-transition`. Reduced-motion skips the overlay
  * and navigates immediately.
  */
@@ -39,6 +43,7 @@ const { class: className } = Astro.props;
     className,
   ]}
   data-page-transition
+  data-theme="light"
   aria-hidden="true"
   inert
 ></div>

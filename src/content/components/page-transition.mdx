@@ -30,6 +30,7 @@ Static composition — the live overlay only runs on a full page load via `Layou
 ## Behavior
 
 - Intercepts same-origin `<a>` clicks (capture phase), fades the overlay in, then assigns the new URL.
+- Overlay is pinned to `data-theme="light"` so the fade is always the interior canvas, even when leaving a dark page.
 - The destination page starts covered when arriving from a transition, then fades out.
 - Skips modifier-key clicks, new tabs, downloads, hashes, `mailto` / `tel`, and links marked `data-no-transition`.
 - `prefers-reduced-motion: reduce` skips the overlay and navigates immediately.

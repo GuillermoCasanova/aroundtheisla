@@ -98,13 +98,13 @@ export const page = defineType({
       type: "array",
       title: "Hero photographs",
       description:
-        "Homepage only. Up to 5 photographs; the hero picks one at random on each visit.",
+        "Homepage only. Up to 5 shots; the hero picks one at random on each visit. Each shot needs a desktop (wide) crop and a mobile (taller) crop.",
       hidden: ({ document }) => {
         const slug = (document?.slug as { current?: string } | undefined)
           ?.current;
         return slug !== "home";
       },
-      of: [defineArrayMember({ type: "altImage" })],
+      of: [defineArrayMember({ type: "heroShot" })],
       options: { layout: "grid" },
       validation: (Rule) =>
         Rule.max(5).custom((images, context) => {
