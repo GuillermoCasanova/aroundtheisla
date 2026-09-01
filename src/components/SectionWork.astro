@@ -30,7 +30,7 @@ interface Props {
 const { projects: items, class: className } = Astro.props;
 
 const tabClass =
-  "cursor-pointer text-body-md text-fg outline-none hover:underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas";
+  "cursor-pointer text-body-md text-fg outline-none hover:underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas";
 
 function padIndex(index: number) {
   return String(index + 1).padStart(2, "0");
@@ -144,7 +144,7 @@ function coverAlt(item: WorkItem) {
               data-work-index={i}
               data-active="false"
               aria-label={item.title}
-              class="inline-flex min-h-11 min-w-0 items-baseline gap-2 text-body-md font-normal lowercase text-fg outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas lg:flex lg:min-h-0 lg:h3 lg:font-normal"
+              class="inline-flex min-h-11 min-w-0 items-baseline gap-2 text-body-md font-bold lowercase text-fg outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas lg:flex lg:min-h-0 lg:h3 lg:font-bold"
             >
               <span aria-hidden="true" class="lg:hidden">
                 {padIndex(i)}.
@@ -257,16 +257,16 @@ function coverAlt(item: WorkItem) {
     flex-direction: column;
   }
 
-  /* `lg:h3` supplies size; keep names regular against that utility's 600. */
+  /* `lg:h3` supplies size; keep names bold against that utility's 600. */
   [data-work-name] {
-    font-weight: 400;
+    font-weight: 700;
   }
 
   [data-work-name]:hover span,
   [data-work-name]:focus-visible span,
   [data-work-name][data-active="true"] span {
     text-decoration-line: underline;
-    text-underline-offset: 0.18em;
+    text-underline-offset: calc(0.18em + 0.125rem);
   }
 
   [data-work-preview] {

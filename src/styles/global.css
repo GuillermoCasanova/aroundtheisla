@@ -204,6 +204,7 @@
 }
 
 [data-theme="light"] {
+  color-scheme: light;
   --color-canvas: #f3f3f3;
   --color-panel: #f9f9f9;
   --color-panel-muted: #ebebeb;

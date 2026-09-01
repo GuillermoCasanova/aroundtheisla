@@ -98,7 +98,7 @@ function photoCaption(image: Photo): string | undefined {
                 stroke-width="1.4"
                 stroke-linecap="square"></path>
             </svg>
-            <span class="group-hover:underline underline-offset-2">work</span>
+            <span class="group-hover:underline underline-offset-4">work</span>
           </a>
         </p>
 
@@ -148,7 +148,7 @@ function photoCaption(image: Photo): string | undefined {
                 placeholder={isCmsImage(image) ? image.lqip : undefined}
               />
               {caption && (
-                <figcaption class="mt-3 max-w-[10.5rem] text-body-sm leading-normal text-fg/30 xl:absolute xl:right-0 xl:bottom-0 xl:mt-0 xl:translate-x-[calc(100%+(var(--spacing)*5))]">
+                <figcaption class="mt-3 max-w-[10.5rem] text-body-sm leading-normal text-secondary xl:absolute xl:right-0 xl:bottom-0 xl:mt-0 xl:translate-x-[calc(100%+(var(--spacing)*5))]">
                   {caption}
                 </figcaption>
               )}

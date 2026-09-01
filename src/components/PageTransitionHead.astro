@@ -1,0 +1,49 @@
+---
+/**
+ * PageTransitionHead
+ * Blocking head snippet for arriving page transitions. Runs before first paint
+ * so the swap gap and the destination's first frame stay on the light canvas
+ * instead of flashing the dark homepage black.
+ *
+ * The hex matches light `--color-canvas` in global.css — inlined because
+ * tokens are not available until the stylesheet parses.
+ */
+---
+
+<script is:inline define:vars={{ sessionKey: "ati-page-transition", lightCanvas: "#f3f3f3" }}>
+  try {
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var kind = sessionStorage.getItem(sessionKey);
+    if (!reduce && kind) {
+      var root = document.documentElement;
+      root.dataset.pageTransitionState = "covered";
+      if (kind === "palm") {
+        root.dataset.pageTransitionKind = "palm";
+      }
+      root.dataset.loaderSkip = "1";
+      root.style.colorScheme = "light";
+      root.style.backgroundColor = lightCanvas;
+      sessionStorage.removeItem(sessionKey);
+    }
+  } catch (e) {
+    /* private mode — skip the cover */
+  }
+</script>
+
+<style is:inline>
+  html[data-page-transition-state="covered"],
+  html[data-page-transition-state="covered"] body {
+    /* light --color-canvas */
+    background-color: #f3f3f3;
+    color-scheme: light;
+  }
+
+  html[data-page-transition-state="covered"] [data-page-transition] {
+    opacity: 1;
+  }
+
+  html[data-page-transition-state="covered"][data-page-transition-kind="palm"]
+    [data-page-transition-mark] {
+    opacity: 1;
+  }
+</style>

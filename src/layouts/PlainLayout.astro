@@ -7,6 +7,7 @@ import "../styles/global.css";
 import Seo from "../components/Seo.astro";
 import Footer from "../components/Footer.astro";
 import PageTransition from "../components/PageTransition.astro";
+import PageTransitionHead from "../components/PageTransitionHead.astro";
 import SmoothScroll from "../components/SmoothScroll.astro";
 import { getFooterCopyright } from "../lib/pages";
 
@@ -53,6 +54,7 @@ const copyright = await getFooterCopyright();
       noindex={noindex}
       jsonLd={jsonLd}
     />
+    <PageTransitionHead />
 
     {
       gtagId && (
@@ -74,6 +76,7 @@ const copyright = await getFooterCopyright();
     }
   </head>
   <body class="bg-panel text-fg">
+    <PageTransition />
     <SmoothScroll />
     <a
       href="#main"
@@ -83,6 +86,5 @@ const copyright = await getFooterCopyright();
     </a>
     <slot />
     {!hideFooter && <Footer copyright={copyright} />}
-    <PageTransition />
   </body>
 </html>

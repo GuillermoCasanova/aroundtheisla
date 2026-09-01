@@ -12,7 +12,7 @@ import Preview from "@components/_docs/Preview.astro";
 import PropsTable from "@components/_docs/PropsTable.astro";
 import palmUrl from "../../images/loader-palm.svg?url";
 
-Site intro loader from the Figma Loader frame: a blank stage with the palm mark centered. Wired into `Layout` by default; dismisses after `window` load (honoring a minimum dwell) and skips on return visits within the same session.
+Site intro loader from the Figma Loader frame: a blank stage with the palm mark centered. Wired into `Layout` by default; dismisses after hero and above-the-fold images have loaded and decoded (honoring a minimum dwell) and skips on return visits within the same session.
 
 ## Preview
 
@@ -20,7 +20,7 @@ Static composition — the live overlay only runs on a full page load via `Layou
 
 <Preview label="Centered mark on stage" align="center">
   <div class="flex min-h-48 w-full items-center justify-center bg-panel text-fg">
-    <img src={palmUrl} alt="" width="54" height="84" class="block size-auto text-fg" />
+    <img src={palmUrl} alt="" width="109" height="149" class="block h-[9.3125rem] w-[6.8125rem] text-fg" />
   </div>
 </Preview>
 
@@ -38,7 +38,8 @@ Pass `skipLoader` on `Layout` to opt a page out (useful for docs or error pages)
 
 ## Behavior
 
-- Covers the viewport with `bg-panel` / `text-fg` so themes invert correctly.
+- Covers the viewport with `bg-panel` / `text-fg` so themes invert correctly. Sits above nav (`z-100`).
+- Waits for above-the-fold images: `fetchpriority="high"`, `[data-loader-wait]`, or in-viewport images that are not `loading="lazy"`. Each image is loaded and `decode()`d before dismiss. Hidden hero alternates are skipped. A safety cap (8s) prevents a hung request from trapping the page.
 - Palm mark breathes gently while waiting; reduced-motion users get a static mark and an immediate exit.
 - Locks document scroll while visible; restores on dismiss.
 - `role="status"` + visually hidden “Loading”; `inert` while covering the page.

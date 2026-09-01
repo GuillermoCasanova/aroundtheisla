@@ -6,6 +6,7 @@
 // Type sizes track the Figma frame (≈13.7 / 10 / 22.5px) rather than the
 // fluid body scale so paragraph measure and brand/caption y-positions hold.
 import type { ImageMetadata } from "astro";
+import Logo from "@components/Logo.astro";
 import OptimizedPicture from "@components/OptimizedPicture.astro";
 import { isCmsImage, type CmsImage } from "../lib/cms-image";
 
@@ -13,6 +14,7 @@ interface Props {
   paragraphs: string[];
   instagramHref: string;
   instagramHandle: string;
+  /** Kept for CMS payloads; the visible signature is <Logo />. */
   brand: string;
   portrait: ImageMetadata | CmsImage;
   portraitAlt?: string;
@@ -24,7 +26,6 @@ const {
   paragraphs,
   instagramHref,
   instagramHandle,
-  brand,
   portrait,
   portraitAlt,
   caption,
@@ -39,7 +40,7 @@ const resolvedAlt =
   portraitAlt ?? (cms ? portrait.alt : "Portrait");
 
 const linkClass =
-  "underline decoration-from-font underline-offset-2 transition-colors duration-default-quarter hover:text-fg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
+  "underline decoration-from-font underline-offset-4 transition-colors duration-default-quarter hover:text-fg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
 ---
 
 <section
@@ -49,12 +50,10 @@ const linkClass =
 >
   {
     /*
-    Desktop proportions from the 1410×886 Figma frame:
-    - Portrait: left 53.2%, top 12px, right 25px, bottom 22px
-    - Bio: left 50px, top 71px, width 361px
-    - Brand: same left, directly under bio
-    - Caption: left 41.6%, bottom band, dark type beside the photo
-    - Back home: left 37px, bottom band
+    Desktop: portrait is capped at the Figma 634×852 and at 85vh so it
+    keeps clear viewport gutters — it no longer stretches to fill the
+    viewport. Right-aligned, vertically centered. Caption hangs off the
+    photo's bottom-left. Bio / back-home stay in the left column.
   */
   }
   <div class="relative flex min-h-dvh flex-col lg:block">
@@ -78,50 +77,49 @@ const linkClass =
           {rest.map((paragraph) => <p>{paragraph}</p>)}
         </div>
 
-        <p
-          class="mt-10 font-heading text-[1.4rem] font-medium leading-none tracking-[-0.11em] text-fg"
-          aria-hidden="true"
-        >
-          {brand}
+        <p class="mt-10 text-fg" aria-hidden="true">
+          <Logo class="h-4 w-auto" decorative />
         </p>
       </div>
     </div>
 
     {
-      /* Portrait — inset on desktop; between bio and caption on small screens */
+      /* Portrait — in-flow on small screens; capped and centered on desktop */
     }
-    <figure
-      class="relative order-2 mx-6 mt-10 aspect-[634/852] overflow-hidden sm:mx-9 lg:absolute lg:top-3 lg:right-[1.5625rem] lg:bottom-[1.375rem] lg:left-[53.2%] lg:order-none lg:mx-0 lg:mt-0 lg:aspect-auto"
+    <div
+      class="about-portrait order-2 mx-6 mt-10 sm:mx-9 lg:order-none lg:mx-0 lg:mt-0"
     >
-      <OptimizedPicture
-        src={cms ? portrait.src : portrait}
-        alt={resolvedAlt}
-        width={portrait.width}
-        height={portrait.height}
-        class="absolute inset-0 h-full w-full object-cover object-[center_18%]"
-        widths={[640, 960, 1280, 1600]}
-        sizes="(min-width: 1024px) 45vw, 100vw"
-        loading="eager"
-        fetchpriority="high"
-        decoding="async"
-      />
-    </figure>
+      <figure class="relative aspect-[634/852] overflow-hidden lg:w-full">
+        <OptimizedPicture
+          src={cms ? portrait.src : portrait}
+          alt={resolvedAlt}
+          width={portrait.width}
+          height={portrait.height}
+          class="absolute inset-0 h-full w-full object-cover object-[center_18%]"
+          widths={[640, 960, 1280, 1600]}
+          sizes="(min-width: 1024px) min(635px, 42vw), 100vw"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+        />
+      </figure>
 
-    {/* Footnote caption — dark type beside the photo, not overlaid */}
-    <p
-      class="relative z-10 order-3 mx-6 mt-4 max-w-[9.5rem] text-[0.625rem] lowercase leading-[normal] text-fg sm:mx-9 lg:absolute lg:bottom-[17px] lg:left-[41.6%] lg:order-none lg:mx-0 lg:mt-0 lg:w-[9.5rem]"
-    >
-      {captionParts[0]}<a
-        href={instagramHref}
-        target="_blank"
-        rel="noopener noreferrer"
-        class={linkClass}>{instagramHandle}</a
-      >{captionParts[1]}
-    </p>
+      {/* Footnote caption — secondary type beside the photo, not overlaid */}
+      <p
+        class="relative z-10 mt-4 max-w-[9.5rem] text-[0.625rem] lowercase leading-[normal] text-secondary lg:absolute lg:right-full lg:bottom-0 lg:mt-0 lg:mr-4 lg:w-[9.5rem]"
+      >
+        {captionParts[0]}<a
+          href={instagramHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          class={linkClass}>{instagramHandle}</a
+        >{captionParts[1]}
+      </p>
+    </div>
 
     {/* Back home — page foot on mobile; bottom-left on desktop */}
     <p
-      class="relative z-10 order-4 mx-6 mt-8 mb-10 sm:mx-9 lg:absolute lg:bottom-8 lg:left-9 lg:order-none lg:mx-0 lg:mt-0 lg:mb-0"
+      class="relative z-10 order-3 mx-6 mt-8 mb-10 sm:mx-9 lg:absolute lg:bottom-8 lg:left-9 lg:order-none lg:mx-0 lg:mt-0 lg:mb-0"
     >
       <a
         href="/"
@@ -132,3 +130,22 @@ const linkClass =
     </p>
   </div>
 </section>
+
+<style>
+  /* Desktop portrait: Figma 634×852 cap, never taller than 85vh,
+     right-aligned and vertically centered. Width follows 634/852 so the
+     photo stays a contained portrait instead of a full-bleed column. */
+  @media (width >= 64rem) {
+    .about-portrait {
+      position: absolute;
+      top: 50%;
+      right: calc(var(--spacing) * 10);
+      width: min(
+        39.7rem,
+        calc(46.8% - var(--spacing) * 10),
+        calc(85vh * 634 / 852)
+      );
+      translate: 0 -50%;
+    }
+  }
+</style>

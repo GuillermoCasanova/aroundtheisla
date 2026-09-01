@@ -5,15 +5,24 @@
  *
  * Does not use Astro's client router. Intercepts internal link clicks, fades
  * this covering div in, then lets the browser load the next page. The
- * destination starts covered (when arriving from a transition) and fades out.
+ * destination starts covered (when arriving from a transition) and fades out
+ * once above-the-fold content has painted.
  *
  * Overlay is a light-theme island (`data-theme="light"`) so `bg-canvas` is
  * always the interior canvas — leaving the dark homepage fades into light,
  * not into the source page's black.
  *
+ * Links marked `data-page-transition-kind="palm"` fade to the light canvas,
+ * reveal the centered palm mark, navigate under that cover, then fade the
+ * whole overlay out once the destination is ready.
+ *
  * Opt a link out with `data-no-transition`. Reduced-motion skips the overlay
  * and navigates immediately.
+ *
+ * Arrival cover is armed in `<PageTransitionHead />` before first paint.
  */
+import palmMark from "../images/loader-palm.svg?raw";
+
 interface Props {
   class?: string;
 }
@@ -21,32 +30,22 @@ interface Props {
 const { class: className } = Astro.props;
 ---
 
-{
-  /* Runs before paint so an arriving transition is covered, and a normal
-     load never flashes the overlay. */
-}
-<script is:inline define:vars={{ sessionKey: "ati-page-transition" }}>
-  try {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!reduce && sessionStorage.getItem(sessionKey) === "1") {
-      document.documentElement.dataset.pageTransitionState = "covered";
-    }
-    sessionStorage.removeItem(sessionKey);
-  } catch {
-    /* private mode — skip the overlay */
-  }
-</script>
-
 <div
   class:list={[
-    "page-transition pointer-events-none fixed inset-0 z-100 bg-canvas opacity-0",
+    "page-transition pointer-events-none fixed inset-0 z-100 flex items-center justify-center bg-canvas opacity-0",
     className,
   ]}
   data-page-transition
   data-theme="light"
   aria-hidden="true"
   inert
-></div>
+>
+  <div
+    class="page-transition__mark"
+    data-page-transition-mark
+    set:html={palmMark}
+  />
+</div>
 
 {/* Without JS the overlay would trap the page — hide it entirely. */}
 <noscript>
@@ -65,6 +64,19 @@ const { class: className } = Astro.props;
     opacity: 1;
     pointer-events: auto;
   }
+
+  /*
+   * Force a light canvas while covered. Dark `color-scheme` makes Chrome
+   * paint the unload / next-document gap black — the overlay is gone the
+   * moment the document is discarded.
+   */
+  html[data-page-transition-state="covered"] {
+    color-scheme: light;
+  }
+
+  html[data-page-transition-kind="palm"] [data-page-transition-mark] {
+    opacity: 1;
+  }
 </style>
 
 <style>
@@ -72,8 +84,31 @@ const { class: className } = Astro.props;
     transition: opacity var(--timing-default-half);
   }
 
+  .page-transition__mark {
+    width: 3rem;
+    height: auto;
+    aspect-ratio: 109 / 149;
+    opacity: 0;
+    color: var(--color-fg);
+  }
+
+  .page-transition__mark :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  :global(html[data-page-transition-kind="palm"]) .page-transition__mark {
+    opacity: 1;
+    transition: opacity var(--timing-default-quarter);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .page-transition {
+      transition: none;
+    }
+
+    :global(html[data-page-transition-kind="palm"]) .page-transition__mark {
       transition: none;
     }
   }
@@ -81,18 +116,42 @@ const { class: className } = Astro.props;
 
 <script>
   const SESSION_KEY = "ati-page-transition";
+  /* Matches light --color-canvas — inlined for pre-stylesheet chrome paint. */
+  const LIGHT_CANVAS = "#f3f3f3";
+  /* Safety cap so a hung image request cannot trap the overlay. Not a motion token. */
+  const IMAGE_WAIT_MAX_MS = 8000;
   const initialized = new WeakSet<HTMLElement>();
+
+  type TransitionKind = "cover" | "palm";
 
   function prefersReducedMotion(): boolean {
     return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }
 
-  function overlayDurationMs(): number {
+  function tokenDurationMs(name: string, fallbackMs: number): number {
     const raw = getComputedStyle(document.documentElement)
-      .getPropertyValue("--duration-default-half")
+      .getPropertyValue(name)
       .trim();
     const seconds = Number.parseFloat(raw);
-    return Number.isFinite(seconds) ? seconds * 1000 : 400;
+    return Number.isFinite(seconds) ? seconds * 1000 : fallbackMs;
+  }
+
+  function overlayDurationMs(): number {
+    return tokenDurationMs("--duration-default-half", 400);
+  }
+
+  function markDurationMs(): number {
+    return tokenDurationMs("--duration-default-quarter", 200);
+  }
+
+  function palmHoldMs(): number {
+    return tokenDurationMs("--duration-default-quarter", 200);
+  }
+
+  function revealMinDwellMs(kind: TransitionKind): number {
+    return kind === "palm"
+      ? tokenDurationMs("--duration-default-half", 400)
+      : tokenDurationMs("--duration-default-quarter", 200);
   }
 
   function isInternalNav(anchor: HTMLAnchorElement): boolean {
@@ -106,19 +165,195 @@ const { class: className } = Astro.props;
 
     const url = new URL(anchor.href, window.location.href);
     if (url.origin !== window.location.origin) return false;
-    if (url.pathname === window.location.pathname && url.search === window.location.search) {
+    if (
+      url.pathname === window.location.pathname &&
+      url.search === window.location.search
+    ) {
       return false;
     }
 
     return true;
   }
 
+  function readKind(anchor: HTMLAnchorElement): TransitionKind {
+    return anchor.getAttribute("data-page-transition-kind") === "palm"
+      ? "palm"
+      : "cover";
+  }
+
+  function persistTransition(kind: TransitionKind): void {
+    try {
+      sessionStorage.setItem(SESSION_KEY, kind === "palm" ? "palm" : "1");
+    } catch {
+      /* ignore */
+    }
+  }
+
   function cover(): void {
     document.documentElement.dataset.pageTransitionState = "covered";
   }
 
-  function uncover(): void {
+  function showPalm(): void {
+    document.documentElement.dataset.pageTransitionKind = "palm";
+  }
+
+  function uncover(root: HTMLElement): void {
     delete document.documentElement.dataset.pageTransitionState;
+    delete document.documentElement.dataset.pageTransitionKind;
+  }
+
+  function fadeOutOverlay(root: HTMLElement, signal: AbortSignal): Promise<void> {
+    if (prefersReducedMotion()) {
+      uncover(root);
+      return Promise.resolve();
+    }
+
+    delete document.documentElement.dataset.pageTransitionState;
+
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        delete document.documentElement.dataset.pageTransitionKind;
+        resolve();
+      };
+
+      root.addEventListener(
+        "transitionend",
+        (event: TransitionEvent) => {
+          if (event.target !== root || event.propertyName !== "opacity") return;
+          finish();
+        },
+        { once: true, signal },
+      );
+      window.setTimeout(finish, overlayDurationMs() + 50);
+    });
+  }
+
+  function arrivalKind(): TransitionKind {
+    return document.documentElement.dataset.pageTransitionKind === "palm"
+      ? "palm"
+      : "cover";
+  }
+
+  /** Keep browser chrome and the root canvas light during the MPA swap gap. */
+  function paintLightChrome(): void {
+    const root = document.documentElement;
+    root.style.colorScheme = "light";
+    root.style.backgroundColor = LIGHT_CANVAS;
+
+    let meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "theme-color");
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute("content", LIGHT_CANVAS);
+  }
+
+  function nextPaint(): Promise<void> {
+    return new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => resolve());
+      });
+    });
+  }
+
+  function waitMs(ms: number, signal: AbortSignal): Promise<void> {
+    if (ms <= 0) return Promise.resolve();
+    return new Promise((resolve) => {
+      const timer = window.setTimeout(resolve, ms);
+      signal.addEventListener("abort", () => {
+        window.clearTimeout(timer);
+        resolve();
+      }, { once: true });
+    });
+  }
+
+  function isSkippableImage(img: HTMLImageElement): boolean {
+    if (img.closest("[hidden]")) return true;
+    const src = img.currentSrc || img.src;
+    return !src;
+  }
+
+  function isAboveFoldImage(img: HTMLImageElement): boolean {
+    if (isSkippableImage(img)) return false;
+    if (img.hasAttribute("data-loader-wait")) return true;
+    if (img.getAttribute("fetchpriority") === "high") return true;
+
+    const rect = img.getBoundingClientRect();
+    if (rect.width === 0 && rect.height === 0) return false;
+    return (
+      rect.top < window.innerHeight &&
+      rect.left < window.innerWidth &&
+      rect.bottom > 0 &&
+      rect.right > 0 &&
+      img.getAttribute("loading") !== "lazy"
+    );
+  }
+
+  async function waitForImage(img: HTMLImageElement): Promise<void> {
+    const decode = async () => {
+      if (typeof img.decode !== "function") return;
+      try {
+        await img.decode();
+      } catch {
+        /* decode rejects on broken images — treat as settled */
+      }
+    };
+
+    if (img.complete) {
+      await decode();
+      return;
+    }
+
+    await new Promise<void>((resolve) => {
+      const done = () => resolve();
+      img.addEventListener("load", done, { once: true });
+      img.addEventListener("error", done, { once: true });
+    });
+    await decode();
+  }
+
+  function waitWithTimeout(
+    work: Promise<void>,
+    ms: number,
+    signal: AbortSignal,
+  ): Promise<void> {
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timer);
+        resolve();
+      };
+      const timer = window.setTimeout(finish, ms);
+      work.then(finish, finish);
+      signal.addEventListener("abort", finish, { once: true });
+    });
+  }
+
+  function waitForDocumentLoad(signal: AbortSignal): Promise<void> {
+    if (document.readyState === "complete") return Promise.resolve();
+    return new Promise((resolve) => {
+      window.addEventListener("load", () => resolve(), { once: true, signal });
+    });
+  }
+
+  function waitForAboveFoldImages(signal: AbortSignal): Promise<void> {
+    const images = Array.from(document.images).filter(isAboveFoldImage);
+    if (images.length === 0) return waitForDocumentLoad(signal);
+    return waitWithTimeout(
+      Promise.all(images.map(waitForImage)).then(() => undefined),
+      IMAGE_WAIT_MAX_MS,
+      signal,
+    );
+  }
+
+  function remainingDwell(startedAt: number, minMs: number): number {
+    return Math.max(0, minMs - (performance.now() - startedAt));
   }
 
   function initPageTransition() {
@@ -129,6 +364,8 @@ const { class: className } = Astro.props;
       const controller = new AbortController();
       const { signal } = controller;
       let leaving = false;
+
+      const mark = root.querySelector<HTMLElement>("[data-page-transition-mark]");
 
       const waitForCover = (): Promise<void> =>
         new Promise((resolve) => {
@@ -155,27 +392,78 @@ const { class: className } = Astro.props;
           window.setTimeout(finish, overlayDurationMs() + 50);
         });
 
-      const reveal = () => {
-        if (document.documentElement.dataset.pageTransitionState !== "covered") return;
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            uncover();
-          });
+      const waitForMark = (): Promise<void> =>
+        new Promise((resolve) => {
+          if (prefersReducedMotion() || !mark) {
+            resolve();
+            return;
+          }
+
+          let settled = false;
+          const finish = () => {
+            if (settled) return;
+            settled = true;
+            resolve();
+          };
+
+          mark.addEventListener(
+            "transitionend",
+            (event: TransitionEvent) => {
+              if (event.target !== mark || event.propertyName !== "opacity") return;
+              finish();
+            },
+            { signal },
+          );
+          window.setTimeout(finish, markDurationMs() + 50);
         });
+
+      const revealWhenReady = async () => {
+        if (document.documentElement.dataset.pageTransitionState !== "covered") return;
+
+        const kind = arrivalKind();
+
+        if (document.readyState === "loading") {
+          await new Promise<void>((resolve) => {
+            document.addEventListener("DOMContentLoaded", () => resolve(), {
+              once: true,
+              signal,
+            });
+          });
+        }
+
+        const startedAt = performance.now();
+        await waitForAboveFoldImages(signal);
+        await nextPaint();
+
+        const wait = remainingDwell(startedAt, revealMinDwellMs(kind));
+        await waitMs(wait, signal);
+
+        if (prefersReducedMotion()) {
+          uncover(root);
+          return;
+        }
+
+        await fadeOutOverlay(root, signal);
       };
 
-      const leaveTo = async (url: URL) => {
+      const leaveTo = async (url: URL, kind: TransitionKind) => {
         if (leaving) return;
         leaving = true;
 
-        try {
-          sessionStorage.setItem(SESSION_KEY, "1");
-        } catch {
-          /* ignore */
-        }
-
+        paintLightChrome();
         cover();
         await waitForCover();
+
+        if (kind === "palm") {
+          showPalm();
+          await waitForMark();
+          await waitMs(palmHoldMs(), signal);
+        }
+
+        persistTransition(kind);
+        paintLightChrome();
+        void document.documentElement.offsetHeight;
+        await nextPaint();
         window.location.assign(url.href);
       };
 
@@ -194,7 +482,7 @@ const { class: className } = Astro.props;
           if (!anchor || !isInternalNav(anchor)) return;
 
           event.preventDefault();
-          void leaveTo(new URL(anchor.href, window.location.href));
+          void leaveTo(new URL(anchor.href, window.location.href), readKind(anchor));
         },
         { capture: true, signal },
       );
@@ -209,7 +497,7 @@ const { class: className } = Astro.props;
           } catch {
             /* ignore */
           }
-          uncover();
+          uncover(root);
         },
         { signal },
       );
@@ -219,14 +507,18 @@ const { class: className } = Astro.props;
         .addEventListener(
           "change",
           () => {
-            if (prefersReducedMotion()) uncover();
+            if (prefersReducedMotion()) uncover(root);
           },
           { signal },
         );
 
-      reveal();
+      if (document.documentElement.dataset.pageTransitionState === "covered") {
+        void revealWhenReady();
+      }
 
-      root.addEventListener("page-transition:destroy", () => controller.abort(), { signal });
+      root.addEventListener("page-transition:destroy", () => controller.abort(), {
+        signal,
+      });
     });
   }
 

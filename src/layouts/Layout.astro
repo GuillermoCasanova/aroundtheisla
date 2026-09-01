@@ -17,6 +17,7 @@ import Seo from "../components/Seo.astro";
 import Loader from "../components/Loader.astro";
 import Footer from "../components/Footer.astro";
 import PageTransition from "../components/PageTransition.astro";
+import PageTransitionHead from "../components/PageTransitionHead.astro";
 import SmoothScroll from "../components/SmoothScroll.astro";
 import { getFooterCopyright, getNavLinks, getPageBySlug } from "../lib/pages";
 interface Props {
@@ -95,6 +96,7 @@ const AnnouncementContent = announcement
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <Seo title={title} description={description} ogType={ogType} image={image} noindex={noindex} jsonLd={jsonLd} />
+    <PageTransitionHead />
 
     {gtagId && (
       <>
@@ -109,6 +111,7 @@ const AnnouncementContent = announcement
     )}
   </head>
   <body>
+    <PageTransition />
     <SmoothScroll />
     {!skipLoader && <Loader />}
     <a
@@ -131,6 +134,5 @@ const AnnouncementContent = announcement
     </Nav>
     <slot />
     {!hideFooter && <Footer copyright={copyright} />}
-    <PageTransition />
   </body>
 </html>

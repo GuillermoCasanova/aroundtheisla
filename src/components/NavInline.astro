@@ -5,11 +5,12 @@
  * Mobile: same full-screen overlay as NavSimple.
  */
 import Button from "./Button.astro";
+import Logo from "./Logo.astro";
 
 type PlainLink = { label: string; href: string };
 
 interface Props {
-  /** Brand wordmark shown on the left. */
+  /** Accessible name for the home link. The visible mark is <Logo />. */
   brand?: string;
   /** Home / logo href. */
   homeHref?: string;
@@ -54,9 +55,10 @@ const linkClass =
   >
     <a
       href={homeHref}
-      class="font-heading text-xl tracking-tighter text-fg outline-none transition hover:text-intent focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+      aria-label={`${brand} home`}
+      class="inline-flex h-14 items-center text-fg outline-none transition hover:text-intent focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
     >
-      {brand}
+      <Logo class="h-4 w-auto shrink-0" decorative />
     </a>
 
     <nav class="hidden items-center gap-8 md:flex" aria-label="Primary">

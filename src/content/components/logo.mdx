@@ -5,19 +5,19 @@ category: primitive
 order: 30
 sourceFile: src/components/Logo.astro
 status: stable
-related: [Nav, NavMega, NavMorph, Footer]
+related: [NavInline, NavSimple, SectionAbout, LogoMenu]
 ---
 
 import Preview from "@components/_docs/Preview.astro";
 import PropsTable from "@components/_docs/PropsTable.astro";
 import Logo from "@components/Logo.astro";
 
-The "Miscreants" SVG wordmark. All paths use `fill="currentColor"`, so color is driven by the parent's `text-*` utility.
+The AroundTheIsla SVG wordmark. All paths use `fill="currentColor"`, so color is driven by the parent's `text-*` utility. Used in the site header and as the signature under the about bio — edit `Logo.astro` once and both update.
 
 ## Preview
 
 <Preview label="Default">
-  <Logo class="h-5 w-auto text-fg" />
+  <Logo class="h-4 w-auto text-fg" />
 </Preview>
 
 <Preview label="Larger, muted">
@@ -32,13 +32,14 @@ The "Miscreants" SVG wordmark. All paths use `fill="currentColor"`, so color is 
 
 <PropsTable props={[
   { name: "class", type: "string", default: '""', description: "Classes applied to the <svg> element. Use h-* + w-auto for sizing, text-* for color." },
+  { name: "decorative", type: "boolean", default: "false", description: "When true, the SVG is aria-hidden. Use inside a parent that already provides the accessible name (home link, about signature)." },
 ]} />
 
 ## Mechanism
 
-- The SVG sets `width="100%"` with a fixed `viewBox="0 0 370 57"`, so it stretches to fill the parent's width while preserving aspect ratio.
+- The SVG ships at `132×17` with `viewBox="0 0 132 17"`. Pass `h-*` + `w-auto` to scale it while keeping the aspect ratio.
 - Every path uses `fill="currentColor"` — the wordmark inherits its color from the nearest ancestor with a `color` value (i.e. any Tailwind `text-*` utility).
-- `aria-label="Miscreants"` and `role="img"` make it announce as a single image to assistive tech.
+- `aria-label="aroundtheisla"` and `role="img"` make it announce as a single image to assistive tech. Pass `decorative` to hide it when a parent already provides the name.
 
 ## Usage
 
@@ -47,7 +48,7 @@ The "Miscreants" SVG wordmark. All paths use `fill="currentColor"`, so color is 
 import Logo from "@components/Logo.astro";
 ---
 
-<Logo class="h-5 w-auto" />
+<Logo class="h-4 w-auto" />
 
 <div class="text-canvas">
   <Logo class="h-8 w-auto" />
@@ -56,5 +57,5 @@ import Logo from "@components/Logo.astro";
 
 ## Notes
 
-- Use `h-*` together with `w-auto` to size the logo. Without `w-auto`, the SVG's `width="100%"` will fill the parent's width.
-- The registered-trademark mark is part of the path data — not a separate text run.
+- Use `h-*` together with `w-auto` to size the logo. Without `w-auto`, a height-only class can squash the viewBox.
+- The trailing period is part of the path data — not a separate text run.

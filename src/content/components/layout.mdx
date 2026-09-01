@@ -28,6 +28,7 @@ The base HTML layout wrapper for every page. Sets up `<html>`, `<head>`, and `<b
 - Imports the Archivo Variable font via `@fontsource-variable/archivo`.
 - Imports `global.css` (all theme tokens, utilities, and base styles).
 - Sets charset, viewport, favicon, and generator meta tags.
+- Includes `<PageTransitionHead />` so an arriving page transition is marked covered before first paint.
 
 ### Google Analytics (optional)
 
@@ -37,7 +38,7 @@ The base HTML layout wrapper for every page. Sets up `<html>`, `<head>`, and `<b
 
 ### `<body>`
 
-- Boots `<SmoothScroll />` (Locomotive Scroll v5 / Lenis) on every page, then the intro `<Loader />` (unless `skipLoader`), then `<Nav />`.
+- Boots `<PageTransition />`, then `<SmoothScroll />` (Locomotive Scroll v5 / Lenis), then the intro `<Loader />` (unless `skipLoader`), then `<Nav />`.
 - Includes a **skip-to-content** link (`<a href="#main">`) — visually hidden by default, becomes visible on focus for keyboard users.
 - Page content is injected via `<slot />`.
 - Renders `<Footer />` after the slot unless `hideFooter` is set.
