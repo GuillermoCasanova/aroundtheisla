@@ -63,6 +63,18 @@ export function cmsOgImageUrl(src: string, width = 1200): string {
   return url.href;
 }
 
+/** Square PNG for a favicon or Apple touch icon, cropped from a Sanity asset. */
+export function cmsFaviconUrl(src: string, size: number): string {
+  if (!isSanityCdnUrl(src)) return src;
+  const url = new URL(src);
+  url.searchParams.set("w", String(size));
+  url.searchParams.set("h", String(size));
+  url.searchParams.set("fit", "crop");
+  url.searchParams.set("fm", "png");
+  url.searchParams.delete("auto");
+  return url.href;
+}
+
 /** Absolute URL for og/JSON-LD. Sanity photos stay on the CDN; local paths resolve against the site origin. */
 export function absoluteImageUrl(src: string, origin: string | URL): string {
   if (isSanityCdnUrl(src)) return cmsOgImageUrl(src);

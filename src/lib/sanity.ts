@@ -454,3 +454,24 @@ export async function fetchFooterCopyright(): Promise<string | undefined> {
   );
   return optionalString(copyright);
 }
+
+export type SiteFavicon = {
+  src: string;
+  mimeType?: string;
+};
+
+export async function fetchSiteFavicon(): Promise<SiteFavicon | null> {
+  const row = await sanityClient.fetch<{
+    asset?: { url?: string; mimeType?: string };
+  } | null>(
+    `*[_type == "siteSettings"][0].favicon{
+      asset->{ url, mimeType }
+    }`,
+  );
+  const src = optionalString(row?.asset?.url);
+  if (!src) return null;
+  return {
+    src,
+    mimeType: optionalString(row?.asset?.mimeType),
+  };
+}

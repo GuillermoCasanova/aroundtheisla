@@ -22,6 +22,17 @@ export const siteSettings = defineType({
         Rule.required().uri({ scheme: ["https", "http"] }),
     }),
     defineField({
+      name: "favicon",
+      type: "image",
+      title: "Favicon",
+      description:
+        "Browser tab and home-screen icon. Square PNG or SVG, at least 180×180. The site derives the tab, PNG, and Apple touch sizes from this file.",
+      options: {
+        hotspot: true,
+        accept: "image/svg+xml,image/png,image/x-icon,image/vnd.microsoft.icon",
+      },
+    }),
+    defineField({
       name: "mainNav",
       type: "reference",
       title: "Main navigation",

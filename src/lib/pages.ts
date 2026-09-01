@@ -5,7 +5,9 @@ import { site } from "../data/site";
 import {
   fetchFooterCopyright,
   fetchMainNavLinks,
+  fetchSiteFavicon,
   type PageSection,
+  type SiteFavicon,
 } from "./sanity";
 
 export type CmsPage = CollectionEntry<"pages">;
@@ -39,6 +41,10 @@ export async function getNavLinks(): Promise<
 
 export async function getFooterCopyright(): Promise<string> {
   return (await fetchFooterCopyright()) ?? site.copyright;
+}
+
+export async function getSiteFavicon(): Promise<SiteFavicon | null> {
+  return fetchSiteFavicon();
 }
 
 export function pageSections(page: CmsPage): PageSection[] {

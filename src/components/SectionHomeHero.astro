@@ -51,8 +51,9 @@ const { images, class: className } = Astro.props;
           widthMobile={shot.mobile.width}
           heightMobile={shot.mobile.height}
           class="absolute inset-0 size-full object-cover object-center"
-          widths={[640, 960, 1280, 1600, 1920]}
+          widths={[640, 960, 1280, 1600, 1920, 2560, 3000]}
           sizes="100vw"
+          quality={90}
           loading="lazy"
           decoding="async"
         />

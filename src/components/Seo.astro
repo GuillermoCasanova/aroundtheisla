@@ -7,7 +7,8 @@
 // (astro.config `site`), so they're correct for whatever domain the build targets.
 // Site-wide defaults (name, default image, twitter handle) come from src/data/site.
 import { site } from "../data/site";
-import { absoluteImageUrl } from "../lib/cms-image";
+import { absoluteImageUrl, cmsFaviconUrl } from "../lib/cms-image";
+import { getSiteFavicon } from "../lib/pages";
 
 interface Props {
   /** Document title — also used for og:title / twitter:title. */
@@ -36,6 +37,9 @@ const {
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = absoluteImageUrl(image, Astro.site ?? site.url);
 const schemas = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+const cmsFavicon = await getSiteFavicon();
+const faviconSvg =
+  cmsFavicon?.mimeType === "image/svg+xml" ? cmsFavicon.src : undefined;
 ---
 
 <title>{title}</title>
@@ -43,22 +47,54 @@ const schemas = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 <link rel="canonical" href={canonical} />
 {noindex && <meta name="robots" content="noindex, nofollow" />}
 
-{/* Favicons — assets live in /public, all generated from favicon.svg.
-    ORDER AND ATTRIBUTES MATTER. The SVG carries its own prefers-color-scheme
-    rule, so it is the only icon that adapts to dark browser chrome — but a
-    raster <link> advertising a large explicit `sizes` will out-rank it in
-    Chrome's icon picking and you get the black mark on a dark tab strip. So:
-    the SVG is declared with `sizes="any"` and no raster competes at icon size.
-    The PNG pair is media-gated purely as a fallback for engines without SVG
-    icon support, and the .ico is last, for legacy. Swap the SVG per project
-    and regenerate the rest from it. */}
-<link rel="icon" href="/favicon.ico" sizes="32x32" />
-<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-<link rel="icon" type="image/png" media="(prefers-color-scheme: light)" href="/favicon-96.png" />
-<link rel="icon" type="image/png" media="(prefers-color-scheme: dark)" href="/favicon-96-dark.png" />
-{/* iOS composites a transparent touch icon onto black, so this one ships with
-    an opaque light background rather than the transparent mark. */}
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+{cmsFavicon ? (
+  <>
+    <link
+      rel="icon"
+      href={cmsFaviconUrl(cmsFavicon.src, 32)}
+      sizes="32x32"
+      type="image/png"
+    />
+    {faviconSvg && <link rel="icon" href={faviconSvg} type="image/svg+xml" />}
+    {!faviconSvg && (
+      <link
+        rel="icon"
+        type="image/png"
+        sizes="96x96"
+        href={cmsFaviconUrl(cmsFavicon.src, 96)}
+      />
+    )}
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href={cmsFaviconUrl(cmsFavicon.src, 180)}
+    />
+  </>
+) : (
+  <>
+    {/* Fallback when Site Settings has no favicon — assets live in /public.
+        ORDER AND ATTRIBUTES MATTER. The SVG carries its own prefers-color-scheme
+        rule, so it is the only icon that adapts to dark browser chrome — but a
+        raster <link> advertising a large explicit `sizes` will out-rank it in
+        Chrome's icon picking. The PNG pair is media-gated for engines without
+        SVG icon support, and the .ico is last, for legacy. */}
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link
+      rel="icon"
+      type="image/png"
+      media="(prefers-color-scheme: light)"
+      href="/favicon-96.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      media="(prefers-color-scheme: dark)"
+      href="/favicon-96-dark.png"
+    />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  </>
+)}
 
 {/* Open Graph */}
 <meta property="og:type" content={ogType} />
