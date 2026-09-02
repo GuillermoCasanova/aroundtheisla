@@ -3,6 +3,9 @@
  * NavInline
  * Desktop: wordmark + bold inline links (Figma Home ALT 222:520). No hamburger.
  * Mobile: same full-screen overlay as NavSimple.
+ *
+ * Dark-theme scrim: a local gradient from canvas → transparent so the
+ * transparent bar stays readable over photographs. Not a theme role.
  */
 import Button from "./Button.astro";
 import Logo from "./Logo.astro";
@@ -33,7 +36,7 @@ const {
 } = Astro.props;
 
 const linkClass =
-  "font-heading text-lg font-bold tracking-tight text-fg outline-none transition hover:text-intent focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas";
+  "font-heading text-lg font-bold tracking-tight text-fg outline-none transition hover:text-intent hover:underline underline-offset-4 focus-visible:underline focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas";
 ---
 
 {
@@ -49,6 +52,12 @@ const linkClass =
 >
   <slot name="announcement" />
 
+  {
+    /* Dark-theme only: fades canvas → transparent so light links hold
+       contrast over a photograph. Hidden while the overlay is open. */
+  }
+  <div data-nav-scrim aria-hidden="true"></div>
+
   <div
     data-nav-bar
     class="container-full relative z-20 flex h-14 items-center justify-between pl-5 pr-4 transition-colors duration-300 md:px-[1.625rem]"
@@ -58,7 +67,7 @@ const linkClass =
       aria-label={`${brand} home`}
       class="inline-flex h-14 items-center text-fg outline-none transition hover:text-intent focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
     >
-      <Logo class="h-4 w-auto shrink-0" decorative />
+      <Logo class="h-5 w-auto shrink-0" decorative />
     </a>
 
     <nav class="hidden items-center gap-8 md:flex" aria-label="Primary">
@@ -118,7 +127,7 @@ const linkClass =
         links.map((link) => (
           <a
             href={link.href}
-            class="font-heading text-3xl tracking-tight text-fg outline-none transition hover:text-intent focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas sm:text-4xl"
+            class="font-heading text-3xl tracking-tight text-fg outline-none transition hover:text-intent hover:underline underline-offset-4 focus-visible:underline focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas sm:text-4xl"
           >
             {link.label}
           </a>
@@ -138,6 +147,31 @@ const linkClass =
 <style>
   /* Open-state ancestors use :global so Astro's scope hash doesn't attach to
      the JS-toggled [data-open] attribute (see components.styling). */
+
+  /* Readable band behind the transparent bar in dark theme only. */
+  [data-nav-scrim] {
+    display: none;
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    z-index: 10;
+    height: 8rem;
+    pointer-events: none;
+    background-image: linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--color-canvas) 72%, transparent),
+      transparent
+    );
+  }
+
+  :global([data-theme="dark"]) [data-nav-scrim] {
+    display: block;
+  }
+
+  :global([data-nav-inline][data-open="true"]) [data-nav-scrim] {
+    display: none;
+  }
+
   /* Frosted fill is mobile-only. Tablet+ (md) stays transparent over the page. */
   @media (max-width: 47.999rem) {
     [data-nav-bar].is-scrolled {

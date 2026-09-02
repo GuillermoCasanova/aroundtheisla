@@ -38,11 +38,7 @@ const { images, class: className } = Astro.props;
 >
   {
     images.map((shot) => (
-      <div
-        data-home-hero-shot
-        hidden
-        class="absolute inset-0"
-      >
+      <div data-home-hero-shot hidden class="absolute inset-0">
         <OptimizedPicture
           src={shot.desktop.src}
           srcMobile={shot.mobile.src}
@@ -75,9 +71,7 @@ const { images, class: className } = Astro.props;
     <span class="sr-only">View work</span>
   </a>
 
-  {
-    /* No-JS: reveal the first cover so the frame is never empty. */
-  }
+  {/* No-JS: reveal the first cover so the frame is never empty. */}
   <noscript>
     <style>
       [data-home-hero-shot]:first-of-type {
@@ -86,14 +80,13 @@ const { images, class: className } = Astro.props;
     </style>
   </noscript>
 
-  {
-    /* Inline so the pick lands before paint — a bundled module would flash. */
-  }
+  {/* Inline so the pick lands before paint — a bundled module would flash. */}
   <script is:inline>
     (function () {
-      var root = document.currentScript && document.currentScript.closest
-        ? document.currentScript.closest("[data-home-hero]")
-        : document.querySelector("[data-home-hero]");
+      var root =
+        document.currentScript && document.currentScript.closest
+          ? document.currentScript.closest("[data-home-hero]")
+          : document.querySelector("[data-home-hero]");
       if (!root) return;
       var shots = root.querySelectorAll("[data-home-hero-shot]");
       if (!shots.length) return;
@@ -108,3 +101,9 @@ const { images, class: className } = Astro.props;
     })();
   </script>
 </section>
+
+<style>
+  .bg-canvas {
+    background-color: var(--color-canvas) !important;
+  }
+</style>
