@@ -2,13 +2,12 @@
 /**
  * NavInline
  * Desktop: wordmark + bold inline links (Figma Home ALT 222:520). No hamburger.
- * Mobile: same full-screen overlay as NavSimple.
- *
- * Dark-theme scrim: a local gradient from canvas → transparent so the
- * transparent bar stays readable over photographs. Not a theme role.
+ * Mobile overlay: Figma 333:26 — left-aligned work/about, studio email,
+ * palm mark. Dark-theme scrim: a local gradient from canvas → transparent
+ * so the transparent bar stays readable over photographs. Not a theme role.
  */
-import Button from "./Button.astro";
 import Logo from "./Logo.astro";
+import palmMark from "../images/loader-palm.svg?raw";
 
 type PlainLink = { label: string; href: string };
 
@@ -19,8 +18,10 @@ interface Props {
   homeHref?: string;
   /** Primary links — desktop row + mobile drawer. */
   links?: PlainLink[];
-  /** Primary CTA at the bottom of the mobile drawer only. */
+  /** Optional leftover CTA; the mobile overlay no longer renders it. */
   cta?: PlainLink;
+  /** Studio email in the mobile overlay (Figma 333:26). */
+  email?: string;
   class?: string;
 }
 
@@ -31,9 +32,12 @@ const {
     { label: "work", href: "/work" },
     { label: "about", href: "/about" },
   ],
-  cta = { label: "Get in touch", href: "/contact" },
+  email = "didielo@aroundtheisla.com",
   class: className = "",
 } = Astro.props;
+
+const drawerLinkClass =
+  "h1 font-bold lowercase text-fg outline-none transition hover:text-intent hover:underline underline-offset-4 focus-visible:underline focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas";
 
 const linkClass =
   "font-heading text-lg font-bold tracking-tight text-fg outline-none transition hover:text-intent hover:underline underline-offset-4 focus-visible:underline focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas";
@@ -120,27 +124,35 @@ const linkClass =
   >
     <nav
       data-nav-links
-      class="flex flex-col items-center gap-2 text-center"
+      class="flex flex-col items-start gap-6 text-left"
       aria-label="Primary"
     >
       {
         links.map((link) => (
-          <a
-            href={link.href}
-            class="font-heading text-3xl tracking-tight text-fg outline-none transition hover:text-intent hover:underline underline-offset-4 focus-visible:underline focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas sm:text-4xl"
-          >
+          <a href={link.href} class={drawerLinkClass}>
             {link.label}
           </a>
         ))
       }
-      {
-        cta && (
-          <div class="mt-8">
-            <Button label={cta.label} href={cta.href} />
-          </div>
-        )
-      }
     </nav>
+    {
+      email && (
+        <div data-nav-meta>
+          <a
+            href={`mailto:${email}`}
+            class="text-body-md lowercase text-fg outline-none transition hover:text-intent hover:underline underline-offset-4 focus-visible:underline focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+          >
+            {email}
+          </a>
+          <div
+            data-nav-palm
+            class="text-fg"
+            aria-hidden="true"
+            set:html={palmMark}
+          />
+        </div>
+      )
+    }
   </div>
 </header>
 
@@ -192,9 +204,13 @@ const linkClass =
     inset: 0;
     z-index: 10;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--spacing-site-margin);
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: space-between;
+    /* Top pad clears the fixed bar so links share the wordmark's left edge. */
+    padding-top: calc(var(--spacing) * 22);
+    padding-bottom: calc(var(--spacing) * 10);
+    padding-inline: calc(var(--spacing) * 5);
     background-color: var(--color-canvas);
     color: var(--color-fg);
     /* Reveal downward from the top edge into the full viewport. */
@@ -215,8 +231,9 @@ const linkClass =
       visibility 0s linear 0s;
   }
 
-  /* Links ease from above into the vertical center as the panel opens. */
-  [data-nav-links] {
+  /* Links and footer ease in from above as the panel opens. */
+  [data-nav-links],
+  [data-nav-meta] {
     opacity: 0;
     transform: translateY(-1.5rem);
     transition:
@@ -224,10 +241,24 @@ const linkClass =
       transform var(--timing-default);
   }
 
-  :global([data-nav-inline][data-open="true"]) [data-nav-links] {
+  :global([data-nav-inline][data-open="true"]) [data-nav-links],
+  :global([data-nav-inline][data-open="true"]) [data-nav-meta] {
     opacity: 1;
     transform: translateY(0);
     transition-delay: var(--duration-default-quarter);
+  }
+
+  [data-nav-meta] {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: calc(var(--spacing) * 6);
+  }
+
+  [data-nav-palm] :global(svg) {
+    display: block;
+    height: 3.5rem;
+    width: auto;
   }
 
   :global(html.nav-inline-open) {
@@ -237,7 +268,8 @@ const linkClass =
   @media (prefers-reduced-motion: reduce) {
     [data-nav-bar],
     [data-nav-panel],
-    [data-nav-links] {
+    [data-nav-links],
+    [data-nav-meta] {
       transition: none !important;
     }
 
@@ -256,7 +288,8 @@ const linkClass =
         visibility 0s linear 0s !important;
     }
 
-    [data-nav-links] {
+    [data-nav-links],
+    [data-nav-meta] {
       transform: none;
     }
   }
