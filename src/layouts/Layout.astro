@@ -19,7 +19,12 @@ import Footer from "../components/Footer.astro";
 import PageTransition from "../components/PageTransition.astro";
 import PageTransitionHead from "../components/PageTransitionHead.astro";
 import SmoothScroll from "../components/SmoothScroll.astro";
-import { getFooterCopyright, getNavLinks, getPageBySlug } from "../lib/pages";
+import {
+  getFooterCopyright,
+  getNavEmail,
+  getNavLinks,
+  getPageBySlug,
+} from "../lib/pages";
 interface Props {
   title?: string;
   /** Meta description for SEO + social cards. */
@@ -61,6 +66,7 @@ const {
 } = Astro.props;
 const gtagId = import.meta.env.PUBLIC_GTAG_ID;
 const navLinks = await getNavLinks();
+const navEmail = await getNavEmail();
 const copyright = await getFooterCopyright();
 const contactPage = await getPageBySlug("contact");
 const navCta = contactPage
@@ -120,7 +126,7 @@ const AnnouncementContent = announcement
     >
       Skip to main content
     </a>
-    <Nav links={navLinks} cta={navCta ?? { label: "Get in touch", href: "/contact/" }}>
+    <Nav links={navLinks} email={navEmail} cta={navCta ?? { label: "Get in touch", href: "/contact/" }}>
       {announcement && AnnouncementContent && (
         <AnnouncementBanner
           slot="announcement"

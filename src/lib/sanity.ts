@@ -426,26 +426,48 @@ export type SiteNavLink = {
   href: string;
 };
 
-export async function fetchMainNavLinks(): Promise<SiteNavLink[]> {
-  const rows = await sanityClient.fetch<NavLinkRow[] | null>(
-    `*[_type == "siteSettings"][0].mainNav->items[]{
-      text,
-      "href": select(
-        link.linkType == "external" => link.href,
-        link.internalLink->_type == "page" && link.internalLink->slug.current == "home" => "/",
-        link.internalLink->_type == "page" => "/" + link.internalLink->slug.current + "/",
-        link.internalLink->_type == "project" => "/project/" + link.internalLink->slug.current + "/",
-        null
-      )
-    }`,
-  );
+export type MainNav = {
+  links: SiteNavLink[];
+  email?: string;
+};
 
+function mapNavLinks(rows: NavLinkRow[] | null | undefined): SiteNavLink[] {
   return (rows ?? [])
     .map((row) => ({
       label: row.text?.trim() ?? "",
       href: row.href?.trim() ?? "",
     }))
     .filter((row) => row.label.length > 0 && row.href.length > 0);
+}
+
+export async function fetchMainNav(): Promise<MainNav> {
+  const row = await sanityClient.fetch<{
+    email?: string | null;
+    items?: NavLinkRow[] | null;
+  } | null>(
+    `*[_type == "siteSettings"][0].mainNav->{
+      email,
+      items[]{
+        text,
+        "href": select(
+          link.linkType == "external" => link.href,
+          link.internalLink->_type == "page" && link.internalLink->slug.current == "home" => "/",
+          link.internalLink->_type == "page" => "/" + link.internalLink->slug.current + "/",
+          link.internalLink->_type == "project" => "/project/" + link.internalLink->slug.current + "/",
+          null
+        )
+      }
+    }`,
+  );
+
+  return {
+    links: mapNavLinks(row?.items),
+    email: optionalString(row?.email),
+  };
+}
+
+export async function fetchMainNavLinks(): Promise<SiteNavLink[]> {
+  return (await fetchMainNav()).links;
 }
 
 export async function fetchFooterCopyright(): Promise<string | undefined> {

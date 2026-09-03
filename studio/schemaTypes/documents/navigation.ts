@@ -27,6 +27,14 @@ export const navigation = defineType({
       of: [{ type: "navigationItem" }],
       validation: (Rule) => Rule.min(1),
     }),
+    defineField({
+      name: "email",
+      type: "string",
+      title: "Studio email",
+      description:
+        "Shown in the mobile navigation overlay as a mailto link.",
+      validation: (Rule) => Rule.email(),
+    }),
   ],
   preview: {
     select: { title: "title", navId: "navId.current" },

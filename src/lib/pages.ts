@@ -4,8 +4,9 @@ import { getCollection, type CollectionEntry } from "astro:content";
 import { site } from "../data/site";
 import {
   fetchFooterCopyright,
-  fetchMainNavLinks,
+  fetchMainNav,
   fetchSiteFavicon,
+  type MainNav,
   type PageSection,
   type SiteFavicon,
 } from "./sanity";
@@ -23,10 +24,17 @@ export async function getPageBySlug(
   return pages.find((page) => page.id === slug);
 }
 
+let mainNavPromise: Promise<MainNav> | undefined;
+
+function getMainNav(): Promise<MainNav> {
+  mainNavPromise ??= fetchMainNav();
+  return mainNavPromise;
+}
+
 export async function getNavLinks(): Promise<
   { label: string; href: string }[]
 > {
-  const fromMenu = await fetchMainNavLinks();
+  const fromMenu = (await getMainNav()).links;
   if (fromMenu.length > 0) return fromMenu;
 
   const pages = await getPublishedPages();
@@ -37,6 +45,10 @@ export async function getNavLinks(): Promise<
       label: page.data.title.toLowerCase(),
       href: `/${page.id}/`,
     }));
+}
+
+export async function getNavEmail(): Promise<string | undefined> {
+  return (await getMainNav()).email;
 }
 
 export async function getFooterCopyright(): Promise<string> {
