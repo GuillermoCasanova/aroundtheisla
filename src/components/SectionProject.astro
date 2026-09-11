@@ -7,8 +7,9 @@
  * top, title + photo index (`1/20`) as a mid-left pair on desktop (index
  * alone on tablet), description pinned to the bottom left. Small / Medium
  * / Large sits mid-right on desktop. Dedicated credits sit after the
- * photographs.
- * Full-bleed by design — no SectionMain column / side rules (same deviation
+ * photographs. Sequential next project at the end: cover rises into
+ * view while the current photographs fade.
+ * Full-bleed by design — no SectionMain column / side rules (same deviation)
  * as SectionHomeSlideshow): the Figma frame is edge-to-edge editorial.
  *
  * `ProjectSize` sets the photo-stack container width (25 / 40 / 60rem)
@@ -198,24 +199,29 @@ function photoCaption(image: Photo): string | undefined {
         aria-label={`Next project: ${nextProject.title}`}
         class="group text-fg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
       >
-        <span data-project-next-copy>
+        <span
+          data-project-next-copy
+          class="mb-5 flex flex-col items-center text-center text-body-sm lowercase"
+        >
           <span>next</span>
           <span class="group-hover:underline underline-offset-4">
             {nextProject.title}
           </span>
         </span>
-        <ImageLoader
-          src={nextCoverSrc}
-          alt=""
-          width={nextCover.width}
-          height={nextCover.height}
-          class="[data-project-next-image]"
-          imgClass="block h-auto w-full"
-          widths={[480, 720, 960, 1280]}
-          sizes="(max-width: 768px) calc(100vw - 2.5rem), min(50vw, 45rem)"
-          loading="lazy"
-          placeholder={isCmsImage(nextCover) ? nextCover.lqip : undefined}
-        />
+        <span data-project-next-image>
+          <ImageLoader
+            src={nextCoverSrc}
+            alt=""
+            width={nextCover.width}
+            height={nextCover.height}
+            imgClass="size-full object-cover"
+            widths={[480, 720, 960, 1280]}
+            sizes="(max-width: 768px) calc(100vw - 2.5rem), min(50vw, 45rem)"
+            loading="lazy"
+            preserveAspect={false}
+            placeholder={isCmsImage(nextCover) ? nextCover.lqip : undefined}
+          />
+        </span>
       </a>
     )
   }
@@ -305,7 +311,8 @@ function photoCaption(image: Photo): string | undefined {
     gap: var(--project-photo-gap);
     transition:
       width var(--timing-default-half),
-      gap var(--timing-default-half);
+      gap var(--timing-default-half),
+      opacity var(--timing-default-half);
   }
 
   @media (min-width: 768px) {
@@ -379,8 +386,72 @@ function photoCaption(image: Photo): string | undefined {
     }
   }
 
+  [data-project-credits],
+  [data-project-mid],
+  [data-project-copy],
+  [data-project-size-dock] {
+    transition: opacity var(--timing-default-half);
+  }
+
+  :global([data-project][data-next-visible]) [data-project-photos],
+  :global([data-project][data-next-visible]) [data-project-credits],
+  :global([data-project][data-next-visible]) [data-project-mid],
+  :global([data-project][data-next-visible]) [data-project-copy],
+  :global([data-project][data-next-visible]) [data-project-size-dock] {
+    opacity: 0.15;
+    pointer-events: none;
+  }
+
+  [data-project-next] {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding-inline: var(--project-pad);
+    padding-top: clamp(calc(var(--spacing) * 24), 18vw, 18.75rem);
+    padding-bottom: 0;
+    text-decoration: none;
+  }
+
+  [data-project-next-image] {
+    display: block;
+    width: min(50vw, 100%);
+    max-height: 50vh;
+    margin-bottom: 0;
+    overflow: hidden;
+    line-height: 0;
+  }
+
+  [data-project-next-image] :global([data-image-loader]) {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    max-height: 50vh;
+  }
+
+  [data-project-next-image] :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (max-width: 767px) {
+    [data-project-next-image] {
+      width: 100%;
+      max-height: 80vh;
+    }
+
+    [data-project-next-image] :global([data-image-loader]) {
+      max-height: 80vh;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    [data-project-photos] {
+    [data-project-photos],
+    [data-project-credits],
+    [data-project-mid],
+    [data-project-copy],
+    [data-project-size-dock] {
       transition: none;
     }
   }
@@ -427,6 +498,13 @@ function photoCaption(image: Photo): string | undefined {
 
   function initOne(root: HTMLElement) {
     if (initialized.has(root)) return;
+    initialized.add(root);
+
+    const controller = new AbortController();
+    const { signal } = controller;
+    let frame = 0;
+    let resizeObserver: ResizeObserver | undefined;
+    let nextObserver: IntersectionObserver | undefined;
 
     const indexEl = root.querySelector<HTMLElement>("[data-project-index]");
     const currentEl = root.querySelector<HTMLElement>(
@@ -436,45 +514,55 @@ function photoCaption(image: Photo): string | undefined {
       root.querySelectorAll<HTMLElement>("[data-project-photo]"),
     );
 
-    if (!indexEl || !currentEl || photos.length < 2) return;
+    if (indexEl && currentEl && photos.length >= 2) {
+      let last = 0;
 
-    initialized.add(root);
+      const render = (next: number) => {
+        if (next === last) return;
+        last = next;
+        currentEl.textContent = String(next);
+      };
 
-    const controller = new AbortController();
-    const { signal } = controller;
-    let frame = 0;
-    let last = 0;
+      const update = () => {
+        frame = 0;
+        const next = indexAtViewportCenter(photos);
+        if (next > 0) render(next);
+      };
 
-    const render = (next: number) => {
-      if (next === last) return;
-      last = next;
-      currentEl.textContent = String(next);
-    };
+      const schedule = () => {
+        if (frame) return;
+        frame = requestAnimationFrame(update);
+      };
 
-    const update = () => {
-      frame = 0;
-      const next = indexAtViewportCenter(photos);
-      if (next > 0) render(next);
-    };
+      window.addEventListener("scroll", schedule, { passive: true, signal });
+      window.addEventListener("resize", schedule, { signal });
 
-    const schedule = () => {
-      if (frame) return;
-      frame = requestAnimationFrame(update);
-    };
+      resizeObserver = new ResizeObserver(schedule);
+      photos.forEach((photo) => resizeObserver?.observe(photo));
 
-    window.addEventListener("scroll", schedule, { passive: true, signal });
-    window.addEventListener("resize", schedule, { signal });
+      update();
+    }
 
-    const resizeObserver = new ResizeObserver(schedule);
-    photos.forEach((photo) => resizeObserver.observe(photo));
-
-    update();
+    const nextEl = root.querySelector<HTMLElement>("[data-project-next]");
+    if (nextEl) {
+      nextObserver = new IntersectionObserver(
+        (entries) => {
+          root.toggleAttribute(
+            "data-next-visible",
+            entries.some((entry) => entry.isIntersecting),
+          );
+        },
+        { rootMargin: "0px 0px -12% 0px" },
+      );
+      nextObserver.observe(nextEl);
+    }
 
     root.addEventListener(
       "project:destroy",
       () => {
         if (frame) cancelAnimationFrame(frame);
-        resizeObserver.disconnect();
+        resizeObserver?.disconnect();
+        nextObserver?.disconnect();
         controller.abort();
       },
       { signal },
