@@ -1,0 +1,53 @@
+---
+title: ReturnLink
+description: Editorial back-link with a left arrow and hover underline. One mark for project and about pages.
+category: primitive
+order: 16
+sourceFile: src/components/ReturnLink.astro
+status: stable
+related: [Button, Breadcrumbs]
+---
+
+import Preview from "@components/_docs/Preview.astro";
+import PropsTable from "@components/_docs/PropsTable.astro";
+import ReturnLink from "@components/ReturnLink.astro";
+
+The “← return” back-link used on project and about pages. Arrow, label, hover underline, and focus ring are defined once here so those pages stay in sync.
+
+## Preview
+
+<Preview label="Default" align="start">
+  <ReturnLink href="/work" />
+</Preview>
+
+<Preview label="Custom label" align="start">
+  <ReturnLink href="/" label="back to home" />
+</Preview>
+
+## Props
+
+<PropsTable props={[
+  { name: "href", type: "string", required: true, description: "Destination of the link." },
+  { name: "label", type: "string", default: '"return"', description: "Visible text. Falls back to slot content if provided." },
+  { name: "class", type: "string", description: "Extra classes on the rendered <a>." },
+]} />
+
+The component also forwards arbitrary attributes via `...rest` — `aria-*`, `data-*`, and other native `<a>` attributes pass through.
+
+## Usage
+
+```astro
+---
+import ReturnLink from "@components/ReturnLink.astro";
+---
+
+<ReturnLink href="/work" />
+<ReturnLink href="/" label="back to home" />
+```
+
+## Tokens
+
+- Text: `text-fg`
+- Type: `text-body-lg font-bold`
+- Gap between arrow and label: `gap-1.5`
+- Focus: `focus-visible:outline-focus`

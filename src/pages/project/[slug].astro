@@ -10,20 +10,29 @@ import {
 
 export async function getStaticPaths() {
   const projects = await getPublishedProjects();
-  return projects.map((entry) => ({
-    params: { slug: entry.id },
-    props: {
-      entry,
-      related: projects
-        .filter((project) => project.id !== entry.id)
-        .map((project) => ({
-          title: project.data.title,
-          year: project.data.date.getFullYear(),
-          href: `/project/${project.id}/`,
-          cover: project.data.cover,
-        })),
-    },
-  }));
+  return projects.map((entry, index) => {
+    const next =
+      projects.length > 1
+        ? projects[(index + 1) % projects.length]
+        : undefined;
+
+    return {
+      params: { slug: entry.id },
+      props: {
+        entry,
+        related: next
+          ? [
+              {
+                title: next.data.title,
+                year: next.data.date.getFullYear(),
+                href: `/project/${next.id}/`,
+                cover: next.data.cover,
+              },
+            ]
+          : [],
+      },
+    };
+  });
 }
 
 const { entry, related } = Astro.props;
@@ -52,6 +61,7 @@ const jsonLd = articleSchema({
   ogType="article"
   jsonLd={jsonLd}
   theme="light"
+  hideFooter
 >
   <main id="main">
     <SectionProject

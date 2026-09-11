@@ -19,6 +19,7 @@
 import type { ImageMetadata } from "astro";
 import ImageLoader from "@components/ImageLoader.astro";
 import ProjectSize from "@components/ProjectSize.astro";
+import ReturnLink from "@components/ReturnLink.astro";
 import { isCmsImage, type CmsImage } from "../lib/cms-image";
 
 type Photo = ImageMetadata | CmsImage;
@@ -39,7 +40,7 @@ interface Props {
   cover: Photo;
   coverAlt?: string;
   gallery?: Photo[];
-  /** Other projects shown as a thumbnail grid after credits. */
+  /** Sequential next project (wraps). Shown as the end-of-page teaser. */
   related?: RelatedProject[];
   class?: string;
 }
@@ -60,6 +61,13 @@ const resolvedCoverAlt =
   coverAlt ?? (isCmsImage(cover) ? cover.alt : `${title} cover photograph`);
 const railCopy = description.trim();
 const footerCredits = (credits ?? "").trim();
+const nextProject = related[0];
+const nextCover = nextProject?.cover;
+const nextCoverSrc = nextCover
+  ? isCmsImage(nextCover)
+    ? nextCover.src
+    : nextCover
+  : undefined;
 
 function photoCaption(image: Photo): string | undefined {
   return isCmsImage(image) ? image.caption : undefined;
@@ -83,13 +91,8 @@ function photoCaption(image: Photo): string | undefined {
   <div data-project-frame>
     <header data-project-rail class="md:section-pt-sm md:pb-6">
       <div data-project-rail-top>
-        <p class="inline-flex min-h-11 items-center">
-          <a
-            href="/work"
-            class="group inline-flex min-h-11 items-center text-body-lg font-bold text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-          >
-            ← <span class="group-hover:underline underline-offset-4">return</span>
-          </a>
+        <p>
+          <ReturnLink href="/work" />
         </p>
 
         <div data-project-mid>
@@ -184,6 +187,36 @@ function photoCaption(image: Photo): string | undefined {
           aria-hidden="true"
         />
       </footer>
+    )
+  }
+
+  {
+    nextProject && nextCover && nextCoverSrc && (
+      <a
+        href={nextProject.href}
+        data-project-next
+        aria-label={`Next project: ${nextProject.title}`}
+        class="group text-fg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
+      >
+        <span data-project-next-copy>
+          <span>next</span>
+          <span class="group-hover:underline underline-offset-4">
+            {nextProject.title}
+          </span>
+        </span>
+        <ImageLoader
+          src={nextCoverSrc}
+          alt=""
+          width={nextCover.width}
+          height={nextCover.height}
+          class="[data-project-next-image]"
+          imgClass="block h-auto w-full"
+          widths={[480, 720, 960, 1280]}
+          sizes="(max-width: 768px) calc(100vw - 2.5rem), min(50vw, 45rem)"
+          loading="lazy"
+          placeholder={isCmsImage(nextCover) ? nextCover.lqip : undefined}
+        />
+      </a>
     )
   }
 </section>

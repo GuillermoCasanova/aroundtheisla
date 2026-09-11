@@ -1,0 +1,33 @@
+---
+/**
+ * ReturnLink
+ * Editorial back-link: a left arrow plus “return”, underlined on hover.
+ * Used on project and about pages so the mark lives in one place.
+ *
+ * @prop href  - Destination. Required.
+ * @prop label - Visible text. Default "return".
+ */
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"a"> {
+  href: string;
+  label?: string;
+  class?: string;
+}
+
+const { href, label = "return", class: className, ...rest } = Astro.props;
+---
+
+<a
+  {...rest}
+  href={href}
+  class:list={[
+    "group inline-flex min-h-11 items-center gap-1.5 text-body-lg font-bold text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
+    className,
+  ]}
+>
+  <span aria-hidden="true">←</span>
+  <span class="group-hover:underline underline-offset-4">
+    <slot>{label}</slot>
+  </span>
+</a>
