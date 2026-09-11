@@ -127,7 +127,6 @@ export const page = defineType({
         { type: "sctnHomeSlideshow" },
         { type: "sctnWork" },
         { type: "sctnAbout" },
-        { type: "sctnContact" },
         { type: "sctnRichText" },
       ],
       validation: (Rule) =>

@@ -14,6 +14,8 @@ interface Props {
   paragraphs: string[];
   instagramHref: string;
   instagramHandle: string;
+  email?: string;
+  phone?: string;
   /** Kept for CMS payloads; the visible signature is <Logo />. */
   brand: string;
   portrait: ImageMetadata | CmsImage;
@@ -26,6 +28,8 @@ const {
   paragraphs,
   instagramHref,
   instagramHandle,
+  email,
+  phone,
   portrait,
   portraitAlt,
   caption,
@@ -45,6 +49,11 @@ const resolvedAlt =
 
 const linkClass =
   "underline decoration-from-font underline-offset-4 transition-colors duration-default-quarter hover:text-fg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
+
+const handleLabel = instagramHandle.startsWith("@")
+  ? instagramHandle
+  : `@${instagramHandle}`;
+const phoneHref = phone ? `tel:${phone.replace(/[^\d+]/g, "")}` : undefined;
 ---
 
 <section
@@ -54,10 +63,10 @@ const linkClass =
 >
   {
     /*
-    Desktop: portrait is capped at the Figma 634×852 and at 85vh so it
-    keeps clear viewport gutters — it no longer stretches to fill the
-    viewport. Right-aligned, vertically centered. Caption hangs off the
-    photo's bottom-left. Bio / back-home stay in the left column.
+    Desktop: portrait scales with the viewport, never taller than 90vh
+    so it keeps clear gutters. Right-aligned, vertically centered.
+    Caption hangs off the photo's bottom-left. Bio / back-home stay
+    in the left column.
   */
   }
   <div class="relative flex min-h-dvh flex-col lg:block">
@@ -93,9 +102,44 @@ const linkClass =
           {rest.map((paragraph) => <p>{paragraph}</p>)}
         </div>
 
-        <p class="mt-10 text-fg" aria-hidden="true">
-          <Logo class="h-4 w-auto" decorative />
-        </p>
+        <div class="mt-10">
+          <p class="text-fg" aria-hidden="true">
+            <Logo class="h-4 w-auto" decorative />
+          </p>
+          <address
+            class="mt-4 not-italic text-[0.858rem] leading-[normal] text-fg"
+            aria-label="Contact"
+          >
+            {
+              email && (
+                <p>
+                  <a href={`mailto:${email}`} class={linkClass}>
+                    E {email}
+                  </a>
+                </p>
+              )
+            }
+            <p>
+              <a
+                href={instagramHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                class={linkClass}
+              >
+                IG {handleLabel}
+              </a>
+            </p>
+            {
+              phone && phoneHref && (
+                <p>
+                  <a href={phoneHref} class={linkClass}>
+                    P {phone}
+                  </a>
+                </p>
+              )
+            }
+          </address>
+        </div>
       </div>
     </div>
 
@@ -113,7 +157,7 @@ const linkClass =
           height={portrait.height}
           class="absolute inset-0 h-full w-full object-cover object-[center_18%]"
           widths={[640, 960, 1280, 1600]}
-          sizes="(min-width: 1024px) min(635px, 42vw), 100vw"
+          sizes="(min-width: 1024px) min(47vw, 67vh), 100vw"
           loading="eager"
           fetchpriority="high"
           decoding="async"
@@ -161,7 +205,7 @@ const linkClass =
 </section>
 
 <style>
-  /* Desktop portrait: Figma 634×852 cap, never taller than 85vh,
+  /* Desktop portrait: scales with the viewport, never taller than 90vh,
      right-aligned and vertically centered. Width follows 634/852 so the
      photo stays a contained portrait instead of a full-bleed column. */
   @media (width >= 64rem) {
@@ -170,9 +214,8 @@ const linkClass =
       top: 50%;
       right: calc(var(--spacing) * 10);
       width: min(
-        39.7rem,
         calc(46.8% - var(--spacing) * 10),
-        calc(85vh * 634 / 852)
+        calc(90vh * 634 / 852)
       );
       translate: 0 -50%;
     }

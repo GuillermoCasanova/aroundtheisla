@@ -4,7 +4,6 @@ import HeroBanner from "./HeroBanner.astro";
 import SectionHomeSlideshow from "./SectionHomeSlideshow.astro";
 import SectionWork from "./SectionWork.astro";
 import SectionAbout from "./SectionAbout.astro";
-import SectionContact from "./SectionContact.astro";
 import SectionRichText from "./SectionRichText.astro";
 
 interface Props {
@@ -53,15 +52,13 @@ const { sections } = Astro.props;
             paragraphs={section.paragraphs}
             instagramHref={section.instagramHref}
             instagramHandle={section.instagramHandle}
+            email={section.email}
+            phone={section.phone}
             brand={section.brand}
             portrait={section.portrait}
             portraitAlt={section.portrait.alt}
             caption={section.caption}
           />
-        );
-      case "sctnContact":
-        return (
-          <SectionContact heading={section.heading} lede={section.lede} />
         );
       case "sctnRichText":
         return (

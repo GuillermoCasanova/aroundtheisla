@@ -8,7 +8,6 @@ import { sctnHero } from "./objects/sctnHero";
 import { sctnHomeSlideshow } from "./objects/sctnHomeSlideshow";
 import { sctnWork } from "./objects/sctnWork";
 import { sctnAbout } from "./objects/sctnAbout";
-import { sctnContact } from "./objects/sctnContact";
 import { sctnRichText } from "./objects/sctnRichText";
 import { project } from "./documents/project";
 import { page } from "./documents/page";
@@ -27,7 +26,6 @@ export const schemaTypes = [
   sctnHomeSlideshow,
   sctnWork,
   sctnAbout,
-  sctnContact,
   sctnRichText,
   project,
   page,

@@ -3,10 +3,11 @@
  * SectionProject
  * Project detail from Figma `268:152` ("Single Project View").
  *
- * Vertical photograph stack with a sticky left rail: return link, title
- * and Small / Medium / Large under it (desktop only), a mid-rail photo
- * index (`1/20`) that tracks the photograph in view (md+), description
- * pinned to the bottom left. Dedicated credits sit after the photographs.
+ * Vertical photograph stack with a sticky left rail: return link at the
+ * top, title + photo index (`1/20`) as a mid-left pair on desktop (index
+ * alone on tablet), description pinned to the bottom left. Small / Medium
+ * / Large sits mid-right on desktop. Dedicated credits sit after the
+ * photographs.
  * Full-bleed by design — no SectionMain column / side rules (same deviation
  * as SectionHomeSlideshow): the Figma frame is edge-to-edge editorial.
  *
@@ -91,30 +92,28 @@ function photoCaption(image: Photo): string | undefined {
           </a>
         </p>
 
-        <div data-project-rail-heading>
+        <div data-project-mid>
           <h1
             class="min-w-0 break-words font-heading text-[clamp(1.75rem,4vw,2.5rem)] leading-none font-bold tracking-tight lowercase text-fg"
           >
             {title}
           </h1>
-          <ProjectSize class="max-lg:hidden" />
+          {
+            images.length > 1 && (
+              <p
+                data-project-index
+                class="max-md:hidden text-body-sm tabular-nums text-fg"
+              >
+                <span class="sr-only">Photograph </span>
+                <span data-project-index-current>1</span>
+                <span aria-hidden="true">/</span>
+                <span class="sr-only"> of </span>
+                <span data-project-index-total>{images.length}</span>
+              </p>
+            )
+          }
         </div>
       </div>
-
-      {
-        images.length > 1 && (
-          <p
-            data-project-index
-            class="max-md:hidden font-mono text-body-sm tabular-nums text-fg"
-          >
-            <span class="sr-only">Photograph </span>
-            <span data-project-index-current>1</span>
-            <span aria-hidden="true">/</span>
-            <span class="sr-only"> of </span>
-            <span data-project-index-total>{images.length}</span>
-          </p>
-        )
-      }
 
       {
         railCopy && (
@@ -127,6 +126,10 @@ function photoCaption(image: Photo): string | undefined {
         )
       }
     </header>
+
+    <div data-project-size-dock class="max-lg:hidden">
+      <ProjectSize />
+    </div>
 
     <div data-project-photos class="min-w-0">
       {
@@ -254,7 +257,7 @@ function photoCaption(image: Photo): string | undefined {
     gap: calc(var(--spacing) * 5);
   }
 
-  [data-project-rail-heading] {
+  [data-project-mid] {
     display: flex;
     flex-direction: column;
     gap: calc(var(--spacing) * 3);
@@ -291,7 +294,7 @@ function photoCaption(image: Photo): string | undefined {
       margin-bottom: 0;
     }
 
-    /* Vertically centered in the rail. Positioning, not motion. */
+    /* Tablet: index alone at mid-left; title stays under return. */
     [data-project-index] {
       position: absolute;
       top: 50%;
@@ -308,6 +311,27 @@ function photoCaption(image: Photo): string | undefined {
   }
 
   @media (min-width: 1024px) {
+    /* Desktop: title + index as a mid-left pair. Positioning, not motion. */
+    [data-project-mid] {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+    }
+
+    [data-project-index] {
+      position: static;
+      transform: none;
+    }
+
+    [data-project-size-dock] {
+      position: fixed;
+      top: 50%;
+      right: var(--project-pad);
+      z-index: 1;
+      transform: translateY(-50%);
+    }
+
     /* Desktop: size-controlled column, always centered so width
        transitions grow from the middle. Shrink equally on both sides
        so the rail never sits under a photograph. */

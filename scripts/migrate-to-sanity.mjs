@@ -266,36 +266,10 @@ async function migratePages() {
       },
     ],
   });
-
-  await client.createOrReplace({
-    _id: "page-contact",
-    _type: "page",
-    title: "Contact",
-    slug: { _type: "slug", current: "contact" },
-    seo: {
-      _type: "seo",
-      title: "Contact",
-      description: "Get in touch with aroundtheisla.",
-    },
-    theme: "light",
-    layout: "site",
-    lang: "en",
-    showInNav: false,
-    navOrder: 90,
-    hideFooter: false,
-    sections: [
-      {
-        _type: "sctnContact",
-        _key: "contact",
-        heading: "Get in touch",
-        lede: "Drop your details and we'll be in touch shortly.",
-      },
-    ],
-  });
 }
 
 const projects = await migrateProjects();
 await migratePages();
 process.stdout.write(
-  `Done. ${projects.length} projects and 4 pages written to ${dataset}.\n`,
+  `Done. ${projects.length} projects and 3 pages written to ${dataset}.\n`,
 );

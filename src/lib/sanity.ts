@@ -208,15 +208,11 @@ export type AboutSection = {
   paragraphs: string[];
   instagramHref: string;
   instagramHandle: string;
+  email?: string;
+  phone?: string;
   brand: string;
   portrait: CmsImage;
   caption: string;
-};
-
-export type ContactSection = {
-  _type: "sctnContact";
-  heading: string;
-  lede?: string;
 };
 
 export type RichTextSection = {
@@ -230,7 +226,6 @@ export type PageSection =
   | SlideshowSection
   | WorkSection
   | AboutSection
-  | ContactSection
   | RichTextSection;
 
 export type PageEntry = {
@@ -309,19 +304,14 @@ function mapSection(
       paragraphs: (section.paragraphs as string[]) ?? [],
       instagramHref: section.instagramHref as string,
       instagramHandle: section.instagramHandle as string,
+      email: optionalString(section.email as string | undefined),
+      phone: optionalString(section.phone as string | undefined),
       brand: (section.brand as string) ?? "aroundtheisla",
       portrait: requireImage(
         section.portrait as SanityAssetImage,
         "about portrait",
       ),
       caption: (section.caption as string) ?? "",
-    };
-  }
-  if (type === "sctnContact") {
-    return {
-      _type: "sctnContact",
-      heading: section.heading as string,
-      lede: section.lede as string | undefined,
     };
   }
   if (type === "sctnRichText") {
@@ -379,13 +369,11 @@ export async function fetchPageEntries(): Promise<PageEntry[]> {
           paragraphs,
           instagramHref,
           instagramHandle,
+          email,
+          phone,
           brand,
           portrait ${imageProjection},
           caption
-        },
-        _type == "sctnContact" => {
-          heading,
-          lede
         },
         _type == "sctnRichText" => {
           heading,

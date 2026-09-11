@@ -26,6 +26,20 @@ export const sctnAbout = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: "email",
+      type: "string",
+      title: "Email",
+      description: 'Shown under the logo as "E {email}".',
+      validation: (Rule) => Rule.email(),
+    }),
+    defineField({
+      name: "phone",
+      type: "string",
+      title: "Phone",
+      description:
+        'Optional. Shown under the Instagram handle as "P {phone}".',
+    }),
+    defineField({
       name: "brand",
       type: "string",
       title: "Brand wordmark",
