@@ -3,9 +3,10 @@
  * SectionProject
  * Project detail from Figma `268:152` ("Single Project View").
  *
- * Vertical photograph stack with a sticky left rail: back-to-Work, title
- * and Small / Medium / Large under it (desktop only), description pinned
- * to the bottom left. Dedicated credits sit after the photographs.
+ * Vertical photograph stack with a sticky left rail: return link, title
+ * and Small / Medium / Large under it (desktop only), a mid-rail photo
+ * index (`1/20`) that tracks the photograph in view (md+), description
+ * pinned to the bottom left. Dedicated credits sit after the photographs.
  * Full-bleed by design — no SectionMain column / side rules (same deviation
  * as SectionHomeSlideshow): the Figma frame is edge-to-edge editorial.
  *
@@ -86,7 +87,7 @@ function photoCaption(image: Photo): string | undefined {
             href="/work"
             class="group inline-flex min-h-11 items-center text-body-lg font-bold text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
           >
-            ← <span class="group-hover:underline underline-offset-4">work</span>
+            ← <span class="group-hover:underline underline-offset-4">return</span>
           </a>
         </p>
 
@@ -99,6 +100,21 @@ function photoCaption(image: Photo): string | undefined {
           <ProjectSize class="max-lg:hidden" />
         </div>
       </div>
+
+      {
+        images.length > 1 && (
+          <p
+            data-project-index
+            class="max-md:hidden font-mono text-body-sm tabular-nums text-fg"
+          >
+            <span class="sr-only">Photograph </span>
+            <span data-project-index-current>1</span>
+            <span aria-hidden="true">/</span>
+            <span class="sr-only"> of </span>
+            <span data-project-index-total>{images.length}</span>
+          </p>
+        )
+      }
 
       {
         railCopy && (
@@ -117,7 +133,11 @@ function photoCaption(image: Photo): string | undefined {
         images.map((image, i) => {
           const caption = photoCaption(image);
           return (
-            <figure data-project-photo class="relative m-0 w-full">
+            <figure
+              data-project-photo
+              data-project-photo-index={i + 1}
+              class="relative m-0 w-full"
+            >
               <ImageLoader
                 src={isCmsImage(image) ? image.src : image}
                 alt={
@@ -271,6 +291,14 @@ function photoCaption(image: Photo): string | undefined {
       margin-bottom: 0;
     }
 
+    /* Vertically centered in the rail. Positioning, not motion. */
+    [data-project-index] {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+    }
+
     /* Tablet: fill the frame. Rail overlays; size tokens do not apply. */
     [data-project-photos] {
       width: 100%;
@@ -300,3 +328,108 @@ function photoCaption(image: Photo): string | undefined {
     }
   }
 </style>
+
+<script>
+  const initialized = new WeakSet<HTMLElement>();
+
+  function photoIndexFromEl(photo: HTMLElement, fallback: number): number {
+    const raw = Number(photo.dataset.projectPhotoIndex);
+    return Number.isFinite(raw) && raw > 0 ? raw : fallback;
+  }
+
+  function indexAtViewportCenter(photos: HTMLElement[]): number {
+    const mid = window.innerHeight / 2;
+    let containing = 0;
+    let containingDist = Number.POSITIVE_INFINITY;
+    let closest = 0;
+    let closestDist = Number.POSITIVE_INFINITY;
+    let foundContaining = false;
+
+    photos.forEach((photo, i) => {
+      const rect = photo.getBoundingClientRect();
+      if (rect.width === 0 && rect.height === 0) return;
+
+      const center = rect.top + rect.height / 2;
+      const dist = Math.abs(center - mid);
+      const index = photoIndexFromEl(photo, i + 1);
+
+      if (dist < closestDist) {
+        closest = index;
+        closestDist = dist;
+      }
+
+      if (rect.top <= mid && rect.bottom >= mid && dist <= containingDist) {
+        containing = index;
+        containingDist = dist;
+        foundContaining = true;
+      }
+    });
+
+    return foundContaining ? containing : closest;
+  }
+
+  function initOne(root: HTMLElement) {
+    if (initialized.has(root)) return;
+
+    const indexEl = root.querySelector<HTMLElement>("[data-project-index]");
+    const currentEl = root.querySelector<HTMLElement>(
+      "[data-project-index-current]",
+    );
+    const photos = Array.from(
+      root.querySelectorAll<HTMLElement>("[data-project-photo]"),
+    );
+
+    if (!indexEl || !currentEl || photos.length < 2) return;
+
+    initialized.add(root);
+
+    const controller = new AbortController();
+    const { signal } = controller;
+    let frame = 0;
+    let last = 0;
+
+    const render = (next: number) => {
+      if (next === last) return;
+      last = next;
+      currentEl.textContent = String(next);
+    };
+
+    const update = () => {
+      frame = 0;
+      const next = indexAtViewportCenter(photos);
+      if (next > 0) render(next);
+    };
+
+    const schedule = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(update);
+    };
+
+    window.addEventListener("scroll", schedule, { passive: true, signal });
+    window.addEventListener("resize", schedule, { signal });
+
+    const resizeObserver = new ResizeObserver(schedule);
+    photos.forEach((photo) => resizeObserver.observe(photo));
+
+    update();
+
+    root.addEventListener(
+      "project:destroy",
+      () => {
+        if (frame) cancelAnimationFrame(frame);
+        resizeObserver.disconnect();
+        controller.abort();
+      },
+      { signal },
+    );
+  }
+
+  function initAll() {
+    document
+      .querySelectorAll<HTMLElement>("[data-project]")
+      .forEach((root) => initOne(root));
+  }
+
+  initAll();
+  document.addEventListener("astro:page-load", initAll);
+</script>

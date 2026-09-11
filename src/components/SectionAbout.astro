@@ -33,8 +33,12 @@ const {
 } = Astro.props;
 
 const [intro, ...rest] = paragraphs;
-const introParts = (intro ?? "").split("{handle}");
+const introText = intro ?? "";
+const introHasHandle = introText.includes("{handle}");
+const introParts = introText.split("{handle}");
+const captionHasHandle = caption.includes("{handle}");
 const captionParts = caption.split("{handle}");
+const captionHasContent = caption.length > 0;
 const cms = isCmsImage(portrait);
 const resolvedAlt =
   portraitAlt ?? (cms ? portrait.alt : "Portrait");
@@ -67,12 +71,24 @@ const linkClass =
         >
           <h1 id="about-heading" class="sr-only">About aroundtheisla</h1>
           <p>
-            {introParts[0]}<a
-              href={instagramHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              class={linkClass}>{instagramHandle}</a
-            >{introParts[1]}
+            {
+              introHasHandle ? (
+                <>
+                  {introParts[0]}
+                  <a
+                    href={instagramHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class={linkClass}
+                  >
+                    {instagramHandle}
+                  </a>
+                  {introParts[1]}
+                </>
+              ) : (
+                introText
+              )
+            }
           </p>
           {rest.map((paragraph) => <p>{paragraph}</p>)}
         </div>
@@ -104,29 +120,42 @@ const linkClass =
         />
       </figure>
 
-      {/* Footnote caption — secondary type beside the photo, not overlaid */}
-      <p
-        class="relative z-10 mt-4 max-w-[9.5rem] text-[0.625rem] lowercase leading-[normal] text-secondary lg:absolute lg:right-full lg:bottom-0 lg:mt-0 lg:mr-4 lg:w-[9.5rem]"
-      >
-        {captionParts[0]}<a
-          href={instagramHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          class={linkClass}>{instagramHandle}</a
-        >{captionParts[1]}
-      </p>
+      {
+        captionHasContent && (
+          <p class="relative z-10 mt-4 max-w-[9.5rem] text-[0.625rem] lowercase leading-[normal] text-secondary lg:absolute lg:right-full lg:bottom-0 lg:mt-0 lg:mr-4 lg:w-[9.5rem]">
+            {captionHasHandle ? (
+              <>
+                {captionParts[0]}
+                <a
+                  href={instagramHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class={linkClass}
+                >
+                  {instagramHandle}
+                </a>
+                {captionParts[1]}
+              </>
+            ) : (
+              caption
+            )}
+          </p>
+        )
+      }
     </div>
 
-    {/* Back home — page foot on mobile; bottom-left on desktop */}
+    {/* Return — page foot on mobile; bottom-left on desktop */}
     <p
       class="relative z-10 order-3 mx-6 mt-8 mb-10 sm:mx-9 lg:absolute lg:bottom-8 lg:left-9 lg:order-none lg:mx-0 lg:mt-0 lg:mb-0"
     >
-      <a
-        href="/"
-        class="inline-flex min-h-11 items-center text-[1.19rem] lowercase leading-none text-fg transition-colors duration-default-quarter hover:text-fg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-      >
-        ← back home
-      </a>
+      <span class="inline-flex min-h-11 items-center">
+        <a
+          href="/"
+          class="group inline-flex min-h-11 items-center text-body-lg font-bold text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+        >
+          ← <span class="group-hover:underline underline-offset-4">return</span>
+        </a>
+      </span>
     </p>
   </div>
 </section>
